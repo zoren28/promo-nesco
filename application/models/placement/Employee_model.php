@@ -43,7 +43,8 @@ class Employee_model extends CI_Model
 
     public function company_list()
     {
-        $query = $this->db->get_where('locate_promo_company', array('status' => 1));
+        $query = $this->db->order_by('pc_name', 'ASC')
+            ->get_where('locate_promo_company', array('status' => 1));
         return $query->result();
     }
 
@@ -175,7 +176,7 @@ class Employee_model extends CI_Model
         return $query->result();
     }
 
-    private function get_company_name($pc_code)
+    public function get_company_name($pc_code)
     {
         $query = $this->db->select('pc_name')
             ->get_where('locate_promo_company', array('pc_code' => $pc_code));
@@ -983,5 +984,97 @@ class Employee_model extends CI_Model
             ->order_by('emp_type', 'ASC')
             ->get('employee_type');
         return $query->result();
+    }
+
+    public function promo_company_products($company_name)
+    {
+        $query = $this->db->select('product')
+            ->order_by('product', 'ASC')
+            ->get_where('promo_company_products', array('company' => $company_name));
+        return $query->result();
+    }
+
+    public function update_employment_contract($data)
+    {
+        if ($data['contract'] == "current") :
+
+            $table = "employee3";
+            $updated_by = 'updated_by';
+        else :
+
+            $table = "employmentrecord_";
+            $updated_by = 'updatedby';
+        endif;
+
+        if ($data['startdate'] == "0000-00-00") : $startdate = '';
+        else : $startdate = date("Y-m-d", strtotime($data['startdate']));
+        endif;
+        if ($data['eocdate'] == "0000-00-00") : $eocdate = '';
+        else : $eocdate = date("Y-m-d", strtotime($data['eocdate']));
+        endif;
+
+        $update = array(
+            'startdate'     => $startdate,
+            'eocdate'       => $eocdate,
+            'emp_type'      => $data['empType'],
+            'duration'      => $data['duration'],
+            'current_status' => $data['current_status'],
+            'positionlevel' => $data['position_level'],
+            'position'      => $data['position'],
+            'date_updated'  => $this->date,
+            $updated_by     => $this->loginId,
+            'remarks'       => $data['remarks']
+        );
+
+        $this->db->where(array('record_no' => $data['recordNo'], 'emp_id' => $data['empId']));
+        $this->db->update($table, $update);
+    }
+
+    public function empty_store_value($data)
+    {
+        if ($data['contract'] == "current") :
+
+            $table = "promo_record";
+        else :
+
+            $table = "promo_history_record";
+        endif;
+
+        $bUs = $this->dashboard_model->businessUnit_list();
+        foreach ($bUs as $bu) {
+
+            $this->db->set($bu->bunit_field, '');
+        }
+
+        $this->db->where(array('record_no' => $data['recordNo'], 'emp_id' => $data['empId']));
+        $this->db->update($table);
+    }
+
+    public function update_promo_details($data)
+    {
+        $company_name = $this->get_company_name($data['company'])->pc_name;
+        if ($data['contract'] == "current") :
+
+            $table = "promo_record";
+        else :
+
+            $table = "promo_history_record";
+        endif;
+
+        foreach ($data['store'] as $key => $value) {
+
+            $store = explode('/', $value);
+            $this->db->set($store[1], 'T');
+        }
+
+        $this->db->set('agency_code', $data['agency']);
+        $this->db->set('promo_company', $company_name);
+        $this->db->set('promo_department', $data['department']);
+        $this->db->set('vendor_code', $data['vendor']);
+        $this->db->set('promo_type', $data['promo_type']);
+        $this->db->set('type', $data['contractType']);
+
+        $this->db->where(array('record_no' => $data['recordNo'], 'emp_id' => $data['empId']));
+        $this->db->update($table);
     }
 }

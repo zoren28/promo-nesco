@@ -2022,7 +2022,7 @@ if ($request == "update_blacklist_form") {
         $table2 = "promo_record";
     else :
 
-        $table = "employmentrecord_";
+        $table1 = "employmentrecord_";
         $table2 = "promo_history_record";
     endif;
 
@@ -2030,7 +2030,7 @@ if ($request == "update_blacklist_form") {
                             FROM `$table1` 
                                 INNER JOIN `$table2`
                                     ON $table1.record_no = $table2.record_no AND $table1.emp_id = $table2.emp_id
-                                        WHERE $table1.record_no = '$recordNo' AND $table2.emp_id = '$empId'";
+                                        WHERE $table1.record_no = '$recordNo' AND $table1.emp_id = '$empId'";
     $row = $this->employee_model->return_row_array($sql);
 
     if ($row['startdate'] == "0000-00-00") : $startdate = '';
@@ -2099,13 +2099,14 @@ if ($request == "update_blacklist_form") {
     <input type="hidden" name="contract" value="<?php echo $contract; ?>">
     <input type="hidden" name="empId" value="<?php echo $empId; ?>">
     <input type="hidden" name="recordNo" value="<?php echo $recordNo; ?>">
+    <input type="hidden" name="company_name" value="<?php echo $row['promo_company']; ?>">
     <div class="row">
         <div class="col-md-6">
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group">
                         <label>Agency</label>
-                        <select name="agency" class="form-control" onchange="select_companies(this.value)">
+                        <select name="agency" class="form-control" onchange="select_company(this.value)">
                             <option value=""> --Select Agency-- </option>
                             <?php
 
@@ -2131,7 +2132,7 @@ if ($request == "update_blacklist_form") {
                 <div class="col-md-12">
                     <div class="form-group"> <i class="text-red">*</i>
                         <label>Company</label>
-                        <select name="company" class="form-control" onchange="select_products(this.value)">
+                        <select name="company" class="form-control" onchange="select_product(this.value)" required>
                             <option value=""> --Select Company-- </option>
                             <?php
 
@@ -2141,7 +2142,6 @@ if ($request == "update_blacklist_form") {
                                 foreach ($result as $res) {
 
                                     $company = $this->employee_model->getcompanyCodeBycompanyName($res->company_name);
-                                    print_r($company);
                                     if (!empty($company)) {
                             ?>
 
@@ -2174,7 +2174,7 @@ if ($request == "update_blacklist_form") {
                 <div class="col-md-12">
                     <div class="form-group"> <i class="text-red">*</i>
                         <label>Promo Type</label>
-                        <select name="promoType" class="form-control" onchange="locate_business_unit(this.value)">
+                        <select name="promo_type" class="form-control" onchange="select_business_unit(this.value)" required>
                             <option value=""> --Select-- </option>
                             <option value="STATION" <?php if ($row['promo_type'] == "STATION") echo "selected=''"; ?>>STATION</option>
                             <option value="ROVING" <?php if ($row['promo_type'] == "ROVING") echo "selected=''"; ?>>ROVING</option>
@@ -2197,14 +2197,14 @@ if ($request == "update_blacklist_form") {
                                     $bUs = $this->dashboard_model->businessUnit_list();
                                     foreach ($bUs as $bu) {
 
+                                        $ctr++;
                                         $hasBU = $this->dashboard_model->promo_has_store($contract, $empId, $recordNo, $bu->bunit_field);
 
-                                        $ctr++;
                                     ?>
                                         <tr>
                                             <td><input type="checkbox" id="check_<?= $ctr; ?>" name="<?= $bu->bunit_field ?>" value="<?= $bu->bunit_id . '/' . $bu->bunit_field ?>" <?php if ($hasBU > 0) {
                                                                                                                                                                                         echo "checked=''";
-                                                                                                                                                                                    } ?> onclick="locate_department_roving()" /></td>
+                                                                                                                                                                                    } ?> onclick="locateDeptRoving()" /></td>
                                             <td><?= $bu->bunit_name ?></td>
                                         </tr>
                                     <?php
@@ -2226,19 +2226,20 @@ if ($request == "update_blacklist_form") {
                                     $bUs = $this->dashboard_model->businessUnit_list();
                                     foreach ($bUs as $bu) {
 
+                                        $ctr++;
                                         $hasBU = $this->dashboard_model->promo_has_store($contract, $empId, $recordNo, $bu->bunit_field);
 
                                     ?>
                                         <tr>
                                             <td><input type="radio" name="station" id="radio_<?= $ctr; ?>" value="<?= $bu->bunit_id . '/' . $bu->bunit_field ?>" <?php if ($hasBU > 0) {
                                                                                                                                                                         echo "checked=''";
-                                                                                                                                                                    } ?> onclick="locate_department_station(this.value)" /></td>
+                                                                                                                                                                    } ?> onclick="locateDeptStation(this.value)" /></td>
                                             <td><?= $bu->bunit_name ?></td>
                                         </tr>
                                     <?php
                                     }
                                     ?>
-                                    <input type="hidden" name="loop" value="<?= $ctr; ?>">
+                                    <input type="hidden" name="counter" value="<?= $ctr; ?>">
                                 </table>
                             <?php
                             }
@@ -2251,7 +2252,7 @@ if ($request == "update_blacklist_form") {
                 <div class="col-md-12">
                     <div class="form-group"> <i class="text-red">*</i>
                         <label>Department</label>
-                        <select name="department" class="form-control" onchange="locate_vendor(this.value)">
+                        <select name="department" class="form-control" onchange="select_vendor(this.value)" required>
                             <option value=""> --Select-- </option>
                             <?php
 
@@ -2272,7 +2273,7 @@ if ($request == "update_blacklist_form") {
                 <div class="col-md-12">
                     <div class="form-group">
                         <label>Vendor Name</label>
-                        <select name="vendor" class="form-control" required="">
+                        <select name="vendor" class="form-control">
                             <option value=""> --Select-- </option>
                             <?php
 
@@ -2319,7 +2320,7 @@ if ($request == "update_blacklist_form") {
                             <div class="input-group-addon">
                                 <i class="fa fa-calendar"></i>
                             </div>
-                            <input type="text" value="<?php echo $startdate; ?>" name="startdate" class="form-control datepicker" onchange="startdate()">
+                            <input type="text" value="<?php echo $startdate; ?>" name="startdate" class="form-control datepicker" onchange="startdate()" required>
                         </div>
                     </div>
                 </div>
@@ -2332,7 +2333,7 @@ if ($request == "update_blacklist_form") {
                             <div class="input-group-addon">
                                 <i class="fa fa-calendar"></i>
                             </div>
-                            <input type="text" value="<?php echo $eocdate; ?>" name="eocdate" class="form-control datepicker" onchange="durationContract(this.value)">
+                            <input type="text" value="<?php echo $eocdate; ?>" name="eocdate" class="form-control datepicker" onchange="durationContract(this.value)" required>
                         </div>
                     </div>
                 </div>
@@ -2342,7 +2343,8 @@ if ($request == "update_blacklist_form") {
                     <div class="form-group"> <i class="text-red">*</i>
                         <label>Position</label>
                         <input type="hidden" name="duration">
-                        <select class="form-control" name="position" style="width: 100%;" onchange="inputField(this.name)">
+                        <input type="hidden" name="position_level" value="0">
+                        <select class="form-control" name="position" style="width: 100%;" onchange="positionLevel(this.value)" required>
                             <option value=""> --Select-- </option>
                             <?php
 
@@ -2361,7 +2363,7 @@ if ($request == "update_blacklist_form") {
                 <div class="col-md-12">
                     <div class="form-group"> <i class="text-red">*</i>
                         <label>Employee Type</label>
-                        <select name="empType" class="form-control" onchange="inputField(this.name)">
+                        <select name="empType" class="form-control" onchange="inputField(this.name)" required>
                             <option value=""> --Select-- </option>
                             <?php
 
@@ -2393,7 +2395,7 @@ if ($request == "update_blacklist_form") {
                 <div class="col-md-12">
                     <div class="form-group"> <i class="text-red">*</i>
                         <label>Current Status <?= in_array($this->employee_model->loginId, $admin_users); ?></label>
-                        <select name="current_status" class="form-control" onchange="inputField(this.name)">
+                        <select name="current_status" class="form-control" onchange="inputField(this.name)" required>
                             <option value="Active" <?php if ($row['current_status'] == "Active") echo "selected=''"; ?>>Active</option>
                             <option value="End of Contract" <?php if ($row['current_status'] == "End of Contract") echo "selected=''"; ?>>End of Contract</option>
                             <option value="Resigned" <?php if ($row['current_status'] == "Resigned") echo "selected=''"; ?>>Resigned</option>

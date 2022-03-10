@@ -321,6 +321,152 @@
                 processData: false
             });
         });
+
+        $('form#dataPromoContractDetails').submit(function(e) {
+
+            e.preventDefault();
+            var formData = $(this).serialize();
+
+            var company = $("[name = 'company']").val();
+            var promo_type = $("[name = 'promo_type']").val();
+            var department = $("[name = 'department']").val();
+            var startdate = $("[name = 'startdate']").val();
+            var eocdate = $("[name = 'eocdate']").val();
+            var position = $("[name = 'position']").val();
+            var empType = $("[name = 'empType']").val();
+            var current_status = $("[name = 'current_status']").val();
+
+            var store = [];
+            if (promo_type == "STATION") {
+
+                var loop = $("[name = 'counter']").val();
+
+                for (var i = 1; i <= loop; i++) {
+
+                    if ($("#radio_" + i).is(':checked')) {
+
+                        store.push($("#radio_" + i).val());
+                    }
+                }
+
+            } else {
+
+                var counter = $("[name = 'counter']").val();
+                for (var i = 1; i <= counter; i++) {
+
+                    if ($("#check_" + i).is(':checked')) {
+
+                        store.push($("#check_" + i).val());
+                    }
+                }
+            }
+
+            if (store.length === 0 || (promo_type == "ROVING" && store.length < 2) || company == "" || promo_type == "" || department == "" || startdate == "" || eocdate == "" || position == "" || empType == "" || current_status == "") {
+
+                if (store.length === 0) {
+
+                    errDup("Please Select Business Unit!");
+                } else if (promo_type == "ROVING" && store.length < 2) {
+
+                    errDup("Please Add Another Business Unit for Setup!");
+                } else {
+
+                    $.alert.open({
+                        type: 'warning',
+                        cancel: false,
+                        content: "Please Fill-up Required Fields!",
+                        buttons: {
+                            OK: 'Ok'
+                        },
+
+                        callback: function(button) {
+                            if (button == 'OK') {
+
+                                if (company == "") {
+
+                                    $("[name = 'company']").css("border-color", "#dd4b39");
+                                }
+
+                                if (promo_type == "") {
+
+                                    $("[name = 'promo_type']").css("border-color", "#dd4b39");
+                                }
+
+                                if (department == "") {
+
+                                    $("[name = 'department']").css("border-color", "#dd4b39");
+                                }
+
+                                if (startdate == "") {
+
+                                    $("[name = 'startdate']").css("border-color", "#dd4b39");
+                                }
+
+                                if (eocdate == "") {
+
+                                    $("[name = 'eocdate']").css("border-color", "#dd4b39");
+                                }
+
+                                if (position == "") {
+
+                                    $("[name = 'position']").css("border-color", "#dd4b39");
+                                }
+
+                                if (empType == "") {
+
+                                    $("[name = 'empType']").css("border-color", "#dd4b39");
+                                }
+
+                                if (current_status == "") {
+
+                                    $("[name = 'current_status']").css("border-color", "#dd4b39");
+                                }
+                            }
+                        }
+                    });
+                }
+            } else {
+
+                formData = formData + '&' + $.param({
+                    'store': store
+                })
+
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo site_url('updatePromoContract') ?>",
+                    data: formData,
+                    success: function(data) {
+
+                        let response = JSON.parse(data);
+                        if (response.message == "success") {
+
+                            $.alert.open({
+                                type: 'warning',
+                                title: 'Info',
+                                icon: 'confirm',
+                                cancel: false,
+                                content: "Contract History Successfully Updated",
+                                buttons: {
+                                    OK: 'Yes'
+                                },
+
+                                callback: function(button) {
+                                    if (button == 'OK') {
+
+                                        $("#updatePromoContractDetails").modal("hide");
+                                        getdefault('employment');
+                                    }
+
+                                }
+                            });
+                        } else {
+
+                            alert(data);
+                        }
+                    }
+                });
+            }
+        });
     });
 
     function changeProfilePic() {
@@ -2164,5 +2310,200 @@
                 }
             });
         }
+    }
+
+    function select_company(agency_code) {
+
+        var promo_company = $("input[name = 'company_name']").val();
+
+        $.ajax({
+            type: "GET",
+            url: "<?php echo site_url('select_company'); ?>",
+            data: {
+                agency_code,
+                promo_company
+            },
+            success: function(data) {
+
+                $("select[name = 'company']").html(data);
+            }
+        });
+    }
+
+    function select_product(company_code) {
+
+        if (company_code) {
+            $.ajax({
+                type: "GET",
+                url: "<?php echo site_url('select_product'); ?>",
+                data: {
+                    company_code
+                },
+                success: function(data) {
+
+                    $("select[name = 'product']").html(data);
+                }
+            });
+        } else {
+
+            $("select[name = 'product']").html('<option value=""> --Select-- </option>');
+            $("select[name = 'product']").prop("disabled", true);
+        }
+    }
+
+    function select_business_unit(promo_type) {
+
+        $("select[name = 'promoType']").css("border-color", "#ccc");
+        $.ajax({
+            type: "GET",
+            url: "<?php echo site_url('select_business_unit'); ?>",
+            data: {
+                promo_type
+            },
+            success: function(data) {
+
+                $(".store").html(data);
+            }
+        });
+    }
+
+    function locateDeptStation(id) {
+        let storeId = [];
+        storeId.push(id);
+
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('locate_promo_department'); ?>",
+            data: {
+                storeId
+            },
+            success: function(data) {
+
+                $("select[name = 'department']").html(data);
+            }
+        });
+    }
+
+    function locateDeptRoving() {
+
+        let storeId = [];
+        var counter = $("[name = 'counter']").val()
+        for (var i = 1; i <= counter; i++) {
+
+            if ($("#check_" + i).is(':checked')) {
+
+                var bunit_id = $("#check_" + i).val();
+                storeId.push(bunit_id);
+            }
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('locate_promo_department'); ?>",
+            data: {
+                storeId
+            },
+            success: function(data) {
+
+                $("select[name = 'department']").html(data);
+            }
+        });
+    }
+
+    function select_vendor(department) {
+
+        $.ajax({
+            type: "GET",
+            url: "<?php echo site_url('select_vendor'); ?>",
+            data: {
+                department
+            },
+            success: function(data) {
+
+                $("select[name = 'vendor']").html(data);
+            }
+        });
+    }
+
+    function startdate() {
+
+        $("[name = 'startdate']").css("border-color", "#ccc");
+        $("[name = 'eocdate']").val("");
+    }
+
+    function durationContract(eocdate) {
+
+        var dF = $("[name = 'startdate']").val();
+        var dT = eocdate;
+        $("[name = 'eocdate']").css("border-color", "#ccc");
+
+        if (dF == "") {
+
+            $.alert.open({
+                type: 'warning',
+                cancel: false,
+                content: "Please Fill-up Startdate First!",
+                buttons: {
+                    OK: 'Ok'
+                },
+
+                callback: function(button) {
+                    if (button == 'OK') {
+
+                        $("[name = 'eocdate']").val("");
+                    }
+                }
+            });
+        } else {
+
+            $.ajax({
+                type: "GET",
+                url: "<?php echo site_url('contract_duration'); ?>",
+                data: {
+                    dF,
+                    dT
+                },
+                success: function(data) {
+                    let response = JSON.parse(data);
+                    if (response.message == "success") {
+
+                        $("input[name = 'duration']").val(response.duration);
+                    } else {
+
+                        $.alert.open({
+                            type: 'warning',
+                            cancel: false,
+                            content: response.message,
+                            buttons: {
+                                OK: 'Ok'
+                            },
+
+                            callback: function(button) {
+                                if (button == 'OK') {
+
+                                    $("[name = 'eocdate']").val("");
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    function positionLevel(position) {
+
+        $("select[name = 'position']").css("border-color", "#d2d6de");
+        $.ajax({
+            type: "GET",
+            url: "<?php echo site_url('position_level'); ?>",
+            data: {
+                position
+            },
+            success: function(data) {
+
+                $("input[name = 'position_level']").val(data);
+            }
+        });
     }
 </script>

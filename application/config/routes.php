@@ -42,6 +42,7 @@ $route['locate_section'] = 'placement/employee/locate_section';
 $route['locate_sub_section'] = 'placement/employee/locate_sub_section';
 $route['locate_unit'] = 'placement/employee/locate_unit';
 $route['position_level'] = 'placement/employee/position_level';
+$route['contract_duration'] = 'placement/employee/contract_duration';
 
 // update employee info
 $route['update_basicinfo'] = 'placement/employee/update_basicinfo';
@@ -65,6 +66,7 @@ $route['get_file'] = 'placement/employee/get_file';
 $route['promoFile'] = 'placement/employee/promoFile';
 $route['editContractDetails'] = 'placement/employee/editContractDetails';
 $route['updateContractDetails'] = 'placement/employee/updateContractDetails';
+$route['updatePromoContract'] = 'placement/employee/updatePromoContract';
 $route['editPromoContractDetails'] = 'placement/employee/editPromoContractDetails';
 $route['updatePromoContractDetails'] = 'placement/employee/updatePromoContractDetails';
 $route['uploadScannedFileForm'] = 'placement/employee/uploadScannedFileForm';
@@ -73,6 +75,13 @@ $route['changeProfilePic'] = 'placement/employee/changeProfilePic';
 $route['getProfilePic'] = 'placement/employee/getProfilePic';
 $route['uploadProfilePic'] = 'placement/employee/uploadProfilePic';
 $route['addContract'] = 'placement/employee/addContract';
+
+// select company, business_unit, department, vendor, product
+$route['select_company'] = 'placement/employee/select_company';
+$route['select_product'] = 'placement/employee/select_product';
+$route['select_business_unit'] = 'placement/employee/select_business_unit';
+$route['locate_promo_department'] = 'placement/employee/locate_promo_department';
+$route['select_vendor'] = 'placement/employee/select_vendor';
 
 // for blacklisted module
 $route['fetch_blacklisted'] = 'placement/blacklist/fetch_blacklisted';

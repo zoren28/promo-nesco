@@ -883,4 +883,199 @@ class Employee extends CI_Controller
 
         die("success||" . $message);
     }
+
+    public function select_company()
+    {
+        $fetch = $this->input->get(NULL, TRUE);
+        if ($fetch['agency_code'] == 0) {
+
+            echo '<option value=""> --Select-- </option>';
+            $companies = $this->employee_model->company_list();
+            foreach ($companies as $company) {
+?>
+                <option value="<?= $company->pc_code ?>" <?php if ($fetch['promo_company'] == $company->pc_name) echo "selected=''"; ?>><?= $company->pc_name ?>
+                </option>
+                <?php
+            }
+        } else {
+
+            echo '<option value=""> --Select-- </option>';
+            $companies = $this->employee_model->company_list_under_agency($fetch['agency_code']);
+            foreach ($companies as $company) {
+
+                $supplier = $this->employee_model->getcompanyCodeBycompanyName($company->company_name);
+                if (!empty($supplier)) {
+                ?>
+                    <option value="<?= $supplier->pc_code ?>" <?php if ($fetch['promo_company'] == $company->company_name) echo "selected=''"; ?>><?= $company->company_name ?></option>
+            <?php
+                }
+            }
+        }
+    }
+
+    public function select_product()
+    {
+        $company_code = $this->input->get('company_code', TRUE);
+        $company = $this->employee_model->get_company_name($company_code);
+        $products = $this->employee_model->promo_company_products($company->pc_name);
+        echo '<option value=""> --Select-- </option>';
+        foreach ($products as $product) {
+            ?>
+            <option value="<?= $product->product ?>"><?= $product->product ?></option>
+        <?php
+        }
+    }
+
+    public function select_business_unit()
+    {
+        $promo_type = $this->input->get('promo_type', TRUE);
+        if ($promo_type == 'ROVING') {
+        ?>
+            <table class="table table-bordered">
+                <tr>
+                    <th colspan="2"><i class="text-red">*</i> SELECT STORE</th>
+                </tr>
+                <?php
+
+                $ctr = 0;
+                $bUs = $this->dashboard_model->businessUnit_list();
+                foreach ($bUs as $bu) {
+
+                    $ctr++;
+                ?>
+                    <tr>
+                        <td><input type="checkbox" id="check_<?= $ctr; ?>" name="<?= $bu->bunit_field ?>" value="<?= $bu->bunit_id . '/' . $bu->bunit_field ?>" onclick="locateDeptRoving()" /></td>
+                        <td><?= $bu->bunit_name ?></td>
+                    </tr>
+                <?php
+                }
+                ?>
+                <input type="hidden" name="counter" value="<?= $ctr; ?>">
+            </table>
+        <?php
+
+        } else {
+        ?>
+            <table class="table table-bordered">
+                <tr>
+                    <th colspan="2"><i class="text-red">*</i> SELECT STORE</th>
+                </tr>
+                <?php
+
+                $ctr = 0;
+                $bUs = $this->dashboard_model->businessUnit_list();
+                foreach ($bUs as $bu) {
+
+                    $ctr++;
+                ?>
+                    <tr>
+                        <td><input type="radio" name="station" id="radio_<?= $ctr; ?>" value="<?= $bu->bunit_id . '/' . $bu->bunit_field ?>" onclick="locateDeptStation(this.value)" /></td>
+                        <td><?= $bu->bunit_name ?></td>
+                    </tr>
+                <?php
+                }
+                ?>
+                <input type="hidden" name="counter" value="<?= $ctr; ?>">
+            </table>
+        <?php
+        }
+    }
+
+    public function locate_promo_department()
+    {
+        $store_ids = $this->input->post('storeId', TRUE);
+        $condition = '';
+        $i = 0;
+        foreach ($store_ids as $id) {
+
+            $bunit_id = explode('/', $id);
+            if ($i == 0) {
+
+                $condition .= "AND (bunit_id = '" . $bunit_id[0] . "'";
+            } else {
+
+                $condition .= " OR bunit_id = '" . $bunit_id[0] . "'";
+            }
+
+            $i++;
+        }
+
+        if ($condition != "") {
+            $condition .= ")";
+        }
+
+        echo '<option value=""> --Select-- </option>';
+        $sql = "SELECT dept_name FROM locate_promo_department WHERE status = 'active' $condition GROUP BY dept_name ORDER BY dept_name ASC";
+        $result = $this->employee_model->return_result_array($sql);
+        foreach ($result as $res) {
+        ?>
+            <option value="<?= $res['dept_name'] ?>"><?= $res['dept_name'] ?></option>
+        <?php
+        }
+    }
+
+    public function select_vendor()
+    {
+        $department = $this->input->get('department', TRUE);
+        if ($department == "EASY FIX") {
+            $department = 'FIXRITE';
+        }
+
+        echo '<option value=""> --Select-- </option>';
+        $vendors = $this->employee_model->locate_vendor($department);
+        foreach ($vendors as $vendor) {
+        ?>
+            <option value="<?= $vendor->vendor_code ?>"><?= $vendor->vendor_name ?></option>
+<?php
+        }
+    }
+
+    public function contract_duration()
+    {
+        $fetch_data = $this->input->get(NULL, TRUE);
+        $dF =  new DateTime($fetch_data['dF']);
+        $dT =  new DateTime($fetch_data['dT']);
+
+        $newDF = strtotime($fetch_data['dF']);
+        $newDT = strtotime($fetch_data['dT']);
+
+        if ($newDF > $newDT) {
+
+            echo json_encode(['message' => 'EOCdate must be greater than or equal to startdate!']);
+        } else {
+
+            $interval = $dT->diff($dF);
+            $duration = $interval->format('%a') + 1;
+
+            if ($duration >= 32) {
+                $duration = $interval->format('%m');
+            } else {
+                $duration = "$duration day(s)";
+            }
+
+            echo json_encode(['message' => 'success', 'duration' => $duration]);
+        }
+    }
+
+    public function updatePromoContract()
+    {
+        $request = $this->input->post(NULL, TRUE);
+        $name = $this->employee_model->employee_name($request['empId']);
+
+        $this->db->trans_start();
+
+        $this->employee_model->update_employment_contract($request);
+        $this->employee_model->empty_store_value($request);
+        $this->employee_model->update_promo_details($request);
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) {
+            echo json_encode(['message' => 'Opps! Something went wrong.']);
+            // generate an error... or use the log_message() function to log your error
+        } else {
+
+            echo json_encode(['message' => 'success']);
+        }
+    }
 }

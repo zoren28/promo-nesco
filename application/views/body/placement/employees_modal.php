@@ -290,13 +290,15 @@
                     <span aria-hidden="true">×</span></button>
                 <h4 class="modal-title">Edit Contract</h4>
             </div>
-            <div class="modal-body">
-                <div class="updatePromoContractDetails"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="updatePromoContractDetails()">Update</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
+            <form action="" id="dataPromoContractDetails" method="post">
+                <div class="modal-body">
+                    <div class="updatePromoContractDetails"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
