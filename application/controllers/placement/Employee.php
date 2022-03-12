@@ -75,7 +75,7 @@ class Employee extends CI_Controller
             }
 
             $sub_array = array();
-            $sub_array[] = '<span style="display:none">' . $row->record_no . '</span><a href="profile/' . $row->emp_id . '" target="_blank">' . ucwords(strtolower($row->name)) . '</a>';
+            $sub_array[] = '<span style="display:none">' . $row->record_no . '</span><a href="profile/' . $row->emp_id . '" target="_blank">' . htmlentities(ucwords(strtolower($row->name))) . '</a>';
             $sub_array[] = $row->promo_company;
             $sub_array[] = $storeName;
             $sub_array[] = $row->promo_department;
@@ -769,6 +769,14 @@ class Employee extends CI_Controller
         $this->load->view('body/placement/modal_response', $data);
     }
 
+    public function uploadPromoScannedFileForm()
+    {
+        $data['fetch'] = $this->input->post(NULL, TRUE);
+        $data['request'] = "uploadPromoScannedFileForm";
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
     public function uploadScannedFile()
     {
         $fetch_data = $this->input->post(NULL, TRUE);
@@ -838,6 +846,130 @@ class Employee extends CI_Controller
 
                 $this->employee_model->upload_scanned_file($table, 'epas_code', $destination_path, $empId, $recordNo);
                 $epasFlag = "true";
+            }
+        }
+
+        $message = "";
+        $name = $this->employee_model->employee_name($fetch_data['empId'])['name'];
+
+        if ($contractFlag == 'true' && $clearanceFlag == 'true' && $epasFlag == 'true') {
+
+            $activity = "Uploaded the scanned Contract, Clearance and EPAS of " . $name . " Record No." . $recordNo;
+            $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), $activity);
+            $message = "Contract, Clearance and Scanned EPAS are Successfully Uploaded!";
+        } else if ($contractFlag == 'true' && $clearanceFlag == 'true') {
+
+            $activity = "Uploaded the scanned Contract and Clearance of " . $name . " Record No." . $recordNo;
+            $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), $activity);
+            $message = "Contract and Clearance are Successfully Uploaded!";
+        } else if ($contractFlag == 'true' && $epasFlag == 'true') {
+
+            $activity = "Uploaded the scanned Contract and EPAS of " . $name . " Record No." . $recordNo;
+            $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), $activity);
+            $message = "Contract and Scanned EPAS are Successfully Uploaded!";
+        } else if ($epasFlag == 'true' && $clearanceFlag == 'true') {
+
+            $activity = "Uploaded the scanned Clearance and EPAS of " . $name . " Record No." . $recordNo;
+            $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), $activity);
+            $message = "Clearance and Scanned EPAS are Successfully Uploaded!";
+        } else if ($contractFlag == 'true') {
+
+            $activity = "Uploaded the scanned Contract of " . $name . " Record No." . $recordNo;
+            $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), $activity);
+            $message = "Contract Successfully Uploaded!";
+        } else if ($clearanceFlag == 'true') {
+
+            $activity = "Uploaded the scanned Clearance (override) " . $name . " Record No." . $recordNo;
+            $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), $activity);
+            $message = "Clearance Successfully Uploaded!";
+        } else if ($epasFlag == 'true') {
+
+            $activity = "Uploaded the scanned EPAS of " . $name . " Record No." . $recordNo;
+            $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), $activity);
+            $message = "Scanned EPAS Successfully Uploaded!";
+        }
+
+        die("success||" . $message);
+    }
+
+    public function uploadPromoScannedFile()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+
+        $contract = $fetch_data['contracta'];
+        $empId = $fetch_data['empId'];
+        $recordNo = $fetch_data['recordNo'];
+        $table = "";
+
+        if ($contract == "current") :
+
+            $table = "promo_record";
+        else :
+
+            $table = "promo_history_record";
+        endif;
+
+        $epasFlag = "";
+        $contractFlag = "";
+        $clearanceFlag = "";
+
+        foreach ($fetch_data['clearance'] as $key => $value) {
+
+            $destination_path = "";
+            if (!empty($_FILES[$value]['name'])) {
+
+                $image        = addslashes(file_get_contents($_FILES[$value]['tmp_name']));
+                $image_name    = addslashes($_FILES[$value]['name']);
+                $array     = explode(".", $image_name);
+
+                $filename     = $empId . "=" . date('Y-m-d') . "=" . $value . "=" . date('H-i-s-A') . "." . end($array);
+                $destination_path    = "../document/clearance/" . $filename;
+
+                if (move_uploaded_file($_FILES[$value]['tmp_name'], $destination_path)) {
+
+                    $this->employee_model->upload_scanned_file($table, $value, $destination_path, $empId, $recordNo);
+                    $clearanceFlag = "true";
+                }
+            }
+        }
+
+        foreach ($fetch_data['contract'] as $key => $value) {
+
+            $destination_path = "";
+            if (!empty($_FILES[$value]['name'])) {
+
+                $image        = addslashes(file_get_contents($_FILES[$value]['tmp_name']));
+                $image_name    = addslashes($_FILES[$value]['name']);
+                $array     = explode(".", $image_name);
+
+                $filename     = $empId . "=" . date('Y-m-d') . "=" . $value . "=" . date('H-i-s-A') . "." . end($array);
+                $destination_path    = "../document/contract/" . $filename;
+
+                if (move_uploaded_file($_FILES[$value]['tmp_name'], $destination_path)) {
+
+                    $this->employee_model->upload_scanned_file($table, $value, $destination_path, $empId, $recordNo);
+                    $contractFlag = "true";
+                }
+            }
+        }
+
+        foreach ($fetch_data['epas'] as $key => $value) {
+
+            $destination_path = "";
+            if (!empty($_FILES[$value]['name'])) {
+
+                $image        = addslashes(file_get_contents($_FILES[$value]['tmp_name']));
+                $image_name    = addslashes($_FILES[$value]['name']);
+                $array     = explode(".", $image_name);
+
+                $filename     = $empId . "=" . date('Y-m-d') . "=" . $value . "=" . date('H-i-s-A') . "." . end($array);
+                $destination_path    = "../document/epas/" . $filename;
+
+                if (move_uploaded_file($_FILES[$value]['tmp_name'], $destination_path)) {
+
+                    $this->employee_model->upload_scanned_file($table, $value, $destination_path, $empId, $recordNo);
+                    $epasFlag = "true";
+                }
             }
         }
 
@@ -1026,7 +1158,7 @@ class Employee extends CI_Controller
         foreach ($vendors as $vendor) {
         ?>
             <option value="<?= $vendor->vendor_code ?>"><?= $vendor->vendor_name ?></option>
-<?php
+        <?php
         }
     }
 
@@ -1076,6 +1208,366 @@ class Employee extends CI_Controller
         } else {
 
             echo json_encode(['message' => 'success']);
+        }
+    }
+
+    public function addEmploymentHist()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+        $no     = $fetch_data['no'];
+        $empId  = $fetch_data['empId'];
+
+        $sql = "SELECT * FROM application_employment_history WHERE no = '$no'";
+        $row = $this->employee_model->return_row_array($sql);
+
+        ?>
+        <input type="hidden" name="empId" value="<?php echo $empId; ?>">
+        <input type="hidden" name="no" value="<?php echo $no; ?>">
+        <div class="form-group"> <i class="text-red">*</i>
+            <label>Company</label>
+            <input type="text" value="<?php echo $row['company']; ?>" name="company" class="form-control" onkeyup="inputField(this.name)">
+        </div>
+        <div class="form-group">
+            <label>Address</label>
+            <input type="text" value="<?php echo $row['address']; ?>" name="address" class="form-control" onkeyup="inputField(this.name)">
+        </div>
+        <div class="form-group"> <i class="text-red">*</i>
+            <label>Position</label>
+            <input type="text" value="<?php echo $row['position']; ?>" name="position" class="form-control" onkeyup="inputField(this.name)">
+        </div>
+        <div class="form-group">
+            <label>Employment Certificate</label> <?php if (!empty($row['emp_certificate'])) : echo "<i class='text-red'> - Already Uploaded</i>";
+                                                    endif; ?>
+            <input type="file" name="certificate" class="form-control">
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Date Start</label>
+                    <input type="text" value="<?php echo $row['yr_start']; ?>" name="startdate" class="form-control" onkeyup="inputField(this.name)">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Date End</label>
+                    <input type="text" value="<?php echo $row['yr_ends']; ?>" name="eocdate" class="form-control" onkeyup="inputField(this.name)">
+                </div>
+            </div>
+        </div>
+<?php
+    }
+
+    public function submitEmploymentHist()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+
+        $no = $fetch_data['no'];
+        $empId = $fetch_data['empId'];
+
+        $destination_path = "";
+        if (!empty($_FILES['certificate']['name'])) {
+
+            $image      = addslashes(file_get_contents($_FILES['certificate']['tmp_name']));
+            $image_name = addslashes($_FILES['certificate']['name']);
+            $array  = explode(".", $image_name);
+
+            $filename   = $empId . "=" . date('Y-m-d') . "=" . 'Employment-Certificate' . "=" . date('H-i-s-A') . "." . end($array);
+            $destination_path   = "../document/employment_certificate/" . $filename;
+
+            move_uploaded_file($_FILES['certificate']['tmp_name'], $destination_path);
+        }
+
+        if ($no == "") {
+
+            $employment = $this->employee_model->insert_application_employment_history($fetch_data, $destination_path);
+            if ($employment) {
+
+                $row = $this->employee_model->employee_name($fetch_data['empId']);
+                $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), 'Adding new Employment History of ' . $row['name']);;
+                die("success||Added");
+            }
+        } else {
+
+            $employment = $this->employee_model->update_application_employment_history($fetch_data, $destination_path);
+            if ($employment) {
+
+                $row = $this->employee_model->employee_name($fetch_data['empId']);
+                $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), 'Updated Employment History of ' . $row['name']);;
+                die("success||Updated");
+            }
+        }
+    }
+
+    public function employmentCertificate()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+
+        $row =  $this->employee_model->employment_certificate($fetch_data);
+        echo $row['emp_certificate'];
+    }
+
+    public function viewJobTrans()
+    {
+        $data['fetch'] = $this->input->post(NULL, TRUE);
+        $data['request'] = "viewJobTrans";
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function addBlacklist()
+    {
+        $data['fetch'] = $this->input->post(NULL, TRUE);
+        $data['request'] = "addBlacklist";
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function submitBlacklist()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+
+        if ($fetch_data['no'] == "") {
+
+            $blacklist = $this->employee_model->insert_blacklist($fetch_data);
+            $update_status = $this->employee_model->update_current_status($fetch_data['empId']);
+
+            if ($blacklist && $update_status) {
+
+                die("success||Added!");
+            }
+        } else {
+
+            $blacklist = $this->employee_model->update_blacklist($fetch_data);
+            $update_status = $this->employee_model->update_current_status($fetch_data['empId']);
+
+            if ($blacklist && $update_status) {
+
+                die("success||Updated!");
+            }
+        }
+    }
+
+    public function update_benefits()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+
+        $pagibigrtn = $_POST['pagibigrtn'];
+        $recordedby = $_SESSION['username'] . "/" . $_SESSION['emp_id'];
+
+        $check = "SELECT * FROM applicant_otherdetails where app_id = '" . $_POST['empId'] . "'";
+        if ($this->employee_model->return_num_rows($check) > 0) {
+            $act = "Updating the Benefits Info of";
+            $updatebenefits = $this->employee_model->update_applicant_otherdetails($fetch_data);
+        } else {
+
+            $act = "Adding the Benefits Info of";
+            $updatebenefits = $this->employee_model->insert_applicant_otherdetails($fetch_data);
+        }
+
+        if ($updatebenefits) {
+
+            $row = $this->employee_model->employee_name($fetch_data['empId']);
+            $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), $act . " " . $row['name']);
+            die("success");
+        }
+    }
+
+    public function view201File()
+    {
+        $data['fetch'] = $this->input->post(NULL, TRUE);
+        $data['request'] = "view201File";
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function upload201Files()
+    {
+        $data['fetch'] = $this->input->post(NULL, TRUE);
+        $data['request'] = "upload201Files";
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function upload201File()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+        $empId  = $fetch_data['empId'];
+        $no     = $fetch_data['sel201File'];
+
+        $sql = "SELECT 201_name, tableName, requirementName, path, empField FROM `201document` WHERE no = '$no'";
+        $row = $this->employee_model->return_row_array($sql);
+
+        $reqName    = $row['requirementName'];
+        $tableName  = $row['tableName'];
+        $empField   = $row['empField'];
+        $path       = $row['path'];
+        $req        = explode("/", $row['path']);
+        $filename   = end($req);
+
+        $destination_path = "";
+
+        if (!empty($_FILES['file_upload']['name'])) {
+
+            $file = $_FILES['file_upload']['name'];
+            for ($i = 0; $i < count($file); $i++) {
+
+                $query = "SELECT 
+                                $empField 
+                            FROM 
+                                `$tableName`
+                            WHERE 
+                                $empField = '" . $empId . "' AND requirement_name = '" . $reqName . "'
+                        ";
+                $num = $this->employee_model->return_num_rows($query) + 1;
+
+                $image = $file[$i];
+                $array = explode(".", $image);
+
+                $destination_path   = $path . "/" . $empId . "=" . $num . "=" . date('Y-m-d') . "=" . $reqName . "=" . date('H-i-s-A') . "." . end($array);
+
+                if (move_uploaded_file($_FILES['file_upload']['tmp_name'][$i], $destination_path)) {
+
+                    $document = $this->employee_model->insert_201_document($empField, $empId, $reqName, $destination_path, $tableName);
+
+                    if ($document) {
+
+                        $row = $this->employee_model->employee_name($fetch_data['empId']);
+                        $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), "Uploaded the 201 file [ " . $reqName . " ] of " . $row['name']);
+                    }
+                }
+            }
+
+            die("success");
+        }
+    }
+
+    public function removeSubordinates()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+
+        $supervisor = $this->employee_model->remove_supervisor($fetch_data);
+        if ($supervisor) {
+            die("success");
+        }
+    }
+
+    public function addSupervisor()
+    {
+        $data['fetch'] = $this->input->post(NULL, TRUE);
+        $data['request'] = "addSupervisor";
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function selectSupervisor()
+    {
+        $data['fetch'] = $this->input->post(NULL, TRUE);
+        $data['request'] = "selectSupervisor";
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function saveSupervisor()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+        $empId = $fetch_data['empId'];
+        $supIds = explode("*", $fetch_data['newCHK']);
+
+        for ($i = 0; $i < sizeof($supIds) - 1; $i++) {
+
+            $this->employee_model->insert_leveling_subordinates($supIds[$i], $empId);
+        }
+        die("success");
+    }
+
+    public function update_remarks()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+
+        $chk = "SELECT * FROM remarks where emp_id = '" . $_POST['empId'] . "'";
+        if ($this->employee_model->return_num_rows($chk) > 0) {
+
+            $remarks = $this->employee_model->update_remarks($fetch_data);
+        } else {
+
+            $remarks = $this->employee_model->insert_remarks($fetch_data);
+        }
+
+        if ($remarks) {
+
+            $row = $this->employee_model->employee_name($fetch_data['empId']);
+            $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), "Saving remarks of " . $row['name']);
+            die("success");
+        }
+    }
+
+    public function resetPass()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+
+        $password = $this->employee_model->reset_password($fetch_data);
+        if ($password) {
+
+            die("Password Successfully Resetted");
+        }
+    }
+
+    public function activateAccount()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+
+        $account = $this->employee_model->activate_account($fetch_data);
+        if ($account) {
+
+            die("Successfully Activated the User Account");
+        }
+    }
+
+    public function deactivateAccount()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+
+        $account = $this->employee_model->deactivate_account($fetch_data);
+        if ($account) {
+
+            die("Successfully Deactivated the User Account");
+        }
+    }
+
+    public function deleteAccount()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+
+        $account = $this->employee_model->delete_account($fetch_data);
+        if ($account) {
+
+            die("User Account Successfully Deleted");
+        }
+    }
+
+    public function addUserAccount()
+    {
+        $data['fetch'] = $this->input->post(NULL, TRUE);
+        $data['request'] = "addUserAccount";
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function submitAccount()
+    {
+        $fetch_data = $this->input->post(NULL, TRUE);
+        $username = $fetch_data['username'];
+
+        $check = "SELECT user_no FROM `users` WHERE username = '$username'";
+        $chkNum = $this->employee_model->return_num_rows($check);
+
+        if ($chkNum > 0) {
+            die("exist");
+        }
+
+        $account = $this->employee_model->insert_users($fetch_data);
+        if ($account) {
+            die("success");
         }
     }
 }

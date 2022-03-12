@@ -127,25 +127,6 @@
 </div>
 
 <!-- ./Modal -->
-<div id="appraisal_form" class="modal fade">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-light-blue color-palette">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span></button>
-                <h4 class="modal-title">Performance Appraisal For Promodiser/Merchandiser</h4>
-            </div>
-            <div class="modal-body">
-                <div class="appraisal_form"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ./Modal -->
 <div id="examDetails" class="modal fade">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
@@ -321,6 +302,208 @@
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- ./Modal -->
+<div id="uploadPromoScannedFile" class="modal fade">
+    <div class="modal-dialog" style="width: 80%;">
+        <div class="modal-content">
+            <div class="modal-header bg-light-blue color-palette">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">Upload Scanned File</h4>
+            </div>
+            <form action="" id="dataUploadPromoScannedFile" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="uploadPromoScannedFile"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary">Upload</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ./Modal -->
+<div id="appraisal_form" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light-blue color-palette">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">Performance Appraisal For Promodiser/Merchandiser</h4>
+            </div>
+            <div class="modal-body">
+                <div class="appraisal_form"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ./Modal -->
+<div id="addEmploymentHist" class="modal fade">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header bg-light-blue color-palette">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">Employment History</h4>
+            </div>
+            <form action="" id="dataEmploymentHistory" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="addEmploymentHist"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="submitEmploymentHist">Submit</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ./Modal -->
+<div id="viewEmploymentCert" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light-blue color-palette">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">Eligibility / Seminars / Trainings Information</h4>
+            </div>
+            <div class="modal-body">
+                <div class="viewEmploymentCert"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ./Modal -->
+<div id="viewJobTransfer" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light-blue color-palette">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">Job Transfer Report</h4>
+            </div>
+            <div class="modal-body">
+                <div class="viewJobTransfer"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ./Modal -->
+<div id="addBlacklist" class="modal fade">
+    <div class="modal-dialog" style="width: 50%;">
+        <div class="modal-content">
+            <div class="modal-header bg-light-blue color-palette">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">Blacklist History</h4>
+            </div>
+            <div class="modal-body">
+                <div class="addBlacklist"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="submitBlacklist()">Submit</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ./Modal -->
+<div id="view201File" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light-blue color-palette">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span></button>
+                <h4 class="modal-title"><span class="201-title"></span></h4>
+            </div>
+            <div class="modal-body">
+                <div class="view201File"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ./Modal -->
+<div id="upload201Files" class="modal fade">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header bg-light-blue color-palette">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">Upload 201 Files</h4>
+            </div>
+            <form action="" id="data201File" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="upload201Files"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="upload_201files_btn">Upload</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ./Modal -->
+<div id="addSupervisor" class="modal fade">
+    <div class="modal-dialog" style="width: 80%;">
+        <div class="modal-content">
+            <div class="modal-header bg-light-blue color-palette">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">Select Supervisor(s)</h4>
+            </div>
+            <div class="modal-body">
+                <div class="addSupervisor"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="submitSupervisor()">Save Supervisor(s)</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ./Modal -->
+<div id="addUserAccount" class="modal fade">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header bg-light-blue color-palette">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">Add New User Account</h4>
+            </div>
+            <div class="modal-body">
+                <div class="addUserAccount"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="submit_user_account" onclick="submitUserAccount()">Submit</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>

@@ -22,12 +22,13 @@ class Blacklist extends CI_Controller
         $fetch_data = $this->blacklist_model->get_blacklist();
         $data = array();
         foreach ($fetch_data as $row) {
+            // echo ucwords(strtolower(addslashes($row->reportedby))) . '/' . $row->blacklist_no . '<br>';
             $sub_array = array();
             $sub_array[] = '<span style="display:none">' . $row->blacklist_no . '</span><a href="' . base_url('placement/page/menu/employee/profile/' . $row->app_id) . '" target="_blank">' . $row->app_id . '</a>';
-            $sub_array[] = $row->name;
-            $sub_array[] = ucwords(strtolower($row->reportedby));
+            $sub_array[] = htmlentities($row->name);
+            $sub_array[] = htmlentities(ucwords(strtolower($row->reportedby)));
             $sub_array[] = date("m/d/Y", strtotime($row->date_blacklisted));
-            $sub_array[] = $row->reason;
+            $sub_array[] = htmlentities($row->reason);
             $sub_array[] = '<button id="record_' . $row->blacklist_no . '" class="btn btn-sm btn-primary record row_select_bgcolor"><i class="fa fa-pencil"></i> Update</button>';
             $data[] = $sub_array;
         }

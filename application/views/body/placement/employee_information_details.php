@@ -1437,4 +1437,490 @@ if ($request == 'basic_info') {
         </tbody>
     </table>
 <?php
+} else if ($request == "history") {
+
+    $sql = "SELECT * FROM application_employment_history WHERE app_id = '$empId'";
+    $result = $this->employee_model->return_result_array($sql);
+
+?>
+    <div class="modf">Employment History
+        <input class="btn btn-primary btn-sm" id="add-emphis" value="add" onclick="add_emphis('')" type="button">
+    </div>
+    <table class="table table-striped" width="100%">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Company</th>
+                <th>Position</th>
+                <th>DateStart</th>
+                <th>DateEnd</th>
+                <th>Address/Location</th>
+                <th>Certificate</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+
+            $i = 0;
+            foreach ($result as $row) {
+
+                $i++;
+                echo "
+								<tr>
+									<td>" . $i . ".</td>
+									<td>" . $row['company'] . "</td>
+									<td>" . $row['position'] . "</td>
+									<td>" . $row['yr_start'] . "</td>
+									<td>" . $row['yr_ends'] . "</td>
+									<td>" . $row['address'] . "</td>
+									<td>";
+
+                if (!empty($row['emp_certificate'])) {
+
+                    echo "<button class='btn btn-primary btn-sm' onclick=viewEmpCert('$row[no]')>view</button>";
+                } else {
+
+                    echo "none";
+                }
+                echo "
+									</td>
+									<td>
+										<td><button class='btn btn-primary btn-sm' onclick=add_emphis('$row[no]')>edit</button></td>
+									</td>
+								</tr>
+							";
+            }
+            ?>
+        </tbody>
+    </table>
+<?php
+} else if ($request == "transfer") {
+
+    $sql = "SELECT * FROM employee_transfer_details WHERE emp_id = '$empId' ORDER BY transfer_no DESC";
+    $result = $this->employee_model->return_result_array($sql);
+?>
+    <div class="modf">Job Transfer History</div>
+    <table class="table table-striped" id="data">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Effectivity</th>
+                <th>TransferFrom</th>
+                <th>TransferTo</th>
+                <th>OldPosition</th>
+                <th>NewPosition</th>
+                <th>DirectSupervisor</th>
+                <th>JobTrans</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+
+            foreach ($result as $row) {
+
+                $oldLoc = explode('-', $row['old_location']);
+                $newLoc = explode('-', $row['new_location']);
+
+                // previous department
+                if ($this->employee_model->get_department_name(@$oldLoc[0], @$oldLoc[1], @$oldLoc[2])['acroname'] != "") {
+
+                    $olddept = $this->employee_model->get_department_name(@$oldLoc[0], @$oldLoc[1], @$oldLoc[2])['acroname'];
+                } else {
+
+                    $olddept = $this->employee_model->get_department_name(@$oldLoc[0], @$oldLoc[1], @$oldLoc[2])['dept_name'];
+                }
+
+                // current department
+                if ($this->employee_model->get_department_name(@$newLoc[0], @$newLoc[1], @$newLoc[2])['acroname'] != "") {
+
+                    $dept = $this->employee_model->get_department_name(@$newLoc[0], @$newLoc[1], @$newLoc[2])['acroname'];
+                } else {
+
+                    $dept = $this->employee_model->get_department_name(@$newLoc[0], @$newLoc[1], @$newLoc[2])['dept_name'];
+                }
+
+                // business unit
+                $businessUnit = $this->employee_model->get_businessunit_name(@$oldLoc[0], @$oldLoc[1])['acroname'];
+                if (trim($businessUnit) != "") {
+
+                    $businessUnit = $this->employee_model->get_businessunit_name(@$oldLoc[0], @$oldLoc[1])['business_unit'];
+                } ?>
+                <tr>
+                    <td><?php echo $row['transfer_no']; ?></td>
+                    <td><?php
+                        if (strlen($row['effectiveon']) > 10 || strlen($row['effectiveon']) < 10) {
+                            echo $row['effectiveon'];
+                        } else {
+                            echo date('m/d/Y', strtotime($row['effectiveon']));
+                        } ?></td>
+                    <td><?php echo $this->employee_model->asc_company_name(@$oldLoc[0])['acroname'] . "-" . $businessUnit . "-" . $olddept; ?></td>
+                    <td><?php echo $this->employee_model->asc_company_name(@$newLoc[0])['acroname'] . "-" . $businessUnit . "-" . $dept; ?></td>
+                    <td><?php echo $row['old_position']; ?></td>
+                    <td><?php echo $row['position']; ?></td>
+                    <td><?php echo $row['supervision']; ?></td>
+                    <td><button class="btn btn-primary btn-sm" onclick="viewJobTrans(<?php echo $row['transfer_no']; ?>)">view</button></td>
+                </tr> <?php
+                    }
+                        ?>
+        </tbody>
+    </table>
+<?php
+} else if ($request == "blacklist") {
+
+    $sql = "SELECT blacklist_no, date_blacklisted, date_added, reportedby, reason, status FROM `blacklist` WHERE app_id = '$empId'";
+    $blNum = $this->employee_model->return_row_array($sql);
+
+?>
+    <div class="modf">Blacklist History
+        <button class="btn btn-primary btn-sm" id="add-blacklist" <?php if ($blNum > 0) : echo "disabled=''";
+                                                                    endif; ?> onclick="add_blacklist('')">add</button>
+    </div>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>DateBlacklisted</th>
+                <th>ReportedBy</th>
+                <th>Reason</th>
+                <th>DateAdded</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+
+            $result = $this->employee_model->return_result_array($sql);
+            foreach ($result as $row) {
+
+                if ($row['date_blacklisted'] == '0000-00-00' || $row['date_blacklisted'] == '') {
+
+                    $datebl = '';
+                } else {
+
+                    $datebl = date("m/d/Y", strtotime($row['date_blacklisted']));
+                }
+
+                if ($row['date_added'] == '0000-00-00' || $row['date_added'] == '') {
+
+                    $dateadded = '';
+                } else {
+
+                    $dateadded = date("m/d/Y", strtotime($row['date_added']));
+                }
+
+                echo "
+                            <tr>
+                                <td>" . $datebl . "</td>
+                                <td>" . $row['reportedby'] . "</td>
+                                <td>" . $row['reason'] . "</td>
+                                <td>" . $dateadded . "</td>
+                                <td><label class='btn btn-xs btn-danger btn-block'>" . $row['status'] . "</label></td>
+                                <td><button class='btn btn-sm btn-primary' onclick='add_blacklist(" . $row['blacklist_no'] . ")'>edit</button></td>
+                            </tr>
+                        ";
+            }
+            ?>
+        </tbody>
+    </table>
+<?php
+} else if ($request == "benefits") {
+
+    $sql = "SELECT sss_no, pagibig_tracking, pagibig, philhealth, tin_no FROM `applicant_otherdetails` WHERE app_id = '$empId'";
+    $row = $this->employee_model->return_row_array($sql);
+
+?>
+    <div class="modf">BENEFITS
+        <input name="edit" id="edit-benefits" value="edit" class="btn btn-primary btn-sm" onclick="edit_benefits()" type="button">
+        <input class="btn btn-primary btn-sm" id="update_benefits" value="update" style="display:none" onclick="update(this.id)" type="button">
+    </div>
+    <table class="table table-bordered" width="100%">
+        <tbody>
+            <tr>
+                <td align="right" width="20%">Philhealth No.</td>
+                <td><input name="ph" value="<?php echo $row['philhealth']; ?>" class="form-control inputForm" placeholder="00-000000000-0" type="text" data-inputmask='"mask": "99-999999999-9"' data-mask></td>
+            </tr>
+            <tr>
+                <td align="right">SSS No.</td>
+                <td><input name="sss" value="<?php echo $row['sss_no']; ?>" class="form-control inputForm" placeholder="00-0000000-0" type="text" data-inputmask='"mask": "99-9999999-9"' data-mask></td>
+            </tr>
+            <tr>
+                <td align="right">Pag-ibig No.</td>
+                <td><input name="pagibig" value="<?php echo $row['pagibig']; ?>" class="form-control inputForm" placeholder="0000-0000-0000" type="text" data-inputmask='"mask": "9999-9999-9999"' data-mask></td>
+            </tr>
+            <tr>
+                <td align="right">Pag-ibig RTN</td>
+                <td><input name="pagibigrtn" value="<?php echo $row['pagibig_tracking']; ?>" class="form-control inputForm" placeholder="0000-0000-0000" type="text" data-inputmask='"mask": "9999-9999-9999"' data-mask></td>
+            </tr>
+            <tr>
+                <td align="right">TIN no.</td>
+                <td><input name="tinno" value="<?php echo $row['tin_no']; ?>" class="form-control inputForm" placeholder="000-000-000-000" type="text" data-inputmask='"mask": "999-999-999-999"' data-mask></td>
+            </tr>
+        </tbody>
+    </table>
+    <script type="text/javascript">
+        $(".inputForm").prop("disabled", true);
+        $("[data-mask]").inputmask();
+    </script>
+<?php
+} else if ($request == "201doc") {
+
+    $doc = "SELECT no, 201_name, tableName, empField, table_condition FROM 201document WHERE promo = 'yes' ORDER BY 201_name ASC";
+    $result = $this->employee_model->return_result_array($doc);
+
+?>
+    <div class="modf">201 Documents
+        <input type="button" class="btn btn-sm btn-primary" value="upload" onclick="upload201Files()">
+    </div>
+    <div class="row">
+        <?php
+
+        $total = 0;
+        foreach ($result as $row) {
+
+            $no         = $row['no'];
+            $title         = $row['201_name'];
+            $tableName     = $row['tableName'];
+            $empField     = $row['empField'];
+            $table_condition = $row['table_condition'];
+
+            $sql = "SELECT $empField FROM `$tableName` WHERE $empField = '$empId' $table_condition";
+            $total = $this->employee_model->return_num_rows($sql);
+
+        ?>
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <center><span class="sm"><?php echo $title; ?></span></center>
+                    </div>
+                    <div class="panel-body">
+                        <span class="label label-danger pull-right"><?php echo $total; ?></span>
+                        <center>
+                            <a href="javascript:void(0)" onclick="view201Files('<?php echo $no; ?>','<?php echo $title; ?>')" title="click to view"><img src="<?php echo base_url('assets/images/docs.png'); ?>" class="img"></a>
+                        </center>
+                    </div>
+                </div>
+            </div> <?php
+                }
+                    ?>
+    </div>
+<?php
+} else if ($request == "pss") {
+
+?>
+    <div class="modf">Peer-Subordinate-Supervisor</div>
+    <div>
+        <h4>Supervisor <button class="btn btn-primary btn-sm" id="add-supervisor" onclick="add_supervisor()">add</button></h4>
+    </div>
+    <hr>
+    <table class="table table-striped table-hover" width="100%">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Status</th>
+                <th>
+                    <center>EmployeeType</center>
+                </th>
+                <th>
+                    <center>Action</center>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+
+            $sql = "SELECT leveling_subordinates.record_no, ratee, name, current_status, emp_type, position FROM leveling_subordinates, employee3 WHERE leveling_subordinates.ratee = employee3.emp_id AND subordinates_rater = '$empId' ORDER BY name ASC";
+            $supervisors = $this->employee_model->return_result_array($sql);
+
+            $no = 1;
+            foreach ($supervisors as $row) {
+
+                if ($row['current_status'] == "Active") {
+
+                    $class = "btn btn-success btn-xs btn-block";
+                } else if ($row['current_status'] == "End of Contract" || $row['current_status'] == "Resigned") {
+
+                    $class = "btn btn-warning btn-xs btn-block";
+                } else {
+
+                    $class = "btn btn-danger btn-xs btn-block";
+                }
+
+                echo "
+                            <tr id='remove_" . $row['record_no'] . "'>
+                                <td>" . $no++ . ".</td>
+                                <td><a href='http://" . $_SERVER['SERVER_ADDR'] . ':' . $_SERVER['SERVER_PORT'] . "/hrms/nesco/?p=employee&com=" . $row['ratee'] . "' target='_blank'>" . ucwords(strtolower($row['name'])) . "</a></td>
+                                <td>" . $row['position'] . "</td>
+                                <td><label class='$class'>" . $row['current_status'] . "</label></td>
+                                <td align='center'>" . $row['emp_type'] . "</td>
+                                <td align='center'><i class='glyphicon glyphicon-trash text-red' title='remove supervisor' onclick=removeSubordinates('" . $row['record_no'] . "','supervisor')></i>
+                            </tr>
+                        ";
+            }
+            ?>
+        </tbody>
+    </table>
+    <br>
+    <h4>Subordinates</h4>
+    <hr>
+    <table id="dt_subordinates" class="table table-striped table-hover" width="100%">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Status</th>
+                <th>
+                    <center>Action</center>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+
+            $sql = "SELECT leveling_subordinates.record_no, subordinates_rater, name, current_status, emp_type, position FROM leveling_subordinates, employee3 WHERE leveling_subordinates.subordinates_rater = employee3.emp_id AND ratee = '" . $empId . "' ORDER BY name ASC";
+            $subordinates = $this->employee_model->return_result_array($sql);
+
+            $no = 1;
+            foreach ($subordinates as $row) {
+
+                if ($row['current_status'] == "Active") {
+
+                    $class = "btn btn-success btn-xs btn-block";
+                } else if ($row['current_status'] == "End of Contract" || $row['current_status'] == "Resigned") {
+
+                    $class = "btn btn-warning btn-xs btn-block";
+                } else {
+
+                    $class = "btn btn-danger btn-xs btn-block";
+                }
+
+                echo "
+                            <tr id='remove_" . $row['record_no'] . "'>
+                                <td>" . $no++ . ".</td>
+                                <td><a href='../profile/" . $row['subordinates_rater'] . "' target='_blank'>" . ucwords(strtolower($row['name'])) . "</a></td>
+                                <td>" . $row['position'] . "</td>
+                                <td><label class='$class'>" . $row['current_status'] . "</label></td>
+                                <td align='center'><i class='glyphicon glyphicon-trash text-red' title='remove subordinates' onclick=removeSubordinates('" . $row['record_no'] . "','subordinate')></i>
+                            </tr>
+                        ";
+            }
+            ?>
+        </tbody>
+    </table>
+    <script type="text/javascript">
+        $(function() {
+            var dataTable = $("#dt_subordinates").DataTable({
+
+                "order": [],
+                "bLengthChange": false,
+                "autoWidth": true,
+                "paging": false,
+                "scrollY": '46vh',
+                "scrollCollapse": true,
+                "columnDefs": [{
+                    "targets": [0, 1, 2, 3, 4],
+                    "orderable": false,
+                }, ],
+            });
+        });
+    </script>
+<?php
+} else if ($request == "remarks") {
+
+    $sql = "SELECT remarks FROM remarks where emp_id = '$empId'";
+    $row = $this->employee_model->return_row_array($sql);
+
+?>
+    <div class="modf">Remarks
+        <input name="edit" id="edit-remarks" value="edit" class="btn btn-primary btn-sm" onclick="edit_remarks()" type="button">
+        <input class="btn btn-primary btn-sm" id="update_remarks" value="update" style="display:none" onclick="update(this.id)" type="button">
+    </div>
+    <?php
+
+    $checkifres = "SELECT * FROM `termination` WHERE emp_id = '$empId' order by date desc";
+    $result = $this->employee_model->return_result_array($checkifres);
+    if ($this->employee_model->return_num_rows($checkifres) > 0) {
+
+        echo "<div class='alert alert-info' role='alert'>";
+
+        foreach ($result as $rch) {
+
+            echo "<i>" . $rch['remarks'] . " last " . date('M d, Y', strtotime($rch['date'])) . " added by " . $this->employee_model->employee_name($rch['added_by'])['name'] . " updated last " . date('M d, Y', strtotime($rch['date_updated'])) . ".</i><br>";
+        }
+        echo "</div>";
+    }
+    ?>
+    <textarea name="remarks" rows="15" cols="150" class="form-control inputForm" id="remarks"><?php echo $row['remarks']; ?></textarea>
+    <script type="text/javascript">
+        $(".inputForm").prop("disabled", true);
+    </script>
+<?php
+} else if ($request == "useraccount") {
+
+    $sql = "SELECT user_no, username, usertype, user_status, login, date_created FROM users WHERE emp_id = '$empId'";
+    $result = $this->employee_model->return_result_array($sql);
+?>
+    <div class="modf">User Account
+        <input type="button" class="btn btn-sm btn-primary" <?php if ($this->employee_model->return_num_rows($sql) > 0) : echo "disabled=''";
+                                                            endif; ?> value="add" onclick="addUserAccount()">
+    </div>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>UserNo.</th>
+                <th>Username</th>
+                <th>Usertype</th>
+                <th>Status</th>
+                <th>LogIn</th>
+                <th>Date Created</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+
+            foreach ($result as $row) {
+
+                $trashImage = "";
+                if ($row['user_status'] == "active") {
+
+                    $userClass = "btn btn-success btn-xs btn-block btn-flat";
+                } else {
+
+                    $userClass = "btn btn-danger btn-xs btn-block btn-flat";
+                }
+
+                if ($row['user_status'] == "active") {
+
+                    $iconImage = "<i class='glyphicon glyphicon-remove text-yellow' href='javascript:void(0);' title='click to deactivate account' onclick=userAction('$row[user_no]','deactivateAccount')></i>";
+                } else {
+
+                    $iconImage = "<i class='glyphicon glyphicon-ok text-green' href='javascript:void(0);' title='click to activate account' onclick=userAction('$row[user_no]','activateAccount')></i>";
+                }
+
+                if ($_SESSION['emp_id'] == "06359-2013") {
+                    $trashImage = "<i class='glyphicon glyphicon-trash text-red' href='javascript:void(0);' title='click to delete account' onclick=userAction('$row[user_no]','deleteAccount')></i>";
+                }
+
+                echo "
+                            <tr>
+                                <td>" . $row['user_no'] . "</td>
+                                <td>" . $row['username'] . "</td>
+                                <td>" . $row['usertype'] . "</td>
+                                <td><label class='$userClass'>" . $row['user_status'] . "</label></td>
+                                <td>" . $row['login'] . "</td>
+                                <td>" . date("M. d, Y", strtotime($row['date_created'])) . "</td>
+                                <td>
+                                    <i class='glyphicon glyphicon-repeat' href='javascript:void(0);' title='click to reset password' onclick=userAction('$row[user_no]','resetPass')></i>&nbsp;$iconImage&nbsp;$trashImage
+                                </td>
+                            </tr>
+                        ";
+            }
+            ?>
+        </tbody>
+    </table>
+<?php
 }

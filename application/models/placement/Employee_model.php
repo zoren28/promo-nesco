@@ -15,6 +15,8 @@ class Employee_model extends CI_Model
         $this->date = date('Y-m-d');
         $this->loginId = $_SESSION['emp_id'];
         $this->db2 = $this->load->database('timekeeping', TRUE);
+
+        $this->db->query('SET SESSION sql_mode = ""');
     }
 
     public function return_result_array($sql)
@@ -1076,5 +1078,253 @@ class Employee_model extends CI_Model
 
         $this->db->where(array('record_no' => $data['recordNo'], 'emp_id' => $data['empId']));
         $this->db->update($table);
+    }
+
+    public function insert_application_employment_history($data, $path)
+    {
+        $insert = array(
+            'app_id'        => $data['empId'],
+            'company'       => $data['company'],
+            'position'      => $data['position'],
+            'yr_start'      => $data['startdate'],
+            'yr_ends'       => $data['eocdate'],
+            'address'       => $data['address'],
+            'emp_certificate' => $path
+        );
+
+        return $this->db->insert('application_employment_history', $insert);
+    }
+
+    public function update_application_employment_history($data, $path)
+    {
+        if (!empty($path)) {
+
+            $update = array(
+                'company'       => $data['company'],
+                'position'      => $data['position'],
+                'yr_start'      => $data['startdate'],
+                'yr_ends'       => $data['eocdate'],
+                'address'       => $data['address'],
+                'emp_certificate' => $path
+            );
+        } else {
+
+            $update = array(
+                'company'       => $data['company'],
+                'position'      => $data['position'],
+                'yr_start'      => $data['startdate'],
+                'yr_ends'       => $data['eocdate'],
+                'address'       => $data['address']
+            );
+        }
+
+        $this->db->where('no', $data['no']);
+        $this->db->where('app_id', $data['empId']);
+        return $this->db->update('application_employment_history', $update);
+    }
+
+    public function employment_certificate($data)
+    {
+        $this->db->select('emp_certificate');
+        $query = $this->db->get_where('application_employment_history', array('no' => $data['no']));
+        return $query->row_array();
+    }
+
+    public function insert_blacklist($data)
+    {
+        if ($data['birthday'] == "") {
+
+            $birthday = "";
+        } else {
+
+            $birthday = date("Y-m-d", strtotime($data['birthday']));
+        }
+
+        $insert = array(
+            'app_id'        => $data['empId'],
+            'name'          => $data['empName'],
+            'date_blacklisted' => date("Y-m-d", strtotime($data['dateBlacklisted'])),
+            'date_added'    => $this->date,
+            'reportedby'    => $data['reportedBy'],
+            'reason'        => $data['reason'],
+            'status'        => 'blacklisted',
+            'staff'         => $this->loginId,
+            'bday'          =>  $birthday,
+            'address'       => $data['address']
+        );
+
+        return $this->db->insert('blacklist', $insert);
+    }
+
+    public function update_current_status($empId)
+    {
+        $update = array(
+            'current_status'  => 'blacklisted'
+        );
+
+        $this->db->where('emp_id', $empId);
+        return $this->db->update('employee3', $update);
+    }
+
+    public function update_blacklist($data)
+    {
+        if ($data['birthday'] == "") {
+
+            $birthday = "";
+        } else {
+
+            $birthday = date("Y-m-d", strtotime($data['birthday']));
+        }
+
+        $update = array(
+            'date_blacklisted' => date("Y-m-d", strtotime($data['dateBlacklisted'])),
+            'reportedby'    => $data['reportedBy'],
+            'reason'        => $data['reason'],
+            'staff'         => $this->loginId,
+            'bday'          =>  $birthday,
+            'address'       => $data['address']
+        );
+
+        $this->db->where('blacklist_no', $data['no']);
+        $this->db->where('app_id', $data['empId']);
+        return $this->db->update('blacklist', $update);
+    }
+
+    public function update_applicant_otherdetails($data)
+    {
+        $recordedby = $_SESSION['username'] . "/" . $_SESSION['emp_id'];
+
+        $update = array(
+            'philhealth'    => $data['ph'],
+            'sss_no'        => $data['sss'],
+            'pagibig'       => $data['pagibig'],
+            'pagibig_tracking' => $data['pagibigrtn'],
+            'tin_no'        => $data['tinno'],
+            'recordedby'    => $recordedby
+        );
+
+        $this->db->where('app_id', $data['empId']);
+        return $this->db->update('applicant_otherdetails', $update);
+    }
+
+    public function insert_applicant_otherdetails($data)
+    {
+        $recordedby = $_SESSION['username'] . "/" . $_SESSION['emp_id'];
+
+        $insert = array(
+            'app_id'        => $data['empId'],
+            'philhealth'    => $data['ph'],
+            'sss_no'        => $data['sss'],
+            'pagibig'       => $data['pagibig'],
+            'pagibig_tracking' => $data['pagibigrtn'],
+            'tin_no'        => $data['tinno'],
+            'recordedby'    => $recordedby
+        );
+
+        return $this->db->insert('applicant_otherdetails', $insert);
+    }
+
+    public function insert_201_document($field, $emp_id, $req_name, $path, $table_name)
+    {
+        $insert = array(
+            $field              => $emp_id,
+            'requirement_name'  => $req_name,
+            'filename'          => $path,
+            'date_time'         => $this->date,
+            'requirement_status' => 'passed',
+            'receiving_staff'   => $this->loginId
+        );
+
+        return $this->db->insert($table_name, $insert);
+    }
+
+    public function remove_supervisor($data)
+    {
+        return $this->db->delete('leveling_subordinates', array('record_no' => $data['recordNo']));
+    }
+
+    public function insert_leveling_subordinates($supervisor, $subordinates)
+    {
+        $insert = array(
+            'ratee'             => $supervisor,
+            'subordinates_rater' => $subordinates
+        );
+
+        return $this->db->insert('leveling_subordinates', $insert);
+    }
+
+    public function update_remarks($data)
+    {
+        $update = array(
+            'remarks'    => $data['remarks']
+        );
+
+        $this->db->where('emp_id', $data['empId']);
+        return $this->db->update('remarks', $update);
+    }
+
+    public function insert_remarks($data)
+    {
+        $insert = array(
+            'emp_id'    => $data['empId'],
+            'remarks'   => $data['remarks']
+        );
+
+        return $this->db->insert('remarks', $insert);
+    }
+
+    public function reset_password($data)
+    {
+        $password = md5("Hrms2014");
+
+        $update = array(
+            'password'    => $password
+        );
+
+        $this->db->where('user_no', $data['userNo']);
+        return $this->db->update('users', $update);
+    }
+
+    public function activate_account($data)
+    {
+        $update = array(
+            'user_status'    => 'active'
+        );
+
+        $this->db->where('user_no', $data['userNo']);
+        return $this->db->update('users', $update);
+    }
+
+    public function deactivate_account($data)
+    {
+        $update = array(
+            'user_status'    => 'inactive'
+        );
+
+        $this->db->where('user_no', $data['userNo']);
+        return $this->db->update('users', $update);
+    }
+
+    public function delete_account($data)
+    {
+        return $this->db->delete('users', array('user_no' => $data['userNo']));
+    }
+
+    public function insert_users($data)
+    {
+        $password = md5($_POST['password']);
+
+        $insert = array(
+            'emp_id'        => $data['empId'],
+            'username'      => $data['username'],
+            'password'      => $password,
+            'usertype'      => $data['usertype'],
+            'user_status'   => 'active',
+            'login'         => 'no',
+            'date_created'  => date("Y-m-d H:i:s"),
+            'user_id'       => 4
+        );
+
+        return $this->db->insert('users', $insert);
     }
 }

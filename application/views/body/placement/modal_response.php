@@ -1870,6 +1870,160 @@ if ($request == "update_blacklist_form") {
             }
         });
     </script>
+    <?php
+} else if ($request == "uploadPromoScannedFileForm") {
+
+    $contract = $fetch['contract'];
+    $recordNo = $fetch['recordNo'];
+    $empId = $fetch['empId'];
+
+    $bUs = $this->dashboard_model->businessUnit_list();
+    foreach ($bUs as $bu) {
+
+        $hasBU = $this->dashboard_model->promo_has_store($contract, $empId, $recordNo, $bu->bunit_field);
+        if ($hasBU > 0) {
+    ?>
+            <input type="hidden" name="epas[]" value="<?= $bu->bunit_epascode ?>">
+            <input type="hidden" name="clearance[]" value="<?= $bu->bunit_clearance ?>">
+            <input type="hidden" name="contract[]" value="<?= $bu->bunit_contract ?>">
+
+            <div class="row">
+                <div class="col-md-4">
+                    <b><?= "Clearance ($bu->bunit_name)" ?></b><br>
+                    <img id="photo<?= $bu->bunit_clearance ?>" class='preview img-responsive' /><br>
+                    <input type='file' name='<?= $bu->bunit_clearance ?>' id='<?= $bu->bunit_clearance ?>' class='btn btn-default' onchange='readURL(this,"<?= $bu->bunit_clearance ?>")'>
+                    <input type='button' name='clear<?= $bu->bunit_clearance ?>' id='clear<?= $bu->bunit_clearance ?>' style='display:none' class='btn btn-default' value='Clear' onclick="clears('<?= $bu->bunit_clearance ?>','photo<?= $bu->bunit_clearance ?>','clear<?= $bu->bunit_clearance ?>')">
+                    <input type='button' id='<?= $bu->bunit_clearance ?>_change' style='display:none' class='btn btn-primary btn-sm' value='Change Clearance?' onclick='changePhoto("Clearance","<?= $bu->bunit_clearance ?>","<?= $bu->bunit_clearance; ?>_change")'>
+                </div>
+                <div class="col-md-4">
+                    <b><?= "Contract ($bu->bunit_name)" ?></b><br>
+                    <img id="photo<?= $bu->bunit_contract ?>" class='preview img-responsive' /><br>
+                    <input type='file' name='<?= $bu->bunit_contract ?>' id='<?= $bu->bunit_contract ?>' class='btn btn-default' onchange='readURL(this,"<?= $bu->bunit_contract ?>")'>
+                    <input type='button' name='clear<?= $bu->bunit_contract ?>' id='clear<?= $bu->bunit_contract ?>' style='display:none' class='btn btn-default' value='Clear' onclick="clears('<?= $bu->bunit_contract ?>','photo<?= $bu->bunit_contract ?>','clear<?= $bu->bunit_contract ?>')">
+                    <input type='button' id='<?= $bu->bunit_contract ?>_change' style='display:none;' class='btn btn-primary btn-sm' value='Change Contract?' onclick='changePhoto("Contract","<?= $bu->bunit_contract ?>","<?= $bu->bunit_contract ?>_change")'>
+                </div>
+                <div class="col-md-4">
+                    <b><?= "EOC Appraisal ($bu->bunit_name)" ?></b><br>
+                    <img id="photo<?= $bu->bunit_epascode ?>" class='preview img-responsive' /><br>
+                    <input type='file' name='<?= $bu->bunit_epascode ?>' id='<?= $bu->bunit_epascode ?>' class='btn btn-default' onchange='readURL(this,"<?= $bu->bunit_epascode ?>")'>
+                    <input type='button' name='clear<?= $bu->bunit_epascode ?>' id='clear<?= $bu->bunit_epascode ?>' class='btn btn-default' value='Clear' style='display:none' onclick="clears('<?= $bu->bunit_epascode ?>','photo<?= $bu->bunit_epascode ?>','clear<?= $bu->bunit_epascode ?>')">
+                    <input type='button' id='<?= $bu->bunit_epascode ?>_change' style='display:none;' class='btn btn-primary btn-sm' value='Change Epas?' onclick='changePhoto("Epas","<?= $bu->bunit_epascode ?>","<?= $bu->bunit_epascode ?>_change")'>
+                </div>
+            </div><br>
+    <?php
+        }
+    }
+    ?>
+    <input type="hidden" name="contracta" value="<?= $contract ?>">
+    <input type="hidden" name="empId" value="<?= $empId ?>">
+    <input type="hidden" name="recordNo" value="<?= $recordNo ?>">
+    <script>
+        var contracta = $("[name = 'contracta']").val();
+        var empId = $("[name = 'empId']").val();
+        var recordNo = $("[name = 'recordNo']").val();
+
+        if (contracta == 'current') {
+
+            var table = 'promo_record';
+        } else {
+
+            var table = 'promo_history_record';
+        }
+
+        var epascode = document.getElementsByName('epas[]');
+        var contracts = document.getElementsByName('contract[]');
+        var clearances = document.getElementsByName('clearance[]');
+
+        for (var i = 0; i < epascode.length; i++) {
+
+            $('input#' + epascode[i].value).val('');
+            $('input#' + clearances[i].value).val('');
+            $('input#' + contracts[i].value).val('');
+            $('input#clear' + epascode[i].value).hide();
+            $('input#clear' + clearances[i].value).hide();
+            $('input#clear' + contracts[i].value).hide();
+
+            (function(i) {
+
+                $('input#photo' + epascode[i].value).removeAttr('src');
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo site_url('promoFile'); ?>",
+                    data: {
+                        table: table,
+                        field: epascode[i].value,
+                        empId: empId,
+                        recordNo: recordNo
+                    },
+                    success: function(data) {
+
+                        if (data != 0) {
+
+                            if (data > 0) {
+
+                                document.getElementById("photo" + epascode[i].value).src = "<?= base_url('assets/images/epas_msg.jpg') ?>";
+                                $('input#' + epascode[i].value).hide();
+
+                            } else {
+                                document.getElementById("photo" + epascode[i].value).src = "<?php echo 'http://' . $_SERVER['SERVER_ADDR'] . ":" . $_SERVER['SERVER_PORT'] . '/hrms/promo-nesco/'; ?>" + data;
+                                $('input#' + epascode[i].value).hide();
+                                $('input#' + epascode[i].value + "_change").show();
+                            }
+                        } else {
+                            $('input#' + epascode[i].value).show();
+                        }
+                    }
+                });
+
+                $('input#photo' + contracts[i].value).removeAttr('src');
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo site_url('promoFile'); ?>",
+                    data: {
+                        table: table,
+                        field: contracts[i].value,
+                        empId: empId,
+                        recordNo: recordNo
+                    },
+                    success: function(data) {
+
+                        if (data != '') {
+                            document.getElementById("photo" + contracts[i].value).src = "<?php echo 'http://' . $_SERVER['SERVER_ADDR'] . ":" . $_SERVER['SERVER_PORT'] . '/hrms/promo-nesco/'; ?>" + data;
+                            $('input#' + contracts[i].value).hide();
+                            $('input#' + contracts[i].value + "_change").show();
+                        } else {
+                            $('input#' + contracts[i].value + "_change").hide();
+                            $('input#' + contracts[i].value).show();
+                        }
+                    }
+                });
+
+                $('input#photo' + clearances[i].value).removeAttr('src');
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo site_url('promoFile'); ?>",
+                    data: {
+                        table: table,
+                        field: clearances[i].value,
+                        empId: empId,
+                        recordNo: recordNo
+                    },
+                    success: function(data) {
+
+                        if (data != '') {
+                            document.getElementById("photo" + clearances[i].value).src = "<?php echo 'http://' . $_SERVER['SERVER_ADDR'] . ":" . $_SERVER['SERVER_PORT'] . '/hrms/promo-nesco/'; ?>" + data;
+                            $('input#' + clearances[i].value).hide();
+                            $('input#' + clearances[i].value + "_change").show();
+                        } else {
+                            $('input#' + clearances[i].value + "_change").hide();
+                            $('input#' + clearances[i].value).show();
+                        }
+                    }
+                });
+
+            })(i);
+        }
+    </script>
 <?php
 } else if ($request == "promoContractDetails") {
 
@@ -1947,15 +2101,15 @@ if ($request == "update_blacklist_form") {
 
                         $displayEpas = '';
                         $epas_sql = "SELECT details_id, numrate, descrate FROM `appraisal_details` WHERE emp_id ='$empId' AND record_no = '$recordNo' AND store = '" . $bu->bunit_name . "'";
-                        if ($this->employee_model->return_num_rows($epas_sql) > 0) {
+                        $epasNum = $this->employee_model->return_num_rows($epas_sql);
+                        if ($epasNum > 0) {
 
                             $epas = $this->employee_model->return_row_array($epas_sql);
+                            $displayEpas = "<button class='btn btn-primary btn-sm btn-flat btn-block' onclick='view_appraisal_details(\"$epas[details_id]\")'>" . $epas['numrate'] . " - " . $epas['descrate'] . " &nbsp;[ View Epas ]</button>";
+                        } else {
 
-                            if ($epasNum == 1) : $displayEpas = "<button class='btn btn-primary btn-sm btn-flat btn-block' onclick='viewAppraisalDetails(\"$epas[details_id]\")'>" . $epas['numrate'] . " - " . $epas['descrate'] . " &nbsp;[ View Epas ]</button>";
-                            else :
-                                if (!empty($promo_details[$bu->bunit_epascode]) && strpos($promo_details[$bu->bunit_epascode], '../document/') !== false) : $displayEpas = "<button class='btn btn-primary btn-sm btn-flat btn-block' onclick='viewFile(\"promoFile\",\"$table2\",\"$bu->bunit_intro\",\"$empId\",\"$recordNo\")'>View Intro</button>";
-                                else : $displayEpas = "";
-                                endif;
+                            if (!empty($promo_details[$bu->bunit_epascode]) && strpos($promo_details[$bu->bunit_epascode], '../document/') !== false) : $displayEpas = "<button class='btn btn-primary btn-sm btn-flat btn-block' onclick='viewFile(\"promoFile\",\"$table2\",\"$bu->bunit_intro\",\"$empId\",\"$recordNo\")'>View Intro</button>";
+                            else : $displayEpas = "";
                             endif;
                         }
 
@@ -2425,6 +2579,406 @@ if ($request == "update_blacklist_form") {
 
         $('.select2').select2();
         $("span.select2").css("width", "100%");
+    </script>
+<?php
+} else if ($request == "viewJobTrans") {
+
+    $jobTransfer = $fetch['jobTransfer'];
+
+    $filename     = "SELECT * FROM employee_transfer_details WHERE transfer_no = '$jobTransfer'";
+    $file         = $this->employee_model->return_row_array($filename)['file'];
+
+?>
+
+    <body>
+        <center>
+            <?php
+
+            echo '<embed src="http://' . $_SERVER['SERVER_ADDR'] . ":" . $_SERVER['SERVER_PORT'] . '/hrms/promo-nesco/' . $file . '" width="85%" height="500"></embed>';
+            ?>
+        </center>
+    </body>
+<?php
+} else if ($request == "addBlacklist") {
+
+    $no = $fetch['no'];
+    $empId = $fetch['empId'];
+    $name = $this->employee_model->employee_name($empId)['name'];
+
+    $sql = "SELECT * FROM `blacklist` WHERE blacklist_no = '$no'";
+    $row = $this->employee_model->return_row_array($sql);
+
+    if ($row['date_blacklisted'] == '0000-00-00' || $row['date_blacklisted'] == '' || $row['bday'] == "1970-01-01") {
+
+        $datebl = '';
+    } else {
+
+        $datebl = date("m/d/Y", strtotime($row['date_blacklisted']));
+    }
+
+    if ($row['date_added'] == '0000-00-00' || $row['date_added'] == '') {
+
+        $dateadded = '';
+    } else {
+
+        $dateadded = date("m/d/Y", strtotime($row['date_added']));
+    }
+
+    if ($row['bday'] == "0000-00-00" || $row['bday'] == "" || $row['bday'] == "1970-01-01") {
+
+        $bday = "";
+    } else {
+
+        $bday = date("m/d/Y", strtotime($row['bday']));
+    }
+
+?>
+    <style type="text/css">
+        .search-results {
+
+            box-shadow: 5px 5px 5px #ccc;
+            margin-top: 1px;
+            margin-left: 0px;
+            background-color: #F1F1F1;
+            width: 85%;
+            border-radius: 3px 3px 3px 3px;
+            font-size: 18x;
+            padding: 8px 10px;
+            display: block;
+            position: absolute;
+            z-index: 9999;
+            max-height: 300px;
+            overflow-y: scroll;
+            overflow: auto;
+        }
+    </style>
+    <input type="hidden" name="empId" value="<?php echo $empId; ?>">
+    <input type="hidden" name="empName" value="<?php echo $name; ?>">
+    <input type="hidden" name="no" value="<?php echo $no; ?>">
+    <div class="form-group">
+        <label>Employee</label>
+        <div class="input-group">
+            <input class="form-control" value="<?php echo $empId . ' * ' . $name; ?>" name="employee" disabled="" type="text">
+            <span class="input-group-addon"><i class="fa fa-user"></i></span>
+        </div>
+    </div>
+    <div class="form-group"> <i class="text-red">*</i>
+        <label>Reason</label>
+        <textarea name="reason" class="form-control" rows="4" onkeyup="inputField(this.name)"><?php echo $row['reason']; ?></textarea>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group"> <i class="text-red">*</i>
+                <label>Date Blacklisted</label>
+                <div class="input-group date">
+                    <div class="input-group-addon">
+                        <i class="fa fa-calendar"></i>
+                    </div>
+                    <input type="text" name="dateBlacklisted" class="form-control pull-right datepicker" style="position: relative; z-index: 100000;" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask onchange="inputField(this.name)" value="<?php echo $datebl; ?>" placeholder="mm/dd/yyy">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Birthday</label>
+                <div class="input-group date">
+                    <div class="input-group-addon">
+                        <i class="fa fa-calendar"></i>
+                    </div>
+                    <input type="text" name="birthday" value="<?php echo $bday; ?>" class="form-control pull-right datepicker" style="position: relative; z-index: 100000;" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask placeholder="mm/dd/yyy">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group"> <i class="text-red">*</i>
+                <label>Reported By</label>
+                <div class="input-group">
+                    <input class="form-control" type="text" name="reportedBy" value="<?php echo $row['reportedby']; ?>" onkeyup="nameSearch(this.value)" autocomplete="off">
+                    <span class="input-group-addon"><i class="fa fa-child"></i></span>
+                </div>
+                <div class="search-results" style="display: none;"></div>
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <input type="text" class="form-control" name="address" value="<?php echo $row['address']; ?>">
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            inline: true,
+            changeYear: true,
+            changeMonth: true
+        });
+
+        $("[data-mask]").inputmask();
+    </script>
+<?php
+} else if ($request == "view201File") {
+
+    $empId  = $fetch['empId'];
+    $no     = $fetch['no'];
+
+    $start  = 0;
+    $limit  = 1;
+    if (!empty($fetch['page'])) {
+
+        $id = $fetch['page'];
+        $start = ($id - 1) * $limit;
+    } else {
+
+        $id = 1;
+    }
+
+    $doc = "SELECT tableName, empField, table_condition FROM 201document WHERE no = '$no'";
+    $d   = $this->employee_model->return_row_array($doc);
+
+    $tableName  = $d['tableName'];
+    $empField   = $d['empField'];
+    $table_condition = $d['table_condition'];
+
+    $sql = "SELECT * FROM $tableName
+                            WHERE 
+                                $empField = '" . $empId . "' $table_condition
+                            LIMIT 
+                                $start, $limit
+                        ";
+    $result = $this->employee_model->return_result_array($sql);
+
+    $rows = $this->employee_model->return_num_rows(
+        "SELECT * FROM $tableName
+                            WHERE
+                                $empField = '" . $empId . "' $table_condition"
+    );
+    $total = ceil($rows / $limit); ?>
+
+    <div class="col-md-2" style="position:absolute;top:2px; right:1px;">
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label class="col-md-3">page</label>
+                <div class="col-md-9">
+                    <select name="page" class="form-control" onchange="pagi('<?php echo $no; ?>',this.value)">
+                        <?php
+
+                        for ($i = 1; $i <= $total; $i++) { ?>
+
+                            <option value="<?php echo $i; ?>" <?php if ($id == $i) : echo "selected=''";
+                                                                endif; ?>><?php echo $i; ?></option> <?php
+                                                                                                    }
+                                                                                                        ?>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php
+
+    foreach ($result as $row) {
+
+        if ($no == 27) {
+
+            $date_time = $row['date_updated'];
+            $receiving_staff = $row['added_by'];
+            $filename = $row['resignation_letter'];
+        } else {
+
+            $date_time = $row['date_time'];
+            $receiving_staff = $row['receiving_staff'];
+            $filename = $row['filename'];
+        }
+    ?>
+
+        <div class="row">
+            <div class="col-md-10">
+                <span><i>Date Uploaded :</i><strong><?php echo date('F d, Y', strtotime($date_time)); ?></strong></span>
+                <span><i>Uploaded By : </i><strong><?php echo $this->employee_model->employee_name($receiving_staff)['name']; ?></strong></span>
+            </div>
+        </div><br>
+        <div class="row">
+            <div class="col-md-12">
+                <center><img src="<?php echo 'http://' . $_SERVER['SERVER_ADDR'] . ":" . $_SERVER['SERVER_PORT'] . '/hrms/promo-nesco/' . $filename; ?>" width="100%"></center>
+            </div>
+        </div>
+    <?php
+    }
+} else if ($request == "upload201Files") {
+
+    $empId = $fetch['empId'];
+
+    ?>
+    <i class="text-red">Allowed File : jpg, jpeg, png only</i><br>
+    <input type="hidden" name="empId" value="<?php echo $empId; ?>">
+    <div class="form-group">
+        <label>201 File</label>
+        <select name="sel201File" class="form-control" onchange="inputField(this.name)">
+            <option value=""> --Select-- </option>
+            <?php
+
+            $qu = "SELECT no, 201_name FROM 201document WHERE promo = 'yes' ORDER BY 201_name ASC";
+            $result = $this->employee_model->return_result_array($qu);
+            foreach ($result as $rq) {
+
+                if ($rq['no'] != 27) {
+
+                    echo "<option value='" . $rq['no'] . "'>" . $rq['201_name'] . "</option>";
+                }
+            }
+            ?>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Browse File</label>
+        <input type="file" name="file_upload[]" multiple class="form-control" onchange="validateFile()">
+    </div>
+<?php
+} else if ($request == "addSupervisor") {
+
+    $empId = $fetch['empId'];
+
+?>
+    <style type="text/css">
+        .table-height {
+
+            overflow: auto;
+            max-height: 450px;
+        }
+    </style>
+    <input type="hidden" name="empId" value="<?php echo $empId; ?>">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Company</label>
+                <select class="form-control" name="company" onchange="loadBusinessUnit(this.value)">
+                    <option value=""> --Select Company-- </option>
+                    <?php
+
+                    $result = $this->employee_model->ae_company_list();
+                    foreach ($result as $res) { ?>
+
+                        <option value="<?php echo $res['company_code']; ?>"><?php echo $res['company']; ?></option> <?php
+                                                                                                                }
+                                                                                                                    ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Business Unit</label>
+                <select class="form-control" name="businessUnit" onchange="loadDepartment(this.value)">
+                    <option value=""> --Select Business Unit-- </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Department</label>
+                <select class="form-control" name="department" onchange="loadSection(this.value)">
+                    <option value=""> --Select Department-- </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Section</label>
+                <select class="form-control" name="section" onchange="loadSubSection(this.value)">
+                    <option value=""> --Select Section-- </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Sub-section</label>
+                <select class="form-control" name="subSection" onchange="loadUnit(this.value)">
+                    <option value=""> --Select Sub-section-- </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Unit</label>
+                <select class="form-control" name="unit">
+                    <option value=""> --Select Unit-- </option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="supervisor table-height">
+                <div class="loading-gif"></div>
+            </div>
+        </div>
+    </div>
+<?php
+} else if ($request == "selectSupervisor") {
+
+    $id = explode("/", $fetch['id']);
+    $loc = $fetch['loc'];
+    $empId = $fetch['empId'];
+
+    $where = "";
+    if ($loc == "cc") {
+        $where = "AND company_code = '" . $fetch['id'] . "'";
+    } else if ($loc == "bc") {
+        $where = "AND company_code = '$id[0]' and bunit_code = '$id[1]'";
+    } else if ($loc == "dc") {
+        $where = "AND company_code = '$id[0]' and bunit_code = '$id[1]' and dept_code = '$id[2]'";
+    } else if ($loc == "sc") {
+        $where = "AND company_code = '$id[0]' and bunit_code = '$id[1]' and dept_code = '$id[2]' and section_code = '$id[3]'";
+    } else if ($loc == "ssc") {
+        $where = "AND company_code = '$id[0]' and bunit_code = '$id[1]' and dept_code = '$id[2]' and section_code = '$id[3]' and sub_section_code = '$id[4]'";
+    } else if ($loc == "uc") {
+        $where = "AND company_code = '$id[0]' and bunit_code = '$id[1]' and dept_code = '$id[2]' and section_code = '$id[3]' and sub_section_code = '$id[4]' and unit_code = '$id[5]'";
+    }
+
+    $sql = "SELECT emp_id, name, position, current_status FROM `employee3`, `leveling_subordinates` WHERE employee3.emp_id = leveling_subordinates.ratee AND current_status = 'Active' AND emp_id != '" . $empId . "' $where GROUP BY ratee ORDER BY name ASC";
+    $result = $this->employee_model->return_result_array($sql);
+?>
+
+    <table id="example2" class="table table-striped table-hover table3">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Emp.ID</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+
+            foreach ($result as $row) {
+
+                $supId = $row['emp_id'];
+
+                if ($row['current_status'] == "Active") {
+
+                    $class = "btn btn-success btn-xs";
+                } else {
+
+                    $class = "btn btn-warning btn-xs";
+                }
+
+                echo "
+                        <tr id='" . $supId . "'>
+                            <span style='display:none;'><input type='checkbox' name='chkempId[]' class='chkId_$supId' value='$supId'></span>
+                            <td><input type='checkbox' class='chkIdC_$supId' onclick='chkIdC(\"$supId\")'></td>
+                            <td><a href='" . base_url('placement/page/menu/employee/profile/' . $row['emp_id']) . "' target='_blank'>$supId</td>
+                            <td>" . ucwords(strtolower($row['name'])) . "</td>
+                            <td>" . $row['position'] . "</td>
+                            <td><span class='$class btn-block'>" . $row['current_status'] . "</span></td>
+                        </tr>
+                    ";
+            }
+            ?>
+        </tbody>
+    </table>
+    <script type="text/javascript">
+        $(".table3").DataTable({
+
+            "order": [
+                [2, 'asc']
+            ],
+            "paging": false
+        });
+
+        $('#example2 tbody').on('click', 'tr', function() {
+
+            var id = this.id;
+            if ($("input.chkIdC_" + id).is(':checked')) {
+
+                $(this).addClass('selected');
+            } else {
+                $(this).removeClass('selected');
+            }
+        });
     </script>
 <?php
 }

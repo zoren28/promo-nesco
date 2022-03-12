@@ -322,6 +322,222 @@
             });
         });
 
+        $("form#dataUploadPromoScannedFile").submit(function(e) {
+
+            e.preventDefault();
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: "<?php echo site_url('uploadPromoScannedFile'); ?>",
+                type: 'POST',
+                data: formData,
+                success: function(data) {
+
+                    response = data.split("||");
+                    if (response[0].trim() == "success") {
+
+                        $.alert.open({
+                            type: 'warning',
+                            title: 'Info',
+                            icon: 'confirm',
+                            cancel: false,
+                            content: response[1].trim(),
+                            buttons: {
+                                OK: 'Yes'
+                            },
+
+                            callback: function(button) {
+
+                                if (button == 'OK') {
+
+                                    $("#uploadPromoScannedFile").modal("hide");
+                                    getdefault('employment');
+                                }
+
+                            }
+                        });
+                    } else {
+
+                        alert(response);
+                    }
+                },
+                async: false,
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+        });
+
+        $("form#dataEmploymentHistory").submit(function(e) {
+
+            e.preventDefault();
+            var formData = new FormData(this);
+
+            var company = $("input[name = 'company']").val();
+            var address = $("input[name = 'address']").val();
+            var position = $("input[name = 'position']").val();
+            var startdate = $("input[name = 'startdate']").val();
+            var eocdate = $("input[name = 'eocdate']").val();
+
+            if (company == "" || position == "") {
+
+                $.alert.open({
+                    type: 'warning',
+                    cancel: false,
+                    content: "Please Fill-up Required Fields!",
+                    buttons: {
+                        OK: 'Ok'
+                    },
+
+                    callback: function(button) {
+                        if (button == 'OK') {
+
+                            if (company == "") {
+
+                                $("[name = 'company']").css("border-color", "rgb(221, 75, 57)");
+                            }
+
+                            if (position == "") {
+
+                                $("[name = 'position']").css("border-color", "rgb(221, 75, 57)");
+                            }
+                        }
+                    }
+                });
+
+            } else {
+
+                $("button#submitEmploymentHist").prop("disabled", true);
+
+                $.ajax({
+                    url: "<?php echo site_url('submitEmploymentHist'); ?>",
+                    type: 'POST',
+                    data: formData,
+                    success: function(data) {
+
+                        response = data.split("||");
+                        if (response[0].trim() == "success") {
+
+                            $.alert.open({
+                                type: 'warning',
+                                title: 'Info',
+                                icon: 'confirm',
+                                cancel: false,
+                                content: "Employment History Successfully " + response[1].trim(),
+                                buttons: {
+                                    OK: 'Yes'
+                                },
+
+                                callback: function(button) {
+                                    if (button == 'OK') {
+
+                                        $("#addEmploymentHist").modal("hide");
+                                        getdefault('history');
+                                    }
+
+                                }
+                            });
+                        } else {
+
+                            alert(response);
+                        }
+                    },
+                    async: false,
+                    cache: false,
+                    contentType: false,
+                    processData: false
+
+                });
+            }
+        });
+
+        $("form#data201File").submit(function(e) {
+
+            e.preventDefault();
+            var formData = new FormData(this);
+
+            var sel201File = $("select[name = 'sel201File']").val();
+            var file = $("input[name = 'file_upload[]']");
+
+            var chkNum = 0;
+            for (var i = 0; i < file.length; i++) {
+
+                if (file[i].value != "") {
+
+                    chkNum++;
+                }
+            }
+
+            if (sel201File == "" || chkNum == 0) {
+
+                $.alert.open({
+                    type: 'warning',
+                    cancel: false,
+                    content: "Please Fill-up Required Fields!",
+                    buttons: {
+                        OK: 'Ok'
+                    },
+
+                    callback: function(button) {
+                        if (button == 'OK') {
+
+                            if (sel201File == "") {
+
+                                $("[name = 'sel201File']").css("border-color", "#dd4b39");
+                            }
+
+                            if (chkNum == 0) {
+
+                                $("[name = 'file_upload[]']").css("border-color", "#dd4b39");
+                            }
+                        }
+                    }
+                });
+            } else {
+
+                $("button#upload_201files_btn").prop("disabled", true);
+
+                $.ajax({
+                    url: "<?php echo site_url('upload201File'); ?>",
+                    type: 'POST',
+                    data: formData,
+                    success: function(data) {
+
+                        response = data.trim();
+                        if (response == "success") {
+
+                            $.alert.open({
+                                type: 'warning',
+                                title: 'Info',
+                                icon: 'confirm',
+                                cancel: false,
+                                content: "Successfully Uploaded!",
+                                buttons: {
+                                    OK: 'Yes'
+                                },
+
+                                callback: function(button) {
+                                    if (button == 'OK') {
+
+                                        $("#upload201Files").modal("hide");
+                                        getdefault('201doc');
+                                    }
+
+                                }
+                            });
+                        } else {
+
+                            alert(response);
+                        }
+                    },
+                    async: false,
+                    cache: false,
+                    contentType: false,
+                    processData: false
+                });
+            }
+        });
+
         $('form#dataPromoContractDetails').submit(function(e) {
 
             e.preventDefault();
@@ -2505,5 +2721,933 @@
                 $("input[name = 'position_level']").val(data);
             }
         });
+    }
+
+    function uploadPromoScannedFile(contract, recordNo, empId) {
+
+        $("#uploadPromoScannedFile").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        $("#uploadPromoScannedFile").modal("show");
+        $(".uploadPromoScannedFile").html("");
+
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('uploadPromoScannedFileForm'); ?>",
+            data: {
+                contract: contract,
+                recordNo: recordNo,
+                empId: empId
+            },
+            success: function(data) {
+
+                $(".uploadPromoScannedFile").html(data);
+            }
+        });
+    }
+
+    function add_emphis(no) {
+
+        $("#addEmploymentHist").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        $("#addEmploymentHist").modal("show");
+        var empId = $("[name = 'empId']").val();
+
+        $("button#submitEmploymentHist").prop("disabled", false);
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('addEmploymentHist'); ?>",
+            data: {
+                empId: empId,
+                no: no
+            },
+            success: function(data) {
+
+                $(".addEmploymentHist").html(data);
+            }
+        });
+    }
+
+    function viewEmpCert(no) {
+
+        $("#viewEmploymentCert").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        $("#viewEmploymentCert").modal("show");
+
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('employmentCertificate'); ?>",
+            data: {
+                no: no
+            },
+            success: function(data) {
+
+                data = data.trim();
+                $(".viewEmploymentCert").html('<center><img class="img-responsive" src="<?php echo 'http://' . $_SERVER['SERVER_ADDR'] . ":" . $_SERVER['SERVER_PORT'] . '/hrms/franchise/'; ?>' + data + '" alt="Photo"></center>');
+            }
+        });
+    }
+
+    function viewJobTrans(jobTransfer) {
+
+        $("#viewJobTransfer").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        $("#viewJobTransfer").modal("show");
+
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('viewJobTrans'); ?>",
+            data: {
+                jobTransfer: jobTransfer
+            },
+            success: function(data) {
+
+                $(".viewJobTransfer").html(data);
+            }
+        });
+    }
+
+    function add_blacklist(no) {
+
+        $("#addBlacklist").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        $("#addBlacklist").modal("show");
+        var empId = $("[name = 'empId']").val();
+
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('addBlacklist'); ?>",
+            data: {
+                no: no,
+                empId: empId
+            },
+            success: function(data) {
+
+                $(".addBlacklist").html(data);
+            }
+        });
+    }
+
+    function submitBlacklist() {
+
+        var no = $("input[name = 'no']").val();
+        var empId = $("input[name = 'empId']").val();
+        var empName = $("input[name = 'empName']").val();
+        var reason = $("textarea[name = 'reason']").val().trim();
+        var dateBlacklisted = $("input[name = 'dateBlacklisted']").val();
+        var birthday = $("input[name = 'birthday']").val();
+        var reportedBy = $("input[name = 'reportedBy']").val();
+        var address = $("input[name = 'address']").val();
+
+        if (reason == "" || dateBlacklisted == "" || reportedBy == "") {
+
+            $.alert.open({
+                type: 'warning',
+                cancel: false,
+                content: "Please Fill-up Required Fields!",
+                buttons: {
+                    OK: 'Ok'
+                },
+
+                callback: function(button) {
+                    if (button == 'OK') {
+
+                        if (reason == "") {
+
+                            $("[name = 'reason']").css("border-color", "rgb(221, 75, 57)");
+                        }
+
+                        if (dateBlacklisted == "") {
+
+                            $("[name = 'dateBlacklisted']").css("border-color", "rgb(221, 75, 57)");
+                        }
+
+                        if (reportedBy == "") {
+
+                            $("[name = 'reportedBy']").css("border-color", "rgb(221, 75, 57)");
+                        }
+                    }
+
+                }
+            });
+        } else {
+
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('submitBlacklist'); ?>",
+                data: {
+                    no: no,
+                    empId: empId,
+                    empName: empName,
+                    reason: reason,
+                    dateBlacklisted: dateBlacklisted,
+                    birthday: birthday,
+                    reportedBy: reportedBy,
+                    address: address
+                },
+                success: function(data) {
+
+                    data = data.split("||");
+                    if (data[0].trim() == "success") {
+
+                        $.alert.open({
+                            type: 'warning',
+                            title: 'Info',
+                            icon: 'confirm',
+                            cancel: false,
+                            content: "Blacklist History Successfully " + data[1].trim(),
+                            buttons: {
+                                OK: 'Yes'
+                            },
+
+                            callback: function(button) {
+                                if (button == 'OK') {
+
+                                    $("#addBlacklist").modal("hide");
+                                    getdefault('blacklist');
+                                }
+
+                            }
+                        });
+                    } else {
+
+                        alert(data);
+                    }
+                }
+            });
+        }
+    }
+
+    function nameSearch(str) {
+
+        $("input[name = 'reportedBy']").css("border-color", "#d2d6de");
+        var str = str.trim();
+        $(".search-results").hide();
+
+        if (str == '') {
+
+            $(".search-results").hide();
+        } else {
+
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('find_hr_staff'); ?>",
+                data: {
+                    str: str
+                },
+                success: function(data) {
+
+                    if (data.trim() != "No Result Found") {
+
+                        $(".search-results").show().html(data);
+                    } else {
+
+                        $(".search-results").hide();
+                    }
+                }
+            });
+        }
+    }
+
+    function getEmpId(supId) {
+
+        $("input[name='reportedBy']").val(supId);
+        $("div.search-results").hide();
+    }
+
+    function view201Files(no, title) {
+
+        $("#view201File").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        $(".201-title").html(title);
+        $("#view201File").modal("show");
+        var empId = $("[name = 'empId']").val();
+
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('view201File'); ?>",
+            data: {
+                empId: empId,
+                no: no,
+                page: ""
+            },
+            success: function(data) {
+
+                $(".view201File").html(data);
+            }
+        });
+    }
+
+    function validateFile() {
+
+        $("input[name = 'file_upload[]']").css("border-color", "#ccc");
+        var chk = $("input[name = 'file_upload[]']");
+        var img = "";
+
+        for (var i = 0; i < chk.length; i++) {
+
+            img = chk[i].value;
+            var res = '';
+            var i = img.length - 1;
+            while (img[i] != ".") {
+                res = img[i] + res;
+                i--;
+            }
+
+            //checks the file format
+            if (res != "PNG" && res != "jpg" && res != "JPG" && res != "png") {
+                $("input[name = 'file_upload[]']").val("");
+                errDup('Invalid File Format. Take note on the allowed file!');
+                return;
+            }
+        }
+    }
+
+    function pagi(no, page) {
+
+        var empId = $("[name = 'empId']").val();
+
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('view201File'); ?>",
+            data: {
+                empId: empId,
+                no: no,
+                page: page
+            },
+            success: function(data) {
+
+                $(".view201File").html(data);
+            }
+        });
+    }
+
+    function upload201Files() {
+
+        $("#upload201Files").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        $("#upload201Files").modal("show");
+        var empId = $("[name = 'empId']").val();
+
+        $("button#upload_201files_btn").prop("disabled", false);
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('upload201Files'); ?>",
+            data: {
+                empId: empId
+            },
+            success: function(data) {
+
+                $(".upload201Files").html(data);
+            }
+        });
+    }
+
+    function removeSubordinates(recordNo, employee) {
+
+        str = employee.toLowerCase().replace(/\b[a-z]/g, function(letter) {
+            return letter.toUpperCase();
+        });
+
+        $.alert.open({
+            type: 'warning',
+            cancel: false,
+            content: "Are you sure you want to remove this " + employee + "?",
+            buttons: {
+                OK: 'Yes',
+                NO: 'Not now'
+            },
+
+            callback: function(button) {
+                if (button == 'OK') {
+
+                    $.ajax({
+                        type: "POST",
+                        url: "<?php echo site_url('removeSubordinates'); ?>",
+                        data: {
+                            recordNo: recordNo
+                        },
+                        success: function(data) {
+
+                            data = data.trim();
+                            if (data == "success") {
+
+                                $.alert.open({
+                                    type: 'warning',
+                                    title: 'Info',
+                                    icon: 'confirm',
+                                    cancel: false,
+                                    content: "Employee's " + str + " Successfully Removed!",
+                                    buttons: {
+                                        OK: 'Yes'
+                                    },
+
+                                    callback: function(button) {
+                                        if (button == 'OK') {
+
+                                            $("#remove_" + recordNo).fadeOut(1000, function() {
+
+                                                getdefault('pss');
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    function add_supervisor() {
+
+        $("#addSupervisor").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        $("#addSupervisor").modal("show");
+        var empId = $("[name = 'empId']").val();
+
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('addSupervisor'); ?>",
+            data: {
+                empId: empId
+            },
+            success: function(data) {
+
+                $(".addSupervisor").html(data);
+            }
+        });
+    }
+
+    function chkIdC(supId) {
+
+        if ($("input.chkIdC_" + supId).is(':checked')) {
+
+            $("input.chkId_" + supId).prop("checked", true);
+        } else {
+
+            $("input.chkId_" + supId).prop("checked", false);
+        }
+    }
+
+    function submitSupervisor() {
+
+        var empId = $("input[name = 'empId']").val();
+        var chk = $("input[name = 'chkempId[]']");
+
+        var newCHK = "";
+        var chkNum = 0;
+        for (var i = 0; i < chk.length; i++) {
+
+            if (chk[i].checked == true) {
+
+                chkNum++;
+                newCHK += chk[i].value + "*";
+            }
+        }
+
+        if (chkNum == 0) {
+
+            errDup("You need to check at least one supervisor to be added!");
+
+        } else {
+
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('saveSupervisor'); ?>",
+                data: {
+                    empId: empId,
+                    newCHK: newCHK
+                },
+                success: function(data) {
+
+                    data = data.trim();
+                    if (data == "success") {
+
+                        $.alert.open({
+                            type: 'warning',
+                            title: 'Info',
+                            icon: 'confirm',
+                            cancel: false,
+                            content: "Supervisor(s) Successfully Added",
+                            buttons: {
+                                OK: 'Yes'
+                            },
+
+                            callback: function(button) {
+                                if (button == 'OK') {
+
+                                    $("#addSupervisor").modal("hide");
+                                    getdefault('pss');
+                                }
+
+                            }
+                        });
+                    } else {
+
+                        alert(data);
+                    }
+                }
+            });
+        }
+    }
+
+    function userAction(userNo, request) {
+
+        var messej = "";
+
+        if (request == 'resetPass') {
+            messej = 'Are you sure to reset password for this User Account?';
+        } else if (request == 'activateAccount') {
+            messej = 'Are you sure to activate this User Account?';
+        } else if (request == 'deactivateAccount') {
+            messej = 'Are you sure to deactivate this User Account?';
+        } else if (request == 'deleteAccount') {
+            messej = 'Are you really sure to delete this User Account?';
+        } else {
+
+            messej = "";
+        }
+
+        $.alert.open({
+            type: 'warning',
+            cancel: false,
+            content: messej,
+            buttons: {
+                OK: 'Yes',
+                NO: 'Not now'
+            },
+
+            callback: function(button) {
+                if (button == 'OK') {
+
+                    $.ajax({
+                        type: "POST",
+                        url: "<?php echo site_url(); ?>" + request,
+                        data: {
+                            userNo: userNo
+                        },
+                        success: function(data) {
+
+
+                            $.alert.open({
+                                type: 'warning',
+                                title: 'Info',
+                                icon: 'confirm',
+                                cancel: false,
+                                content: data,
+                                buttons: {
+                                    OK: 'Yes'
+                                },
+
+                                callback: function(button) {
+                                    if (button == 'OK') {
+
+                                        $("#addUserAccount").modal("hide");
+                                        getdefault('useraccount')
+                                    }
+
+                                }
+                            });
+                        }
+                    });
+                }
+
+            }
+        });
+    }
+
+    function addUserAccount() {
+
+        $("#addUserAccount").modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        $("#addUserAccount").modal("show");
+        var empId = $("[name = 'empId']").val();
+
+        $("button#submit_user_account").prop("disabled", false);
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('addUserAccount'); ?>",
+            data: {
+                empId: empId
+            },
+            success: function(data) {
+
+                $(".addUserAccount").html(data);
+            }
+        });
+    }
+
+    function defaultPassword() {
+
+        var password = "Hrms2014";
+        $("input[name= 'password']").val(password);
+        $("input[name= 'password']").prop("disabled", true);
+        $("input[name= 'password']").css("border-color", "#d2d6de");
+    }
+
+    function submitUserAccount() {
+
+        var empId = $("input[name='empId']").val();
+        var usertype = $("input[name = 'usertype']").val();
+        var username = $("input[name = 'username']").val();
+        var password = $("input[name = 'password']").val();
+
+        if (password == "") {
+
+            $.alert.open({
+                type: 'warning',
+                cancel: false,
+                content: "Please Fill-up Required Fields!",
+                buttons: {
+                    OK: 'Ok'
+                },
+
+                callback: function(button) {
+                    if (button == 'OK') {
+
+                        if (password == "") {
+
+                            $("[name = 'password']").css("border-color", "rgb(221, 75, 57)");
+                        }
+                    }
+
+                }
+            });
+        } else {
+
+            $("button#submit_user_account").prop("disabled", true);
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('submitAccount'); ?>",
+                data: {
+                    empId: empId,
+                    usertype: usertype,
+                    username: username,
+                    password: password
+                },
+                success: function(data) {
+
+                    data = data.trim();
+                    if (data == "success") {
+
+                        $.alert.open({
+                            type: 'warning',
+                            title: 'Info',
+                            icon: 'confirm',
+                            cancel: false,
+                            content: "Employee Account Successfully Saved",
+                            buttons: {
+                                OK: 'Yes'
+                            },
+
+                            callback: function(button) {
+                                if (button == 'OK') {
+
+                                    $("#addUserAccount").modal("hide");
+                                    getdefault('useraccount');
+                                }
+
+                            }
+                        });
+
+                    } else if (data == "exist") {
+
+                        errDup("Username Already Exist");
+                    } else {
+
+                        alert(data);
+                    }
+                }
+            });
+        }
+    }
+
+    // for add supervisor module
+    function loadBusinessUnit(id) {
+
+        var empId = $("input[name = 'empId']").val();
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('locate_business_unit'); ?>",
+            data: {
+                id: id
+            },
+            success: function(response) {
+
+                $("select[name = 'businessUnit']").html(response);
+                $("select[name = 'department']").html('<option value=""> Select Department </option>');
+                $("select[name = 'section']").html('<option value=""> Select Section </option>');
+                $("select[name = 'subSection']").html('<option value=""> Select Sub-Section </option>');
+                $("select[name = 'unit']").html('<option value=""> Select Unit </option>');
+            }
+        });
+
+        if (id.trim() != "") {
+
+            $(".loading-gif").html('<center><img src="<?php echo base_url('assets/images/gif/loader_seq.gif'); ?>" width="60%" height="60%"></center>');
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('selectSupervisor'); ?>",
+                data: {
+                    id: id,
+                    loc: "cc",
+                    empId: empId
+                },
+                success: function(data) {
+
+                    $(".loading-gif").html("");
+                    $(".supervisor").html(data);
+                }
+            });
+        } else {
+
+            $(".supervisor").html("");
+        }
+    }
+
+    function loadDepartment(id) {
+
+        var empId = $("input[name = 'empId']").val();
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('locate_department'); ?>",
+            data: {
+                id: id
+            },
+            success: function(response) {
+
+                $("select[name = 'department']").html(response);
+                $("select[name = 'section']").html('<option value=""> Select Section </option>');
+                $("select[name = 'subSection']").html('<option value=""> Select Sub-Section </option>');
+                $("select[name = 'unit']").html('<option value=""> Select Unit </option>');
+            }
+        });
+
+        if (id.trim() != "") {
+
+            $(".loading-gif").html('<center><img src="<?php echo base_url('assets/images/gif/loader_seq.gif'); ?>" width="60%" height="60%"></center>');
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('selectSupervisor'); ?>",
+                data: {
+                    id: id,
+                    loc: "bc",
+                    empId: empId
+                },
+                success: function(data) {
+
+                    $(".loading-gif").html("");
+                    $(".supervisor").html(data);
+                }
+            });
+        } else {
+
+            id = $("select[name = 'company']").val();
+            $(".loading-gif").html('<center><img src="<?php echo base_url('assets/images/gif/loader_seq.gif'); ?>" width="60%" height="60%"></center>');
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('selectSupervisor'); ?>",
+                data: {
+                    id: id,
+                    loc: "cc",
+                    empId: empId
+                },
+                success: function(data) {
+
+                    $(".loading-gif").html("");
+                    $(".supervisor").html(data);
+                }
+            });
+        }
+    }
+
+    function loadSection(id) {
+
+        var empId = $("input[name = 'empId']").val();
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('locate_section'); ?>",
+            data: {
+                id: id
+            },
+            success: function(response) {
+
+                $("select[name = 'section']").html(response);
+                $("select[name = 'subSection']").html('<option value=""> Select Sub-Section </option>');
+                $("select[name = 'unit']").html('<option value=""> Select Unit </option>');
+            }
+        });
+
+        if (id.trim() != "") {
+
+            $(".loading-gif").html('<center><img src="<?php echo base_url('assets/images/gif/loader_seq.gif'); ?>" width="60%" height="60%"></center>');
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('selectSupervisor'); ?>",
+                data: {
+                    id: id,
+                    loc: "dc",
+                    empId: empId
+                },
+                success: function(data) {
+
+                    $(".loading-gif").html("");
+                    $(".supervisor").html(data);
+                }
+            });
+        } else {
+
+            id = $("select[name = 'businessUnit']").val();
+            $(".loading-gif").html('<center><img src="<?php echo base_url('assets/images/gif/loader_seq.gif'); ?>" width="60%" height="60%"></center>');
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('selectSupervisor'); ?>",
+                data: {
+                    id: id,
+                    loc: "bc",
+                    empId: empId
+                },
+                success: function(data) {
+
+                    $(".loading-gif").html("");
+                    $(".supervisor").html(data);
+                }
+            });
+        }
+    }
+
+    function loadSubSection(id) {
+
+        var empId = $("input[name = 'empId']").val();
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('locate_sub_section'); ?>",
+            data: {
+                id: id
+            },
+            success: function(response) {
+
+                $("select[name = 'subSection']").html(response);
+                $("select[name = 'unit']").html('<option value=""> Select Unit </option>');
+            }
+        });
+
+        if (id.trim() != "") {
+
+            $(".loading-gif").html('<center><img src="<?php echo base_url('assets/images/gif/loader_seq.gif'); ?>" width="60%" height="60%"></center>');
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('selectSupervisor'); ?>",
+                data: {
+                    id: id,
+                    loc: "sc",
+                    empId: empId
+                },
+                success: function(data) {
+
+                    $(".loading-gif").html("");
+                    $(".supervisor").html(data);
+                }
+            });
+        } else {
+
+            id = $("select[name = 'department']").val();
+            $(".loading-gif").html('<center><img src="<?php echo base_url('assets/images/gif/loader_seq.gif'); ?>" width="60%" height="60%"></center>');
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('selectSupervisor'); ?>",
+                data: {
+                    id: id,
+                    loc: "dc",
+                    empId: empId
+                },
+                success: function(data) {
+
+                    $(".loading-gif").html("");
+                    $(".supervisor").html(data);
+                }
+            });
+        }
+    }
+
+    function loadUnit(id) {
+
+        var empId = $("input[name = 'empId']").val();
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('locate_unit'); ?>",
+            data: {
+                id: id
+            },
+            success: function(response) {
+
+                $("select[name = 'unit']").html(response);
+            }
+        });
+
+        if (id.trim() != "") {
+
+            $(".loading-gif").html('<center><img src="<?php echo base_url('assets/images/gif/loader_seq.gif'); ?>" width="60%" height="60%"></center>');
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('selectSupervisor'); ?>",
+                data: {
+                    id: id,
+                    loc: "ssc",
+                    empId: empId
+                },
+                success: function(data) {
+
+                    $(".loading-gif").html("");
+                    $(".supervisor").html(data);
+                }
+            });
+        } else {
+
+            id = $("select[name = 'section']").val();
+            $(".loading-gif").html('<center><img src="<?php echo base_url('assets/images/gif/loader_seq.gif'); ?>" width="60%" height="60%"></center>');
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('selectSupervisor'); ?>",
+                data: {
+                    id: id,
+                    loc: "sc",
+                    empId: empId
+                },
+                success: function(data) {
+
+                    $(".loading-gif").html("");
+                    $(".supervisor").html(data);
+                }
+            });
+        }
     }
 </script>
