@@ -1021,7 +1021,7 @@ class Employee extends CI_Controller
         $fetch = $this->input->get(NULL, TRUE);
         if ($fetch['agency_code'] == 0) {
 
-            echo '<option value=""> --Select-- </option>';
+            echo '<option value=""> --Select Company-- </option>';
             $companies = $this->employee_model->company_list();
             foreach ($companies as $company) {
 ?>
@@ -1031,7 +1031,7 @@ class Employee extends CI_Controller
             }
         } else {
 
-            echo '<option value=""> --Select-- </option>';
+            echo '<option value=""> --Select Company-- </option>';
             $companies = $this->employee_model->company_list_under_agency($fetch['agency_code']);
             foreach ($companies as $company) {
 
@@ -1050,7 +1050,7 @@ class Employee extends CI_Controller
         $company_code = $this->input->get('company_code', TRUE);
         $company = $this->employee_model->get_company_name($company_code);
         $products = $this->employee_model->promo_company_products($company->pc_name);
-        echo '<option value=""> --Select-- </option>';
+        echo '<option value=""> --Select Product-- </option>';
         foreach ($products as $product) {
             ?>
             <option value="<?= $product->product ?>"><?= $product->product ?></option>
@@ -1136,7 +1136,7 @@ class Employee extends CI_Controller
             $condition .= ")";
         }
 
-        echo '<option value=""> --Select-- </option>';
+        echo '<option value=""> --Select Department-- </option>';
         $sql = "SELECT dept_name FROM locate_promo_department WHERE status = 'active' $condition GROUP BY dept_name ORDER BY dept_name ASC";
         $result = $this->employee_model->return_result_array($sql);
         foreach ($result as $res) {
@@ -1153,7 +1153,7 @@ class Employee extends CI_Controller
             $department = 'FIXRITE';
         }
 
-        echo '<option value=""> --Select-- </option>';
+        echo '<option value=""> --Select Vendor-- </option>';
         $vendors = $this->employee_model->locate_vendor($department);
         foreach ($vendors as $vendor) {
         ?>

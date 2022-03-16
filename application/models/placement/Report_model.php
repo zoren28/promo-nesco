@@ -38,4 +38,133 @@ class Report_model extends CI_Model
             ->get();
         return $query->result();
     }
+
+    public function username_list($data)
+    {
+        $this->db->select('employee3.record_no, employee3.emp_id, name, position, promo_company, promo_department, promo_type')
+            ->from('employee3')
+            ->join('promo_record', 'promo_record.record_no = employee3.record_no AND promo_record.emp_id = employee3.emp_id')
+            ->where('current_status', 'Active')
+            ->where('emp_type', 'Promo-NESCO');
+
+        if (!empty($data['store'])) {
+
+            $field = explode('/', $data['store']);
+            $this->db->where($field, end($field));
+        }
+
+        if (!empty($data['department'])) {
+
+            $this->db->where('promo_department', $data['department']);
+        }
+
+        if (!empty($data['company'])) {
+
+            $company = $this->employee_model->get_company_name($data['company']);
+            $this->db->where('promo_company', $company->pc_name);
+        }
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function get_username($emp_id)
+    {
+        $query = $this->db->select('username')
+            ->get_where('users', array('emp_id' => $emp_id, 'usertype' => 'employee'));
+        return $query->row();
+    }
+
+    public function fetch_qbe_results($data)
+    {
+        $field = '';
+        foreach ($data['fields'] as $key => $value) {
+
+            $field .= ", $value";
+        }
+
+        $fields = "employee3.record_no, employee3.emp_id, startdate, eocdate, position, firstname, middlename, lastname, suffix, birthdate, agency_code, promo_company, promo_department, company_duration, promo_type, type" . $field;
+        $this->db->select($fields)
+            ->from('employee3')
+            ->join('applicant', 'applicant.app_id = employee3.emp_id')
+            ->join('promo_record', 'promo_record.record_no = employee3.record_no AND promo_record.emp_id = employee3.emp_id')
+            ->where('emp_type', 'Promo-NESCO');
+
+        if (!empty($data['current_status'])) {
+            $this->db->where('current_status', $data['current_status']);
+        }
+
+        if (!empty($data['date_asof'])) {
+            $this->db->where('startdate <=', date('Y-m-d', strtotime($data['date_asof'])));
+        }
+
+        if (!empty($data['promo_type'])) {
+            $this->db->where('promo_type', $data['promo_type']);
+        }
+
+        if (!empty($data['department'])) {
+            $this->db->where('promo_department', $data['department']);
+        }
+
+        if (!empty($data['department'])) {
+            $this->db->where('promo_department', $data['department']);
+        }
+
+        if (!empty($data['business_unit'])) {
+            $bunit_field = explode('/', $data['business_unit']);
+            $this->db->where('promo_department', end($bunit_field));
+        }
+
+        if (!empty($data['company'])) {
+            $company = $this->employee_model->get_company_name($data['company']);
+            $this->db->where('promo_department', $company->pc_name);
+        }
+
+        if (!empty($data['bloodtypetf'])) {
+            $this->db->where('bloodtype', $data['bloodtypetf']);
+        }
+
+        if (!empty($data['weighttf'])) {
+            $this->db->like('weight', $data['weighttf']);
+        }
+
+        if (!empty($data['heighttf'])) {
+            $this->db->like('height', $data['heighttf']);
+        }
+
+        if (!empty($data['coursetf'])) {
+            $this->db->like('course', $data['coursetf']);
+        }
+
+        if (!empty($data['attainmenttf'])) {
+            $this->db->like('attainment', $data['attainmenttf']);
+        }
+
+        if (!empty($data['schooltf'])) {
+            $this->db->like('school', $data['schooltf']);
+        }
+
+        if (!empty($data['civilstatustf'])) {
+            $this->db->where('civilstatus', $data['civilstatustf']);
+        }
+
+        if (!empty($data['religiontf'])) {
+            $this->db->like('religion', $data['religiontf']);
+        }
+
+        if (!empty($data['gendertf'])) {
+            $this->db->where('gender', $data['gendertf']);
+        }
+
+        if (!empty($data['home_addresstf'])) {
+            $this->db->like('home_address', $data['home_addresstf']);
+        }
+
+        if (!empty($data['nametf'])) {
+            $this->db->like('name', $data['nametf']);
+        }
+
+        $query = $this->db->get();
+        return $query->result_array();
+    }
 }

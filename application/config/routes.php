@@ -6,6 +6,8 @@ $route['view_stat_BU'] = 'placement/report/view_stat_BU';
 $route['load_stat_BU'] = 'placement/report/load_stat_BU';
 $route['view_stat_dept'] = 'placement/report/view_stat_dept';
 $route['load_stat_dept'] = 'placement/report/load_stat_dept';
+$route['select_company_under_agency'] = 'placement/report/select_company_under_agency';
+$route['report/qbe_report'] = 'placement/report/qbe_report';
 
 // for dashboard module
 $route['new_employee'] = 'placement/dashboard/new_employee';

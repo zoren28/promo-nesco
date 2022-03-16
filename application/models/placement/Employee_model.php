@@ -50,6 +50,16 @@ class Employee_model extends CI_Model
         return $query->result();
     }
 
+    public function nesco_company_list()
+    {
+        $query = $this->db2->select('company_name')
+            ->from('promo_locate_company')
+            ->join('promo_locate_agency', 'promo_locate_agency.agency_code = promo_locate_company.agency_code')
+            ->where('promo_locate_agency.agency_code', '29')
+            ->get();
+        return $query->result();
+    }
+
     public function company_list_under_agency($agency_code)
     {
         $query = $this->db2->select('company_name')
@@ -958,6 +968,13 @@ class Employee_model extends CI_Model
         return $query->result();
     }
 
+    public function select_promo_products($record_no, $emp_id, $product)
+    {
+        $query = $this->db->select('product')
+            ->get_where('promo_products', array('record_no' => $record_no, 'emp_id' => $emp_id, 'product' => $product));
+        return $query->result();
+    }
+
     public function agency_list()
     {
         $query = $this->db2->order_by('agency_name', 'ASC')
@@ -977,6 +994,13 @@ class Employee_model extends CI_Model
     {
         $query = $this->db->select('product')
             ->get_where('promo_company_products', array('company' => $company));
+        return $query->result();
+    }
+
+    public function promo_product_list()
+    {
+        $query = $this->db->select('product')
+            ->get_where('locate_promo_product', array('status' => 1));
         return $query->result();
     }
 
@@ -1326,5 +1350,46 @@ class Employee_model extends CI_Model
         );
 
         return $this->db->insert('users', $insert);
+    }
+
+    public function months()
+    {
+        return array(
+            '01' => 'January',
+            '02' => 'February',
+            '03' => 'March',
+            '04' => 'April',
+            '05' => 'May',
+            '06' => 'June',
+            '07' => 'July',
+            '08' => 'August',
+            '09' => 'September',
+            '10' => 'October',
+            '11' => 'November',
+            '12' => 'December'
+        );
+    }
+
+    public function field_names()
+    {
+        return array(
+            'home_address' => 'Home Address',
+            'gender' => 'Gender',
+            'birthdate' => 'Birth Day',
+            'religion' => 'Religion',
+            'civilstatus' => 'Civil Status',
+            'school' => 'School',
+            'attainment' => 'Attainment',
+            'course' => 'Course',
+            'contactno' => 'Contact Number',
+            'mother' => 'Mother',
+            'father' => 'Father',
+            'height' => 'Height',
+            'weight' => 'Weight',
+            'bloodtype' => 'Bloodtype',
+            'startdate' => 'Startdate',
+            'eocdate' => 'Eocdate',
+            'current_status' => 'Current Status'
+        );
     }
 }

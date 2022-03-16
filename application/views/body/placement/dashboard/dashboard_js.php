@@ -110,39 +110,6 @@
                 "orderable": false,
             }, ],
         });
-
-        var dataTable = $("#due_of_contract").DataTable({
-
-            "destroy": true,
-            "ajax": {
-                url: "<?php echo site_url('fetch_due_contract'); ?>",
-            },
-            "order": [],
-            "columnDefs": [{
-                "targets": [1, 2, 3, 4, 5, 6],
-                "orderable": false,
-            }, ],
-        });
-
-        $("button#generate_duecontract").click(function() {
-
-            $.alert.open({
-                type: 'warning',
-                cancel: false,
-                content: "Generate Report Now?",
-                buttons: {
-                    OK: 'Yes',
-                    NO: 'Not now'
-                },
-
-                callback: function(button) {
-                    if (button == 'OK') {
-
-                        window.open("<?php echo base_url('placement/dashboard/due_contract_xls'); ?>");
-                    }
-                }
-            });
-        });
     });
 
     function viewDetails() {

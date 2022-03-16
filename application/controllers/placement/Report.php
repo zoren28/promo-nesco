@@ -14,6 +14,7 @@ class Report extends CI_Controller
             redirect('http://' . $_SERVER['SERVER_ADDR'] . ":" . $_SERVER['SERVER_PORT'] . '/hrms/nesco');
         }
 
+        $this->load->model('placement/employee_model');
         $this->load->model('placement/report_model');
         $this->load->model('placement/dashboard_model');
     }
@@ -91,6 +92,40 @@ class Report extends CI_Controller
         $fetch_data = array('field' => $field, 'dept' => $dept);
         $data['statistics'] = $this->report_model->load_stat_dept($fetch_data);
         $data['request'] = "statistics_xls";
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function select_company_under_agency()
+    {
+        $agency_code = $this->input->get('agency_code', TRUE);
+        $companies = $this->employee_model->company_list_under_agency($agency_code);
+        echo '<option value=""> --Select Company-- </option>';
+        foreach ($companies as $company) {
+
+            $supplier = $this->employee_model->getcompanyCodeBycompanyName($company->company_name);
+            if (!empty($supplier)) {
+?>
+                <option value="<?= $supplier->pc_code ?>"><?= $company->company_name ?></option>
+<?php
+            }
+        }
+    }
+
+    public function username_xls()
+    {
+        $fetch = $this->input->get(NULL, TRUE);
+
+        $data['usernames'] = $this->report_model->username_list($fetch);
+        $data['request'] = "username_xls";
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function qbe_report()
+    {
+        $data['fetch'] = $this->input->get(NULL, TRUE);
+        $data['request'] = "qbe_report";
 
         $this->load->view('body/placement/modal_response', $data);
     }
