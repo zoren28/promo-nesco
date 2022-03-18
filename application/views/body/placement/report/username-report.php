@@ -22,7 +22,7 @@
                             <div class="form-group">
                                 <label>Agency</label>
                                 <select name="agency" class="form-control select2" onchange="select_company(this.value)">
-                                    <option value=""> --Select Agency-- </option>
+                                    <option value=""> All Agency </option>
                                 </select>
                             </div>
                         </div>
@@ -32,7 +32,7 @@
                             <div class="form-group">
                                 <label>Company</label>
                                 <select name="company" class="form-control select2">
-                                    <option value=""> --Select Company </option>
+                                    <option value=""> All Company </option>
                                     <?php
 
                                     $companies = $this->employee_model->nesco_company_list();
@@ -55,7 +55,7 @@
                             <div class="form-group">
                                 <label>Business Unit</label>
                                 <select name="business_unit" class="form-control" onchange="select_department(this.value)">
-                                    <option value=""> --Select Business Unit-- </option>
+                                    <option value=""> All Business Unit </option>
                                     <?php
 
                                     $business_units = $this->dashboard_model->businessUnit_list();
@@ -74,7 +74,7 @@
                             <div class="form-group">
                                 <label>Department</label>
                                 <select name="department" class="form-control">
-                                    <option value=""> --Select Department-- </option>
+                                    <option value=""> All Department </option>
                                 </select>
                             </div>
                         </div>

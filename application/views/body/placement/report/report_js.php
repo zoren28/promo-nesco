@@ -255,10 +255,10 @@
 
                         if (type == "excel") {
 
-                            window.open("pages/reports/termination_of_contract_xls.php?store=" + store + "&&department=" + department + "&&company=" + company + "&&month=" + month);
+                            window.location = "<?= base_url('placement/report/termination_of_contract_xls') ?>" + '?' + `store=${store}&department=${department}&company=${company}&month=${month}`;
                         } else if (type == "pdf") {
 
-                            window.open("pages/reports/termination_of_contract_pdf.php?store=" + store + "&&department=" + department + "&&company=" + company + "&&month=" + month);
+                            window.location = "<?= base_url('placement/report/termination_of_contract_pdf') ?>" + '?' + `store=${store}&department=${department}&company=${company}&month=${month}`;
                         } else if (type == "list") {
 
                             window.open("?p=terminationReportList&&module=Reports&&report=forStore&&store=" + store + "&&department=" + department + "&&company=" + company + "&&month=" + month);

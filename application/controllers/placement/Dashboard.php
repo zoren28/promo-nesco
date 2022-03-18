@@ -15,6 +15,7 @@ class Dashboard extends CI_Controller
         }
 
         $this->load->model('placement/dashboard_model');
+        $this->load->model('placement/employee_model');
     }
 
     public function new_employee()

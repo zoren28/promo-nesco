@@ -22,7 +22,7 @@
                             <div class="form-group">
                                 <label>Agency</label>
                                 <select name="agency" class="form-control select2" onchange="select_company(this.value)">
-                                    <option value=""> --Select Agency-- </option>
+                                    <option value=""> All Agency </option>
                                 </select>
                             </div>
                         </div>
@@ -32,7 +32,7 @@
                             <div class="form-group">
                                 <label>Company</label>
                                 <select name="company" class="form-control select2">
-                                    <option value=""> --Select Company </option>
+                                    <option value=""> All Company </option>
                                     <?php
 
                                     $companies = $this->employee_model->nesco_company_list();
@@ -55,7 +55,7 @@
                             <div class="form-group">
                                 <label>Business Unit</label>
                                 <select name="business_unit" class="form-control" onchange="select_department(this.value)">
-                                    <option value=""> --Select Business Unit-- </option>
+                                    <option value=""> All Business Unit </option>
                                     <?php
 
                                     $business_units = $this->dashboard_model->businessUnit_list();
@@ -74,7 +74,7 @@
                             <div class="form-group">
                                 <label>Department</label>
                                 <select name="department" class="form-control">
-                                    <option value=""> --Select Department-- </option>
+                                    <option value=""> All Department </option>
                                 </select>
                             </div>
                         </div>
@@ -90,11 +90,11 @@
                                     $months = $this->employee_model->months();
                                     foreach ($months as $month => $value) {
                                     ?>
-                                        <option value="<?= $month ?>"><?= $value ?></option>
+                                        <option value="<?= date('Y') . '-' . $month  ?>"><?= $value ?></option>
                                     <?php
                                     }
                                     ?>
-                                    <option value="01|<?= date('Y', strtotime('+1 years')) ?>">January <?= date('Y', strtotime('+1 years')) ?></option>
+                                    <option value="<?= date('Y', strtotime('+1 years')) . '-01' ?>">January <?= date('Y', strtotime('+1 years')) ?></option>
                                 </select>
                             </div>
                         </div>

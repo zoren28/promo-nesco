@@ -129,4 +129,133 @@ class Report extends CI_Controller
 
         $this->load->view('body/placement/modal_response', $data);
     }
+
+    public function termination_of_contract_xls()
+    {
+        $data['fetch'] = $this->input->get(NULL, TRUE);
+        $data['request'] = "termination_of_contract_xls";
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function termination_of_contract_pdf()
+    {
+        $fetch = $this->input->get(NULL, TRUE);
+
+        // create new PDF document
+        $this->load->library('Pdf');
+        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+        // set document information
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('Zoren Ormido');
+        $pdf->SetTitle('Termination Report');
+        $pdf->SetSubject('End of Contract');
+        $pdf->SetKeywords('termination, end of contract, merchandiser, promodiser, diser');
+
+        // remove default header/footer
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        // set default monospaced font
+        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+        // set margins
+        $pdf->SetMargins(15, 15, 15);
+
+        // set auto page breaks
+        $pdf->SetAutoPageBreak(TRUE, 15);
+
+        // set some language-dependent strings (optional)
+        if (@file_exists(dirname(__FILE__) . '/lang/eng.php')) {
+            require_once(dirname(__FILE__) . '/lang/eng.php');
+            $pdf->setLanguageArray($l);
+        }
+
+        // set font
+        $pdf->SetFont('times', 'B', 12);
+
+        // add a page
+        $pdf->AddPage('P', 'Letter');
+
+        $result = $this->report_model->naend_of_contract_list($fetch);
+        foreach ($result as $row) {
+
+            $bUs = $this->dashboard_model->businessUnit_list();
+            foreach ($bUs as $bu) {
+
+                $hasBU = $this->dashboard_model->promo_has_bu($row->emp_id, $bu->bunit_field);
+                if ($hasBU > 0) {
+
+                    // Cell($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=0, $link='', $stretch=0, $ignore_min_height=false, $calign='T', $valign='M')
+                    $pdf->Cell(0, 0, 'NOTICE OF TERMINATION', 0, 0, 'C', 0, '', 0);
+                    $pdf->SetFont('times', '', 12);
+
+                    $pdf->Ln(5);
+                    $pdf->Cell(0, 0, 'For Promodiser - Merchandiser', 0, 0, 'C');
+
+                    $pdf->Ln(5);
+                    $pdf->Cell(0, 0, 'Assigned at ' . $bu->bunit_name, 0, 0, 'C');
+
+                    $pdf->Ln(10);
+                    $pdf->SetFont('times', 'B', 12);
+                    $pdf->SetX(145);
+                    $pdf->Cell(0, 0, 'Date:');
+                    $pdf->SetX(157);
+                    $pdf->SetFont('times', 'BU', 12);
+                    $pdf->Cell(0, 0, date('F d, Y'));
+
+                    $pdf->Ln(10);
+                    $pdf->SetFont('times', 'B', 12);
+                    $pdf->Cell(0, 8, 'To', 0, 0, 'L');
+                    $pdf->SetX(53);
+                    $pdf->Cell(0, 8, ':');
+                    $pdf->SetFont('times', 'BU', 12);
+                    $pdf->SetX(58);
+                    $pdf->Cell(0, 8, ucwords(strtolower($row->name)));
+
+                    $pdf->Ln(5);
+                    $pdf->SetFont('times', 'B', 12);
+                    $pdf->Cell(0, 8, 'Company/Agency');
+                    $pdf->SetX(53);
+                    $pdf->Cell(0, 8, ':');
+                    $pdf->SetX(58);
+                    $pdf->Cell(0, 8, $row->promo_department . ' - ' . $row->promo_company);
+
+                    $pdf->Ln(10);
+                    $pdf->SetFont('times', '', 12);
+                    $pdf->SetX(50);
+                    $pdf->Cell(0, 8, 'Please be reminded that according to the Introductory Letter we received from your', 0, 0, 'J');
+                    $pdf->Ln(5);
+                    $pdf->Cell(0, 8, 'company/agency, your assignment on this establishment will expire on');
+                    $pdf->Ln(5);
+                    $pdf->SetFont('times', 'BU', 12);
+                    $pdf->Cell(15, 8, date('l', strtotime($row->eocdate)) . ' ' . date('F d, Y', strtotime($row->eocdate)));
+
+                    $pdf->Ln(10);
+                    $pdf->SetFont('times', '', 12);
+                    $pdf->SetX(50);
+                    $pdf->Cell(0, 8, 'In connection with this you are advised to yield all company properties under your', 0, 0, 'J');
+                    $pdf->Ln(6);
+                    // MultiCell($w, $h, $txt, $border=0, $align='J', $fill=0, $ln=1, $x='', $y='', $reseth=true, $stretch=0, $ishtml=false, $autopadding=true, $maxh=0)    
+                    $pdf->MultiCell(0, 12, 'care and seek clearance before you leave the company premises of ' . $bu->bunit_name . ' at the close of business hours on such day.', 0, 'L');
+
+                    $pdf->Ln(4);
+                    $pdf->SetX(50);
+                    $pdf->Cell(0, 8, 'Thank you and good luck!');
+
+                    $pdf->Ln(18);
+                    $pdf->SetFont('times', 'B', 12);
+                    $pdf->Cell(63, 8, 'MS. MARIA NORA A. PAHANG', 0);
+                    $pdf->Ln(6);
+                    $pdf->Cell(63, 8, 'HRD Manager', 0, 0, 'C');
+
+                    $pdf->Ln(30);
+                }
+            }
+        }
+
+        //Close and output PDF document
+        $pdf->Output('termination.pdf', 'I');
+    }
 }

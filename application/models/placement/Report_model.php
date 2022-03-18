@@ -41,7 +41,11 @@ class Report_model extends CI_Model
 
     public function username_list($data)
     {
-        $this->db->select('employee3.record_no, employee3.emp_id, name, position, promo_company, promo_department, promo_type')
+        if (!empty($data['company'])) {
+            $company_name = $this->employee_model->get_company_name($data['company'])->pc_name;
+        }
+
+        $this->db->select('employee3.record_no, employee3.emp_id, name, position, agency_code, promo_company, promo_department, promo_type')
             ->from('employee3')
             ->join('promo_record', 'promo_record.record_no = employee3.record_no AND promo_record.emp_id = employee3.emp_id')
             ->where('current_status', 'Active')
@@ -50,7 +54,7 @@ class Report_model extends CI_Model
         if (!empty($data['store'])) {
 
             $field = explode('/', $data['store']);
-            $this->db->where($field, end($field));
+            $this->db->where(end($field), 'T');
         }
 
         if (!empty($data['department'])) {
@@ -59,9 +63,7 @@ class Report_model extends CI_Model
         }
 
         if (!empty($data['company'])) {
-
-            $company = $this->employee_model->get_company_name($data['company']);
-            $this->db->where('promo_company', $company->pc_name);
+            $this->db->where('promo_company', $company_name);
         }
 
         $query = $this->db->get();
@@ -78,9 +80,16 @@ class Report_model extends CI_Model
     public function fetch_qbe_results($data)
     {
         $field = '';
-        foreach ($data['fields'] as $key => $value) {
+        if (!empty($data['fields'])) {
 
-            $field .= ", $value";
+            foreach ($data['fields'] as $key => $value) {
+
+                $field .= ", $value";
+            }
+        }
+
+        if (!empty($data['company'])) {
+            $company_name = $this->employee_model->get_company_name($data['company'])->pc_name;
         }
 
         $fields = "employee3.record_no, employee3.emp_id, startdate, eocdate, position, firstname, middlename, lastname, suffix, birthdate, agency_code, promo_company, promo_department, company_duration, promo_type, type" . $field;
@@ -106,18 +115,13 @@ class Report_model extends CI_Model
             $this->db->where('promo_department', $data['department']);
         }
 
-        if (!empty($data['department'])) {
-            $this->db->where('promo_department', $data['department']);
-        }
-
         if (!empty($data['business_unit'])) {
             $bunit_field = explode('/', $data['business_unit']);
-            $this->db->where('promo_department', end($bunit_field));
+            $this->db->where(end($bunit_field), 'T');
         }
 
         if (!empty($data['company'])) {
-            $company = $this->employee_model->get_company_name($data['company']);
-            $this->db->where('promo_department', $company->pc_name);
+            $this->db->where('promo_company', $company_name);
         }
 
         if (!empty($data['bloodtypetf'])) {
@@ -166,5 +170,37 @@ class Report_model extends CI_Model
 
         $query = $this->db->get();
         return $query->result_array();
+    }
+
+    public function naend_of_contract_list($data)
+    {
+        if (!empty($data['company'])) {
+            $company_name = $this->employee_model->get_company_name($data['company'])->pc_name;
+        }
+
+        $this->db->select('employee3.record_no, employee3.emp_id, name, startdate, eocdate, position, agency_code, promo_company, promo_department, promo_type, type, company_duration')
+            ->from('employee3')
+            ->join('promo_record', 'promo_record.record_no = employee3.record_no AND promo_record.emp_id = employee3.emp_id')
+            ->where(array('emp_type' => 'Promo-NESCO', 'current_status' => 'Active'));
+
+        if (!empty($data['month'])) {
+            $this->db->like('eocdate', $data['month']);
+        }
+
+        if (!empty($data['department'])) {
+            $this->db->where('promo_department', $data['department']);
+        }
+
+        if (!empty($data['business_unit'])) {
+            $field = explode('/', $data['business_unit']);
+            $this->db->where(end($field), 'T');
+        }
+
+        if (!empty($data['company'])) {
+            $this->db->where('promo_company', $company_name);
+        }
+
+        $query = $this->db->get();
+        return $query->result();
     }
 }
