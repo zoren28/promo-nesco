@@ -253,18 +253,44 @@
                 callback: function(button) {
                     if (button == 'OK') {
 
+                        if (type == 'list' || type == 'listCompany') {
+
+                            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                            const d = new Date(month);
+                            let buwan = months[d.getMonth()];
+
+                            var year = month.split('-');
+                            $("span.termination_date").html(`${buwan} ${year[0]}`)
+                        }
+
                         if (type == "excel") {
 
-                            window.location = "<?= base_url('placement/report/termination_of_contract_xls') ?>" + '?' + `store=${store}&department=${department}&company=${company}&month=${month}`;
+                            window.location = "<?= base_url('placement/report/termination_of_contract_xls') ?>" + '?' + `business_unit=${store}&department=${department}&company=${company}&month=${month}`;
                         } else if (type == "pdf") {
 
-                            window.location = "<?= base_url('placement/report/termination_of_contract_pdf') ?>" + '?' + `store=${store}&department=${department}&company=${company}&month=${month}`;
-                        } else if (type == "list") {
-
-                            window.open("?p=terminationReportList&&module=Reports&&report=forStore&&store=" + store + "&&department=" + department + "&&company=" + company + "&&month=" + month);
+                            window.open("<?= base_url('placement/report/termination_of_contract_pdf') ?>" + '?' + `business_unit=${store}&department=${department}&company=${company}&month=${month}`);
                         } else {
 
-                            window.open("?p=terminationReportList&&module=Reports&&report=forCompany&&store=" + store + "&&department=" + department + "&&company=" + company + "&&month=" + month);
+                            $("div#termination").modal({
+                                backdrop: 'static',
+                                keyboard: false,
+                                show: true
+                            });
+
+                            $.ajax({
+                                type: "GET",
+                                url: "<?php echo site_url('termination_list'); ?>",
+                                data: {
+                                    company,
+                                    business_unit: store,
+                                    department,
+                                    month
+                                },
+                                success: function(data) {
+
+                                    $(".termination").html(data);
+                                }
+                            });
                         }
                     }
 
@@ -321,6 +347,60 @@
                     $("select[name = 'product']").html(data);
                 }
             });
+        }
+    }
+
+    function termination() {
+
+        var business_unit = $("input[name = 'business_unit']").val();
+
+        var termination_list = $("table#termination_list").DataTable();
+        var value = termination_list.rows('.selected').data();
+
+        var empIds = [];
+        $.each(value, function(i) {
+            var id = value[i][1];
+            empIds.push(id);
+        });
+
+        if (empIds.length === 0) {
+
+            $.alert.open({
+                type: 'warning',
+                title: 'Info',
+                icon: 'confirm',
+                content: 'Please select atleast one employee.'
+            });
+        } else {
+
+            window.open("<?= base_url('placement/report/termination_for_store_pdf') ?>" + '?' + `empIds=${empIds}`);
+        }
+    }
+
+    function termination_for_company() {
+
+        var business_unit = $("input[name = 'business_unit']").val();
+
+        var termination_list = $("table#termination_list").DataTable();
+        var value = termination_list.rows('.selected').data();
+
+        var empIds = [];
+        $.each(value, function(i) {
+            var id = value[i][1];
+            empIds.push(id);
+        });
+
+        if (empIds.length === 0) {
+
+            $.alert.open({
+                type: 'warning',
+                title: 'Info',
+                icon: 'confirm',
+                content: 'Please select atleast one employee.'
+            });
+        } else {
+
+            window.open("<?= base_url('placement/report/termination_for_company_pdf') ?>" + '?' + `business_unit=${business_unit}&empIds=${empIds}`);
         }
     }
 </script>

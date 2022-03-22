@@ -203,4 +203,15 @@ class Report_model extends CI_Model
         $query = $this->db->get();
         return $query->result();
     }
+
+    public function mga_naend_of_contract($empIds)
+    {
+        $query = $this->db->select('employee3.record_no, employee3.emp_id, name, startdate, eocdate, position, agency_code, promo_company, promo_department, promo_type, type, company_duration')
+            ->from('employee3')
+            ->join('promo_record', 'promo_record.record_no = employee3.record_no AND promo_record.emp_id = employee3.emp_id')
+            ->where(array('emp_type' => 'Promo-NESCO', 'current_status' => 'Active'))
+            ->where_in('employee3.emp_id', $empIds)
+            ->get();
+        return $query->result();
+    }
 }

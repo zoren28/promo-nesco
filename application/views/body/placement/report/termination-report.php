@@ -107,7 +107,27 @@
                     <button type="button" class="btn btn-primary" onclick="genReport('excel')"> Generate in Excel <img src="<?= $link ?>../images/icons/excel-xls-icon.png"></button>
                     <button type="button" class="btn btn-primary" onclick="genReport('pdf')"> Generate in PDF <img src="<?= $link ?>../images/icons/pdf-icon.png"></button>
                     <button type="button" class="btn btn-primary" onclick="genReport('list')"> Generate List <img src='<?= $link ?>../images/icons/txt-icon.png' /></button>
-                    <button type="button" class="btn btn-primary" onclick="genReport('listCompany')"> Generate List for Company <img src='<?= $link ?>../images/icons/txt-icon.png' /></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ./Modal -->
+    <div id="termination" class="modal fade">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header bg-light-blue color-palette">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title">List of End Contract for <span class="termination_date"></span></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="termination"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="employee btn btn-primary" onclick="termination()">Generate Termination of Contract</button>
+                    <button class="company btn btn-primary" onclick="termination_for_company()">Generate Termination of Contract for Company</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>

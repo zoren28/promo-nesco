@@ -3381,5 +3381,77 @@ if ($request == "update_blacklist_form") {
         ?>
     </table>
 <?php
+} else if ($request == 'termination_list') {
+?>
+    <input type="hidden" name="company" value="<?= $fetch['company'] ?>">
+    <input type="hidden" name="business_unit" value="<?= $fetch['business_unit'] ?>">
+    <input type="hidden" name="department" value="<?= $fetch['department'] ?>">
+    <input type="hidden" name="month" value="<?= $fetch['month'] ?>">
+    <table id="termination_list" class="table table-bordered table-hover" width="100%">
+        <thead>
+            <tr>
+                <td>
+                    <center><input type="checkbox" class="select-all"></center>
+                </td>
+                <td>Emp.Id</td>
+                <td>Name</td>
+                <td>Agency</td>
+                <td>Company</td>
+                <td>BusinessUnit</td>
+                <td>Department</td>
+                <td>Position</td>
+                <td>Startdate</td>
+                <td>EOCdate</td>
+            </tr>
+        </thead>
+    </table>
+    <script>
+        var company = $("input[name = 'company']").val();
+        var business_unit = $("input[name = 'business_unit']").val();
+        var department = $("input[name = 'department']").val();
+        var month = $("input[name = 'month']").val();
+
+        var maEOC_list = $('#termination_list').DataTable({
+
+            "destroy": true,
+            "order": [
+                [2, "asc"]
+            ],
+            "ajax": {
+                url: "<?php echo site_url('eoc_employees'); ?>",
+                type: "get",
+                data: {
+                    company,
+                    business_unit,
+                    department,
+                    month
+                },
+            },
+            "columnDefs": [{
+                    "targets": [1],
+                    "orderable": false
+                },
+                {
+                    orderable: false,
+                    className: 'select-checkbox',
+                    targets: 0
+                }
+            ],
+            select: {
+                style: 'multi',
+                selector: 'td:first-child'
+            },
+        });
+
+        $('.select-all').change(function() {
+            if (this.checked) {
+                ;
+                maEOC_list.rows().select();
+            } else {
+                maEOC_list.rows().deselect();
+            }
+        });
+    </script>
+<?php
 }
 ?>

@@ -84,6 +84,28 @@ class Employee_model extends CI_Model
         return $query->row_array();
     }
 
+    public function applicant_name($app_id)
+    {
+        $query = $this->db->select('firstname, lastname, middlename, suffix')
+            ->get_where('applicant', array('app_id' => $app_id));
+        $applicant = $query->row();
+
+        $suffix = '';
+        if (!empty($applicant->suffix)) {
+            $suffix = ", $applicant->suffix";
+        }
+
+        if (!empty($applicant->middlename)) {
+
+            $name = $applicant->firstname . ' ' . $applicant->middlename . ' ' . $applicant->lastname . '' . $suffix;
+        } else {
+
+            $name = $applicant->firstname . ' ' . $applicant->lastname . '' . $suffix;
+        }
+
+        return $name;
+    }
+
     public function update_family($data)
     {
         if ($data['mother_bdate'] == "" || $data['mother_bdate'] == "00/00/0000") {
