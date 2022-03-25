@@ -21,7 +21,6 @@ class Employee extends CI_Controller
 
     public function find_hr_staff()
     {
-
         $val = "";
         $fetch = $this->input->post(NULL, TRUE);
 
@@ -36,6 +35,34 @@ class Employee extends CI_Controller
 
                 if ($val != $empId) {
                     echo "<a href = \"javascript:void(0)\" onclick='getEmpId(\"$name\")'>" . $name . "</a></br>";
+                } else {
+                    echo 'No Result Found';
+                }
+            }
+        } else {
+
+            echo 'No Result Found';
+        }
+    }
+
+    public function find_active_promo()
+    {
+        $val = "";
+        $fetch = $this->input->post(NULL, TRUE);
+
+        $query = $this->employee_model->find_active_promo($fetch);
+        if ($query->num_rows() > 0) {
+
+            $info = $query->result_array();
+            foreach ($info as $emp) {
+
+                $empId = $emp['emp_id'];
+                $name  = ucwords(strtolower($emp['name']));
+
+                if ($val != $empId) {
+?>
+                    <a href="javascript:void(0);" onclick="getEmpId('<?= $emp['emp_id'] . ' * ' . $emp['name']  ?>')"><?= $emp['emp_id'] . ' * ' . $emp['name']  ?></a></br>
+                <?php
                 } else {
                     echo 'No Result Found';
                 }
@@ -1024,7 +1051,7 @@ class Employee extends CI_Controller
             echo '<option value=""> --Select Company-- </option>';
             $companies = $this->employee_model->company_list();
             foreach ($companies as $company) {
-?>
+                ?>
                 <option value="<?= $company->pc_code ?>" <?php if ($fetch['promo_company'] == $company->pc_name) echo "selected=''"; ?>><?= $company->pc_name ?>
                 </option>
                 <?php

@@ -3453,5 +3453,148 @@ if ($request == "update_blacklist_form") {
         });
     </script>
 <?php
+} else if ($request == 'promo_details') {
+
+    $ctr = 0;
+    $storeName = '';
+    $bUs = $this->dashboard_model->businessUnit_list();
+    foreach ($bUs as $bu) {
+
+        $hasBU = $this->dashboard_model->promo_has_bu($employee->emp_id, $bu->bunit_field);
+        if ($hasBU > 0) {
+
+            $ctr++;
+
+            if ($ctr == 1) {
+
+                $storeName = $bu->bunit_name;
+            } else {
+
+                $storeName .= ", " . $bu->bunit_name;
+            }
+        }
+    }
+
+    $agency_name = '';
+    if ($employee->agency_code != 0) {
+
+        $agency_name = $this->employee_model->agency_name($employee->agency_code);
+    }
+?>
+    <input type="hidden" name="current_store" value="<?= $storeName ?>">
+    <table class="table">
+        <tr>
+            <th width="25%">Agency</th>
+            <td>:</td>
+            <td><?= $agency_name ?></td>
+        </tr>
+        <tr>
+            <th>Company</th>
+            <td>:</td>
+            <td><?= $employee->promo_company ?></td>
+        </tr>
+        <tr>
+            <th>Business Unit</th>
+            <td>:</td>
+            <td><?= $storeName ?></td>
+        </tr>
+        <tr>
+            <th>Department</th>
+            <td>:</td>
+            <td><?= $employee->promo_department ?></td>
+        </tr>
+        <tr>
+            <th>Promo Type</th>
+            <td>:</td>
+            <td><?= $employee->promo_type ?></td>
+        </tr>
+        <tr>
+            <th>Contract Type</th>
+            <td>:</td>
+            <td><?= $employee->type ?></td>
+        </tr>
+        <tr>
+            <th>Position</th>
+            <td>:</td>
+            <td><?= $employee->position ?></td>
+        </tr>
+        <tr>
+            <th>Startdate</th>
+            <td>:</td>
+            <td><?= date('m/d/Y', strtotime($employee->startdate)) ?></td>
+        </tr>
+        <tr>
+            <th>EOCdate</th>
+            <td>:</td>
+            <td><?= date('m/d/Y', strtotime($employee->eocdate)) ?></td>
+        </tr>
+    </table>
+<?php
+} else if ($request == 'add_outlet_form') {
+?>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4>Current Outlet</h4>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th colspan="2"><span class="text-red">*</span> Business Unit</th>
+                        </tr>
+                        <?php
+
+                        $ctr = 1;
+                        $bUs = $this->dashboard_model->businessUnit_list();
+                        foreach ($bUs as $bu) {
+
+                            $hasBU = $this->dashboard_model->promo_has_bu($emp_id, $bu->bunit_field);
+                            if ($hasBU > 0) {
+
+                                $attributes = "checked= '' disabled= ''";
+                            } else {
+
+                                $attributes = '';
+                            }
+
+                            echo '
+                                        <tr>
+                                            <td><input type="checkbox" name="' . $bu->bunit_field . '" id="field' . $ctr . '" value="' . $bu->bunit_id . '/' . $bu->bunit_field . '" ' . $attributes . '></td>
+                                            <td>' . $bu->bunit_name . '</td>
+                                        </tr>
+                                    ';
+
+                            $ctr++;
+                        }
+
+                        ?>
+                        <input type="hidden" name="counter" value="<?= $ctr ?>">
+                    </table>
+                </div>
+            </div>
+            <div class="form-group"> <span class="text-red">*</span>
+                <label for="effective_on">Effective On</label>
+                <input type="text" name="effective_on" class="form-control datepicker" value="<?= date('m/d/Y') ?>" onchange="inputField(this.name)" required>
+            </div>
+            <div class="form-group">
+                <label>Remarks</label> <i class="">(optional)</i>
+                <textarea name="remarks" class="form-control" rows="4"></textarea>
+            </div>
+        </div>
+        <div class="panel-footer">
+            <button type="submit" class="btn btn-primary"><i class="fa fa-bank"></i>&nbsp; Add Outlet</button>
+        </div>
+    </div>
+    </div>
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            inline: true,
+            changeYear: true,
+            changeMonth: true
+        });
+    </script>
+<?php
 }
 ?>

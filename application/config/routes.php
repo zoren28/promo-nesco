@@ -1,6 +1,13 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+// for outlet module
+$route['find_active_promo'] = 'placement/employee/find_active_promo';
+$route['promo_details'] = 'placement/outlet/promo_details';
+$route['add_outlet_form'] = 'placement/outlet/add_outlet_form';
+$route['add_new_outlet'] = 'placement/outlet/add_new_outlet';
+$route['change_outlet_histories'] = 'placement/outlet/change_outlet_histories';
+
 // for report module
 $route['view_stat_BU'] = 'placement/report/view_stat_BU';
 $route['load_stat_BU'] = 'placement/report/load_stat_BU';

@@ -175,6 +175,31 @@ class Employee_model extends CI_Model
             ->get();
     }
 
+    public function find_active_promo($fetch)
+    {
+        $this->db->query('SET SESSION sql_mode = ""');
+
+        // ONLY_FULL_GROUP_BY
+        $this->db->query('SET SESSION sql_mode =
+                              REPLACE(REPLACE(REPLACE(
+                              @@sql_mode,
+                              "ONLY_FULL_GROUP_BY,", ""),
+                              ",ONLY_FULL_GROUP_BY", ""),
+                              "ONLY_FULL_GROUP_BY", "")');
+
+        return $this->db->select('emp_id, name')
+            ->from('employee3')
+            ->group_start()
+            ->like('name', $fetch['str'])
+            ->or_where('emp_id', $fetch['str'])
+            ->group_end()
+            ->where('emp_type', 'Promo-NESCO')
+            ->where('current_status', 'Active')
+            ->order_by('name', 'ASC')
+            ->limit(10)
+            ->get();
+    }
+
     public function employee_list($data)
     {
         if (!empty($data['company'])) {
@@ -1413,5 +1438,15 @@ class Employee_model extends CI_Model
             'eocdate' => 'Eocdate',
             'current_status' => 'Current Status'
         );
+    }
+
+    public function get_promo_details($emp_id)
+    {
+        $query = $this->db->select('employee3.record_no, employee3.emp_id, name, startdate, eocdate, position, agency_code, promo_company, promo_department, promo_type, type, company_duration')
+            ->from('employee3')
+            ->join('promo_record', 'employee3.record_no = promo_record.record_no AND employee3.emp_id = promo_record.emp_id')
+            ->where('employee3.emp_id', $emp_id)
+            ->get();
+        return $query->row();
     }
 }
