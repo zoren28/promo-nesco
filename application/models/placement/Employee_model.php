@@ -187,17 +187,26 @@ class Employee_model extends CI_Model
                               ",ONLY_FULL_GROUP_BY", ""),
                               "ONLY_FULL_GROUP_BY", "")');
 
-        return $this->db->select('emp_id, name')
+        $this->db->select('emp_id, name')
             ->from('employee3')
             ->group_start()
             ->like('name', $fetch['str'])
             ->or_where('emp_id', $fetch['str'])
             ->group_end()
             ->where('emp_type', 'Promo-NESCO')
-            ->where('current_status', 'Active')
-            ->order_by('name', 'ASC')
-            ->limit(10)
-            ->get();
+            ->where('current_status', 'Active');
+
+        if ($fetch['promo_type'] == 'ROVING') {
+
+            $this->db->where('promo_type', $fetch['promo_type']);
+        } else if ($fetch['promo_type'] == 'STATION') {
+
+            $this->db->where('promo_type', $fetch['promo_type']);
+        }
+
+        $this->db->order_by('name', 'ASC')
+            ->limit(10);
+        return $this->db->get();
     }
 
     public function employee_list($data)
@@ -335,7 +344,14 @@ class Employee_model extends CI_Model
     {
         $query = $this->db->select('date_hired')
             ->get_where('application_details', array('app_id' => $app_id));
-        return $query->row()->date_hired;
+
+        if (!empty($query->row())) {
+
+            return $query->row()->date_hired;
+        } else {
+
+            return '';
+        }
     }
 
     public function agency_name($agency_code)

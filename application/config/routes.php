@@ -7,6 +7,13 @@ $route['promo_details'] = 'placement/outlet/promo_details';
 $route['add_outlet_form'] = 'placement/outlet/add_outlet_form';
 $route['add_new_outlet'] = 'placement/outlet/add_new_outlet';
 $route['change_outlet_histories'] = 'placement/outlet/change_outlet_histories';
+$route['find_active_station_promo'] = 'placement/employee/find_active_station_promo';
+$route['find_active_roving_promo'] = 'placement/employee/find_active_roving_promo';
+$route['transfer_outlet_form'] = 'placement/outlet/transfer_outlet_form';
+$route['store_clearance_form'] = 'placement/outlet/store_clearance_form';
+$route['uploadClearance'] = 'placement/outlet/uploadClearance';
+$route['transfer_details_form'] = 'placement/outlet/transfer_details_form';
+$route['transfer_outlet'] = 'placement/outlet/transfer_outlet';
 
 // for report module
 $route['view_stat_BU'] = 'placement/report/view_stat_BU';

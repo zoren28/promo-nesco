@@ -3587,6 +3587,263 @@ if ($request == "update_blacklist_form") {
             <button type="submit" class="btn btn-primary"><i class="fa fa-bank"></i>&nbsp; Add Outlet</button>
         </div>
     </div>
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            inline: true,
+            changeYear: true,
+            changeMonth: true
+        });
+    </script>
+<?php
+} else if ($request == 'transfer_outlet_form') {
+?>
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Business Unit</th>
+                            <th style="text-align: center;">Rate</th>
+                            <th style="text-align: center;">Transfer</th>
+                        </tr>
+                        <?php
+
+                        $ctr = 1;
+                        $bUs = $this->dashboard_model->businessUnit_list();
+                        foreach ($bUs as $bu) {
+
+                            echo '
+                                            <tr>
+                                                <td>' . $bu->bunit_name . '</td>
+                            ';
+
+                            $hasBU = $this->dashboard_model->promo_has_bu($details->emp_id, $bu->bunit_field);
+                            if ($hasBU > 0) {
+
+                                $rate = $this->outlet_model->appraisal_details($details->record_no, $details->emp_id, $bu->bunit_name);
+                                if ($rate->num_rows() > 0) {
+                                    $appraisal = $rate->row();
+
+                                    if ($appraisal->raterSO == 1 && $appraisal->rateeSO == 1) {
+
+                                        $rate = "yes";
+                                        $attributes = "btn btn-success btn-xs btn-flat";
+                                    } else {
+
+                                        $rate = "no";
+                                        $attributes = "btn btn-warning btn-xs btn-flat";
+                                    }
+
+                                    if ($appraisal->numrate == 100) {
+                                        $grade = 'pass';
+                                        $label = "btn btn-success btn-flat btn-xs";
+                                    } else if ($appraisal->numrate >= 90 && $appraisal->numrate <= 99.99) {
+                                        $grade = 'pass';
+                                        $label = "btn btn-primary btn-flat btn-xs";
+                                    } else if ($appraisal->numrate >= 85 && $appraisal->numrate <= 89.99) {
+                                        $grade = 'pass';
+                                        $label = "btn btn-info btn-flat btn-xs";
+                                    } else if ($appraisal->numrate >= 70 && $appraisal->numrate <= 84.99) {
+                                        $grade = 'failed';
+                                        $label = "btn btn-danger btn-flat btn-xs";
+                                    } else if ($appraisal->numrate >= 0 && $appraisal->numrate <= 69.99) {
+                                        $grade = 'failed';
+                                        $label = "btn btn-danger btn-flat btn-xs";
+                                    } else {
+                                        $grage = 'failed';
+                                        $label = "label label-danger";
+                                    }
+
+                                    echo '
+                                        <td style="text-align: center;">
+                                            <button class="' . $label . '" onclick="view_appraisal_details(' . $appraisal->details_id . ')">' . $appraisal->numrate . '</button>
+                                            <span class="' . $attributes . '">' . $rate . '</span>
+                                        </td>
+                                    ';
+
+                                    if ($rate == 'yes' && $grade == 'pass') {
+
+                                        echo '
+                                            <td style="text-align: center;">
+                                                <input type="checkbox" name="stores[]" id="store-' . $ctr . '" value="' . $bu->bunit_id . '/' . $bu->bunit_field . '" onclick="storeChoice(' . $ctr . ')"> <span class="transfer_' . $ctr . '">Transfer</span>
+                                            </td>
+                                        ';
+                                    } else {
+
+                                        echo '
+                                            <td></td>
+                                        ';
+                                    }
+                                } else {
+
+                                    echo '
+                                        <td></td>
+                                        <td></td>
+                                    ';
+                                }
+                            } else {
+
+                                echo '
+                                    <td></td>
+                                    <td></td>
+                                ';
+                            }
+
+                            echo '</tr>';
+
+                            $ctr++;
+                        }
+
+                        ?>
+                        <input type="hidden" name="counter" value="<?= $ctr ?>">
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="panel-footer">
+            <button class="btn btn-primary transfer_btn" disabled onclick="proceedTransfer('<?= $details->record_no ?>', '<?= $details->emp_id ?>')">Proceed to Transfer</button>
+        </div>
+    </div>
+    <?php
+} else if ($request == 'store_clearance_form') {
+
+    $loop = 1;
+    echo '<div class="row">';
+    foreach ($fetch['stores'] as $key => $value) {
+
+        $field = explode('/', $value);
+        $bu = $this->outlet_model->business_unit_details(end($field));
+    ?>
+        <input type="hidden" name="clearances[]" value="<?= $bu->bunit_clearance ?>">
+        <input type="hidden" name="fields[]" value="<?= $bu->bunit_field ?>">
+        <div class="col-md-4" style="margin-top: 30px;">
+            <b>Clearance (<?= $bu->bunit_name ?>)</b></br>
+            <img id="photo<?= $bu->bunit_clearance ?>" class='preview img-responsive' /></br>
+            <input type='file' name='<?= $bu->bunit_clearance ?>' id='<?= $bu->bunit_clearance ?>' class='btn btn-default clearance_<?= $loop ?>' onchange='readURL(this,"<?= $bu->bunit_clearance ?>");'>
+            <input type='button' name='clear<?= $bu->bunit_clearance ?>' id='clear<?= $bu->bunit_clearance ?>' style='display:none' class='btn btn-default' value='Clear' onclick="clears('<?= $bu->bunit_clearance ?>','photo<?= $bu->bunit_clearance ?>','clear<?= $bu->bunit_clearance ?>')">
+            <input type='button' id='<?= $bu->bunit_clearance ?>_change' style='display:none;' class='btn btn-primary btn-sm' value='Change Clearance?' onclick='changePhoto("Clearance","<?= $bu->bunit_clearance ?>","<?= $bu->bunit_clearance ?>_change")'>
+        </div>
+    <?php
+        $loop++;
+    }
+    echo '</div>';
+    echo '<input type="hidden" name="record_no" value="' . $fetch['record_no'] . '">';
+    echo '<input type="hidden" name="emp_id" value="' . $fetch['emp_id'] . '">';
+} else if ($request == 'transfer_details_form') {
+
+    ?>
+    <input type="hidden" name="emp_id" value="<?= $details['emp_id'] ?>">
+    <input type="hidden" name="record_no" value="<?= $details['record_no'] ?>">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Previous Outlet</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th colspan="2">Business Unit</th>
+                                </tr>
+                                <?php
+
+                                $ctr = 1;
+                                $storeName = '';
+                                $bUs = $this->dashboard_model->businessUnit_list();
+                                foreach ($bUs as $bu) {
+
+                                    $checked = '';
+                                    $hasBU = $this->dashboard_model->promo_has_bu($details['emp_id'], $bu->bunit_field);
+                                    if ($hasBU > 0) {
+
+                                        if ($ctr == 1) {
+
+                                            $storeName = $bu->bunit_name;
+                                        } else {
+
+                                            $storeName .= ", " . $bu->bunit_name;
+                                        }
+                                        $checked = "checked=''";
+                                    }
+                                    echo '
+                                        <tr>
+                                            <td><input type="checkbox" name="' . $bu->bunit_field . '" value="' . $bu->bunit_id . '/' . $bu->bunit_field . '" disabled ' . $checked . '></td>
+                                            <td>' . $bu->bunit_name . '</td>
+                                        </tr>
+                                    ';
+
+                                    $ctr++;
+                                }
+                                ?>
+                            </table>
+                        </div>
+                    </div>
+                    <input type="hidden" name="current_store" value="<?= $storeName ?>">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Current Outlet</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th colspan="2"><span class="text-red">*</span> Business Unit</th>
+                                </tr>
+                                <?php
+
+                                $ctr = 1;
+                                $bUs = $this->dashboard_model->businessUnit_list();
+                                foreach ($bUs as $bu) {
+
+                                    $checked = '';
+                                    $disabled = '';
+
+                                    $hasBU = $this->dashboard_model->promo_has_bu($details['emp_id'], $bu->bunit_field);
+                                    if ($hasBU > 0) {
+
+                                        if (in_array($bu->bunit_clearance, $details['clearances'])) {
+
+                                            $checked = '';
+                                        } else {
+
+                                            $checked = "checked=''";
+                                        }
+
+                                        $disabled = "disabled=''";
+                                    }
+                                    echo '
+                                        <tr>
+                                            <td><input type="checkbox" id="store-' . $ctr . '" class="store-' . $ctr . '" name="transfer_stores[]" value="' . $bu->bunit_id . '/' . $bu->bunit_field . '" ' . $disabled . ' ' . $checked . ' onclick="selectStore(' . $ctr . ')"></td>
+                                            <td>' . $bu->bunit_name . '</td>
+                                        </tr>
+                                    ';
+                                    $ctr++;
+                                }
+                                ?>
+                            </table>
+                            <input type="hidden" name="loop" value="0">
+                        </div>
+                    </div>
+                    <div class="form-group"> <span class="text-red">*</span>
+                        <label for="effective_on">Effective On</label>
+                        <input type="text" name="effective_on" class="form-control datepicker" value="<?= date('m/d/Y') ?>" onchange="inputField(this.name)" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Remarks</label> <i class="">(optional)</i>
+                        <textarea name="remarks" class="form-control" rows="4"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script type="text/javascript">
         $('.datepicker').datepicker({

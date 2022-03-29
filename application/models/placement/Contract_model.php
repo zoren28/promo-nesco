@@ -62,7 +62,13 @@ class Contract_model extends CI_Model
                 $fields = array('promo_id');
                 if (!in_array($field, $fields)) {
 
-                    $fields2[$field] = $value;
+                    if ($field == 'record_no') {
+
+                        $fields2[$field] = $previous_record_no;
+                    } else {
+
+                        $fields2[$field] = $value;
+                    }
                 }
             }
             $this->db->insert('promo_history_record', $fields2);
@@ -112,6 +118,14 @@ class Contract_model extends CI_Model
             $this->db->insert('employee3', $data);
             $current_record_no = $this->db->insert_id();
 
+            if (count($stores) > 1) {
+
+                $promo_type = 'ROVING';
+            } else {
+
+                $promo_type = 'STATION';
+            }
+
             foreach ($stores as $key => $value) {
 
                 $bunit_field = explode('/', $value);
@@ -125,7 +139,7 @@ class Contract_model extends CI_Model
             $this->db->set('promo_department', $row2->promo_department);
             $this->db->set('vendor_code', $row2->vendor_code);
             $this->db->set('company_duration', $row2->company_duration);
-            $this->db->set('promo_type', 'ROVING');
+            $this->db->set('promo_type', $promo_type);
             $this->db->set('type', $row2->type);
             $this->db->set('hr_location', $row2->hr_location);
             $this->db->insert('promo_record');
@@ -141,7 +155,7 @@ class Contract_model extends CI_Model
 
                 $data = array(
                     'record_no' => $current_record_no,
-                    'empId' => $emp_id,
+                    'emp_id' => $emp_id,
                     'product' => $product->product
                 );
 

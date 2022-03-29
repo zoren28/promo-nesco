@@ -19,4 +19,22 @@ class Outlet_model extends CI_Model
             ->get();
         return $query->result();
     }
+
+    public function employee_details($emp_id)
+    {
+        $query = $this->db->select('record_no, emp_id')
+            ->get_where('employee3', array('emp_id' => $emp_id));
+        return $query->row();
+    }
+
+    public function appraisal_details($record_no, $emp_id, $store)
+    {
+        return $this->db->get_where('appraisal_details', array('record_no' => $record_no, 'emp_id' => $emp_id, 'store' => $store));
+    }
+
+    public function business_unit_details($bunit_field)
+    {
+        $query = $this->db->get_where('locate_promo_business_unit', array('bunit_field' => $bunit_field));
+        return $query->row();
+    }
 }

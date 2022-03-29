@@ -49,7 +49,7 @@
                     <div class="row">
                         <form id="dataOutlet" method="post" autocomplete="off">
                             <div class="col-md-5">
-                                <!-- <h3>Supervisor Details</h3> -->
+                                <input type="hidden" name="action" value="add_outlet">
                                 <div class="form-group">
                                     <label>Search Promo</label>
                                     <div class="input-group">
