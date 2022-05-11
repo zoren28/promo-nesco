@@ -551,6 +551,7 @@
             var position = $("[name = 'position']").val();
             var empType = $("[name = 'empType']").val();
             var current_status = $("[name = 'current_status']").val();
+            var cutoff = $("select[name = 'cutoff']").val();
 
             var store = [];
             if (promo_type == "STATION") {
@@ -577,7 +578,7 @@
                 }
             }
 
-            if (store.length === 0 || (promo_type == "ROVING" && store.length < 2) || company == "" || promo_type == "" || department == "" || startdate == "" || eocdate == "" || position == "" || empType == "" || current_status == "") {
+            if (store.length === 0 || (promo_type == "ROVING" && store.length < 2) || company == "" || promo_type == "" || department == "" || startdate == "" || eocdate == "" || position == "" || empType == "" || current_status == "" || cutoff == "") {
 
                 if (store.length === 0) {
 
@@ -636,6 +637,11 @@
                                 if (current_status == "") {
 
                                     $("[name = 'current_status']").css("border-color", "#dd4b39");
+                                }
+
+                                if (cutoff == "") {
+
+                                    $("select[name = 'cutoff']").css("border-color", "#dd4b39");
                                 }
                             }
                         }
@@ -2641,7 +2647,7 @@
         });
     }
 
-    function startdate() {
+    function checkStartdate() {
 
         $("[name = 'startdate']").css("border-color", "#ccc");
         $("[name = 'eocdate']").val("");

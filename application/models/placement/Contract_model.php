@@ -3,10 +3,23 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Contract_model extends CI_Model
 {
+    public $tk;
+    public $tk_talibon;
+    public $tk_tubigon;
+    public $date;
+    public $hrd_location;
+
     function __construct()
     {
         parent::__construct();
         $this->load->library('nativesession');
+
+        $this->tk = $this->load->database('timekeeping', TRUE);
+        $this->tk_talibon = $this->load->database('talibon', TRUE);
+        $this->tk_tubigon = $this->load->database('tubigon', TRUE);
+
+        $this->date = date('Y-m-d');
+        $this->hrd_location = 'asc';
     }
 
     public function update_employment_history($emp_id, $startdate, $remarks, $stores)
@@ -161,7 +174,112 @@ class Contract_model extends CI_Model
 
                 $this->db->insert('promo_products', $data);
             }
+
+            $corporate = '';
+            $talibon = '';
+            $tubigon = '';
+            $bUs = $this->businessUnit_list();
+            foreach ($bUs as $bu) {
+
+                $hasBU = $this->promo_has_bu($emp_id, $bu->bunit_field);
+                if ($hasBU > 0) {
+
+                    if ($bu->bunit_field == 'al_tal') {
+                        $talibon = 'true';
+                    } else if ($bu->bunit_field == 'al_tub') {
+                        $tubigon = 'true';
+                    } else {
+                        $corporate = 'true';
+                    }
+                }
+            }
+
+            $cutoff = $this->select_promo_cutoff($emp_id);
+            $this->update_promo_cutoff('corporate', $cutoff, $emp_id, $current_record_no, $previous_record_no);
+            $this->insert_promo_cutoff('corporate', $cutoff, $emp_id, $current_record_no);
+
+            /* if ($talibon == 'true') {
+
+                $this->update_promo_cutoff('talibon', $cutoff, $emp_id, $current_record_no, $previous_record_no);
+                $this->insert_promo_cutoff('talibon', $cutoff, $emp_id, $current_record_no);
+            }
+
+            if ($tubigon == 'true') {
+
+                $this->update_promo_cutoff('tubigon', $cutoff, $emp_id, $current_record_no, $previous_record_no);
+                $this->insert_promo_cutoff('tubigon', $cutoff, $emp_id, $current_record_no);
+            } */
         }
+    }
+
+    public function select_promo_cutoff($empId)
+    {
+        $query = $this->tk->select('statCut')
+            ->from('promo_sched_emp')
+            ->order_by('peId', 'DESC')
+            ->limit(1)
+            ->get();
+        return $query->row()->statCut;
+    }
+
+    public function update_promo_cutoff($server, $statCut, $emp_id, $record_no, $previous_record_no)
+    {
+        $where = array('recordNo' => $record_no, 'empId' => $emp_id);
+
+        if ($server == 'talibon') {
+
+            $this->tk_talibon->set('recordNo', $previous_record_no)
+                ->set('statCut', $statCut)
+                ->where($where)
+                ->update('promo_sched_emp');
+        } else if ($server == 'tubigon') {
+
+            $this->tk_tubigon->set('recordNo', $previous_record_no)
+                ->set('statCut', $statCut)
+                ->where($where)
+                ->update('promo_sched_emp');
+        } else {
+
+            $this->tk->set('recordNo', $previous_record_no)
+                ->set('statCut', $statCut)
+                ->where($where)
+                ->update('promo_sched_emp');
+        }
+    }
+
+    public function insert_promo_cutoff($server, $statCut, $empId, $recordNo)
+    {
+        $insert = array(
+            'statCut' => $statCut,
+            'recordNo' => $recordNo,
+            'empId' => $empId,
+            'date_setup' => $this->date
+        );
+
+        if ($server == 'talibon') {
+
+            $this->tk_talibon->insert('promo_sched_emp', $insert);
+        } else if ($server == 'tubigon') {
+
+            $this->tk_tubigon->insert('promo_sched_emp', $insert);
+        } else {
+
+            $this->tk->insert('promo_sched_emp', $insert);
+        }
+    }
+
+    public function businessUnit_list()
+    {
+        $query = $this->db->select('bunit_id, bunit_name, bunit_field, bunit_acronym, bunit_epascode, bunit_clearance, bunit_contract, bunit_intro')
+            ->get_where('locate_promo_business_unit', array('status' => 'active', 'hrd_location' => $this->hrd_location));
+        return $query->result();
+    }
+
+    function promo_has_bu($emp_id, $field)
+    {
+        $query = $this->db->select('COUNT(promo_id) AS exist')
+            ->get_where('promo_record', array('emp_id' => $emp_id, $field => 'T'));
+        return $query->row()->exist;
     }
 
     public function change_outlet_record($emp_id, $data)

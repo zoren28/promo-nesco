@@ -2196,7 +2196,7 @@ if ($request == "update_blacklist_form") {
 
     $sql = "SELECT startdate, eocdate, current_status, position, emp_type, remarks, agency_code, promo_company, promo_department, vendor_code, promo_type, type 
                             FROM `$table1` 
-                                INNER JOIN `$table2`
+                                LEFT JOIN `$table2`
                                     ON $table1.record_no = $table2.record_no AND $table1.emp_id = $table2.emp_id
                                         WHERE $table1.record_no = '$recordNo' AND $table1.emp_id = '$empId'";
     $row = $this->employee_model->return_row_array($sql);
@@ -2255,8 +2255,10 @@ if ($request == "update_blacklist_form") {
     $products = $this->employee_model->promo_products($recordNo, $empId);
     foreach ($products as $product => $value) {
 
-        array_push($emp_products, $value);
+        array_push($emp_products, $value->product);
     }
+
+    $cutoff = $this->employee_model->promo_cutoff($recordNo, $empId);
 
 ?>
     <style type="text/css">
@@ -2321,7 +2323,7 @@ if ($request == "update_blacklist_form") {
                                 foreach ($result as $res) {
                                 ?>
 
-                                    <option value="<?= $res->pc_name ?>" <?php
+                                    <option value="<?= $res->pc_code ?>" <?php
                                                                             if ($row['promo_company'] == $res->pc_name) echo "selected=''"; ?>>
                                         <?= $res->pc_name; ?>
                                     </option>
@@ -2460,8 +2462,7 @@ if ($request == "update_blacklist_form") {
                 <div class="col-md-12">
                     <div class="form-group">
                         <label>Product</label>
-                        <select name="product" class="form-control select2" multiple="multiple">
-                            <option value=""> --Select-- </option>
+                        <select name="product[]" class="form-control select2" multiple="multiple">
                             <?php
                             $products = $this->employee_model->locate_promo_products($row['promo_company']);
                             foreach ($products as $product) {
@@ -2469,7 +2470,7 @@ if ($request == "update_blacklist_form") {
                                 <option value="<?= $product->product ?>" <?php if (in_array($product->product, $emp_products)) echo "selected=''"; ?>><?= $product->product ?></option>
                             <?php
                             }
-                            ?> ?>
+                            ?>
                         </select>
                     </div>
                 </div>
@@ -2484,7 +2485,7 @@ if ($request == "update_blacklist_form") {
                             <div class="input-group-addon">
                                 <i class="fa fa-calendar"></i>
                             </div>
-                            <input type="text" value="<?php echo $startdate; ?>" name="startdate" class="form-control datepicker" onchange="startdate()" required>
+                            <input type="text" value="<?php echo $startdate; ?>" name="startdate" class="form-control datepicker" onchange="checkStartdate()" required>
                         </div>
                     </div>
                 </div>
@@ -2558,7 +2559,7 @@ if ($request == "update_blacklist_form") {
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group"> <i class="text-red">*</i>
-                        <label>Current Status <?= in_array($this->employee_model->loginId, $admin_users); ?></label>
+                        <label>Current Status</label>
                         <select name="current_status" class="form-control" onchange="inputField(this.name)" required>
                             <option value="Active" <?php if ($row['current_status'] == "Active") echo "selected=''"; ?>>Active</option>
                             <option value="End of Contract" <?php if ($row['current_status'] == "End of Contract") echo "selected=''"; ?>>End of Contract</option>
@@ -2566,6 +2567,31 @@ if ($request == "update_blacklist_form") {
                             <?php if (in_array($this->employee_model->loginId, $admin_users)) : ?>
                                 <option value="blacklisted" <?php if ($row['current_status'] == "blacklisted") echo "selected=''"; ?>>blacklisted</option>
                             <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group"> <i class="text-red">*</i>
+                        <label for="cutoff">Cut-off</label>
+                        <select name="cutoff" id="cutoff" class="form-control">
+                            <option value=""> --Select-- </option>
+                            <?php
+
+                            $cutoffs = $this->employee_model->cutoff_list();
+                            foreach ($cutoffs as $co) {
+
+                                $endFC = ($co->endFC != '') ? $co->endFC : 'last';
+                                if (@$cutoff->statCut == $co->statCut) {
+
+                                    echo '<option value="' . $co->statCut . '" selected>' . $co->startFC . '-' . $endFC . ' / ' . $co->startSC . '-' . $co->endSC . '</option>';
+                                } else {
+
+                                    echo '<option value="' . $co->statCut . '">' . $co->startFC . '-' . $endFC . ' / ' . $co->startSC . '-' . $co->endSC . '</option>';
+                                }
+                            }
+                            ?>
                         </select>
                     </div>
                 </div>
@@ -3464,7 +3490,7 @@ if ($request == "update_blacklist_form") {
         if ($hasBU > 0) {
 
             $ctr++;
-
+            echo '<input type="hidden" name="bUs[]" value="' . $bu->bunit_id . '/' . $bu->bunit_field . '">';
             if ($ctr == 1) {
 
                 $storeName = $bu->bunit_name;
@@ -3703,7 +3729,7 @@ if ($request == "update_blacklist_form") {
             </div>
         </div>
         <div class="panel-footer">
-            <button class="btn btn-primary transfer_btn" disabled onclick="proceedTransfer('<?= $details->record_no ?>', '<?= $details->emp_id ?>')">Proceed to Transfer</button>
+            <button class="btn btn-primary transfer_btn" disabled onclick="proceedTo('<?= $details->record_no ?>', '<?= $details->emp_id ?>')">Proceed to Transfer Outlet</button>
         </div>
     </div>
     <?php
@@ -3729,8 +3755,14 @@ if ($request == "update_blacklist_form") {
         $loop++;
     }
     echo '</div>';
+
+    foreach ($fetch['bUs'] as $key => $value) {
+        echo '<input type="hidden" name="bUs[]" value="' . $value . '">';
+    }
+
     echo '<input type="hidden" name="record_no" value="' . $fetch['record_no'] . '">';
     echo '<input type="hidden" name="emp_id" value="' . $fetch['emp_id'] . '">';
+    echo '<input type="hidden" name="current_store" value="' . $fetch['current_store'] . '">';
 } else if ($request == 'transfer_details_form') {
 
     ?>
@@ -3852,6 +3884,118 @@ if ($request == "update_blacklist_form") {
             changeMonth: true
         });
     </script>
+<?php
+} else if ($request == 'remove_outlet_form') {
+?>
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Business Unit</th>
+                            <th style="text-align: center;">Rate</th>
+                            <th style="text-align: center;">Transfer</th>
+                        </tr>
+                        <?php
+
+                        $ctr = 1;
+                        $bUs = $this->dashboard_model->businessUnit_list();
+                        foreach ($bUs as $bu) {
+
+                            echo '
+                                                <tr>
+                                                    <td>' . $bu->bunit_name . '</td>
+                                ';
+
+                            $hasBU = $this->dashboard_model->promo_has_bu($details->emp_id, $bu->bunit_field);
+                            if ($hasBU > 0) {
+
+                                $rate = $this->outlet_model->appraisal_details($details->record_no, $details->emp_id, $bu->bunit_name);
+                                if ($rate->num_rows() > 0) {
+                                    $appraisal = $rate->row();
+
+                                    if ($appraisal->raterSO == 1 && $appraisal->rateeSO == 1) {
+
+                                        $rate = "yes";
+                                        $attributes = "btn btn-success btn-xs btn-flat";
+                                    } else {
+
+                                        $rate = "no";
+                                        $attributes = "btn btn-warning btn-xs btn-flat";
+                                    }
+
+                                    if ($appraisal->numrate == 100) {
+                                        $grade = 'pass';
+                                        $label = "btn btn-success btn-flat btn-xs";
+                                    } else if ($appraisal->numrate >= 90 && $appraisal->numrate <= 99.99) {
+                                        $grade = 'pass';
+                                        $label = "btn btn-primary btn-flat btn-xs";
+                                    } else if ($appraisal->numrate >= 85 && $appraisal->numrate <= 89.99) {
+                                        $grade = 'pass';
+                                        $label = "btn btn-info btn-flat btn-xs";
+                                    } else if ($appraisal->numrate >= 70 && $appraisal->numrate <= 84.99) {
+                                        $grade = 'failed';
+                                        $label = "btn btn-danger btn-flat btn-xs";
+                                    } else if ($appraisal->numrate >= 0 && $appraisal->numrate <= 69.99) {
+                                        $grade = 'failed';
+                                        $label = "btn btn-danger btn-flat btn-xs";
+                                    } else {
+                                        $grage = 'failed';
+                                        $label = "label label-danger";
+                                    }
+
+                                    echo '
+                                            <td style="text-align: center;">
+                                                <button class="' . $label . '" onclick="view_appraisal_details(' . $appraisal->details_id . ')">' . $appraisal->numrate . '</button>
+                                                <span class="' . $attributes . '">' . $rate . '</span>
+                                            </td>
+                                        ';
+
+                                    if ($rate == 'yes' && $grade == 'pass') {
+
+                                        echo '
+                                                <td style="text-align: center;">
+                                                    <input type="checkbox" name="stores[]" id="store-' . $ctr . '" value="' . $bu->bunit_id . '/' . $bu->bunit_field . '" onclick="removeThisStore(' . $ctr . ')"> <span class="remove_' . $ctr . '">Remove</span>
+                                                </td>
+                                            ';
+                                    } else {
+
+                                        echo '
+                                                <td></td>
+                                            ';
+                                    }
+                                } else {
+
+                                    echo '
+                                            <td></td>
+                                            <td></td>
+                                        ';
+                                }
+                            } else {
+
+                                echo '
+                                        <td></td>
+                                        <td></td>
+                                    ';
+                            }
+
+                            echo '</tr>';
+
+                            $ctr++;
+                        }
+
+                        ?>
+                        <input type="hidden" name="counter" value="<?= $ctr ?>">
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="panel-footer">
+            <button class="btn btn-primary remove_btn" disabled onclick="proceedTo('<?= $details->record_no ?>', '<?= $details->emp_id ?>')">Proceed to Remove Outlet</button>
+        </div>
+    </div>
 <?php
 }
 ?>

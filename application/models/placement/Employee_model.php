@@ -187,11 +187,12 @@ class Employee_model extends CI_Model
                               ",ONLY_FULL_GROUP_BY", ""),
                               "ONLY_FULL_GROUP_BY", "")');
 
-        $this->db->select('emp_id, name')
+        $this->db->select('employee3.emp_id, name')
             ->from('employee3')
+            ->join('promo_record', 'promo_record.record_no = employee3.record_no AND promo_record.emp_id = employee3.emp_id')
             ->group_start()
             ->like('name', $fetch['str'])
-            ->or_where('emp_id', $fetch['str'])
+            ->or_where('employee3.emp_id', $fetch['str'])
             ->group_end()
             ->where('emp_type', 'Promo-NESCO')
             ->where('current_status', 'Active');
@@ -1150,21 +1151,118 @@ class Employee_model extends CI_Model
             $table = "promo_history_record";
         endif;
 
+        $query = $this->db->get_where('promo_record', array('record_no' => $data['recordNo'], 'emp_id' => $data['empId']));
+        $records = $query->num_rows();
+
         foreach ($data['store'] as $key => $value) {
 
             $store = explode('/', $value);
             $this->db->set($store[1], 'T');
         }
 
-        $this->db->set('agency_code', $data['agency']);
-        $this->db->set('promo_company', $company_name);
-        $this->db->set('promo_department', $data['department']);
-        $this->db->set('vendor_code', $data['vendor']);
-        $this->db->set('promo_type', $data['promo_type']);
-        $this->db->set('type', $data['contractType']);
+        if ($records > 0) {
 
-        $this->db->where(array('record_no' => $data['recordNo'], 'emp_id' => $data['empId']));
-        $this->db->update($table);
+            $this->db->set('agency_code', $data['agency']);
+            $this->db->set('promo_company', $company_name);
+            $this->db->set('promo_department', $data['department']);
+            $this->db->set('vendor_code', $data['vendor']);
+            $this->db->set('promo_type', $data['promo_type']);
+            $this->db->set('type', $data['contractType']);
+
+            $this->db->where(array('record_no' => $data['recordNo'], 'emp_id' => $data['empId']));
+            $this->db->update($table);
+        } else {
+
+            $insert = array(
+                'agency_code' => $data['agency'],
+                'promo_company' => $company_name,
+                'promo_department' => $data['department'],
+                'vendor_code' => $data['vendor'],
+                'promo_type' => $data['promo_type'],
+                'type' => $data['contractType'],
+                'record_no' => $data['recordNo'],
+                'emp_id' => $data['empId']
+            );
+            $this->db->set($insert);
+            $this->db->insert($table);
+        }
+    }
+
+    public function update_promo_products($data)
+    {
+        if (isset($data['product'])) {
+
+            $this->db->delete('promo_products', array('record_no' => $data['recordNo'], 'emp_id' => $data['empId']));
+            if (is_array($data['product'])) {
+
+                foreach ($data['product'] as $key => $value) {
+
+                    $insert = array(
+                        'record_no' => $data['recordNo'],
+                        'emp_id' => $data['empId'],
+                        'product' => $value,
+                        'created_at' => date('Y-m-d H:i:s')
+                    );
+                    $this->db->insert('promo_products', $insert);
+                }
+            } else {
+
+                $insert = array(
+                    'record_no' => $data['recordNo'],
+                    'emp_id' => $data['empId'],
+                    'product' => $data['product'],
+                    'created_at' => date('Y-m-d H:i:s')
+                );
+                $this->db->insert('promo_products', $insert);
+            }
+        }
+    }
+
+    public function update_promo_cutoff($data)
+    {
+        $query = $this->db2->get_where('promo_sched_emp', array('recordNo' => $data['recordNo'], 'empId' => $data['empId']));
+        $exist = $query->num_rows();
+        if ($exist == 0) {
+
+            // $query = $this->db2->get_where('promo_sched_emp', array('recordNo' => '', 'empId' => $data['empId']));
+            $query = $this->db2->from('promo_sched_emp')
+                ->where_in('recordNo', array('', '0'))
+                ->where('empId', $data['empId'])
+                ->get();
+
+            $exist = $query->num_rows();
+            if ($exist == 0) {
+
+                $insert = array(
+                    'statCut' => $data['cutoff'],
+                    'recordNo' => $data['recordNo'],
+                    'empId' => $data['empId'],
+                    'date_setup' => $this->date
+                );
+
+                $this->db2->insert('promo_sched_emp', $insert);
+            } else {
+
+                $row = $query->row();
+
+                $this->db2->set('statCut', $data['cutoff']);
+                $this->db2->set('recordNo', $data['recordNo']);
+                $this->db2->where(array('recordNo' => $row->recordNo, 'empId' => $data['empId']));
+                $this->db2->update('promo_sched_emp');
+            }
+        } else {
+
+            $this->db2->set('statCut', $data['cutoff']);
+            $this->db2->where(array('recordNo' => $data['recordNo'], 'empId' => $data['empId']));
+            $this->db2->update('promo_sched_emp');
+        }
+    }
+
+    public function promo_cutoff($record_no, $emp_id)
+    {
+        $query = $this->db2->select('statCut')
+            ->get_where('promo_sched_emp', array('recordNo' => $record_no, 'empId' => $emp_id));
+        return $query->row();
     }
 
     public function insert_application_employment_history($data, $path)
@@ -1464,5 +1562,12 @@ class Employee_model extends CI_Model
             ->where('employee3.emp_id', $emp_id)
             ->get();
         return $query->row();
+    }
+
+    public function cutoff_list()
+    {
+        $query = $this->db2->select('startFC, endFC, startSC, endSC, statCut')
+            ->get_where('promo_schedule', array('remark' => 'active'));
+        return $query->result();
     }
 }

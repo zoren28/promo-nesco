@@ -1077,7 +1077,6 @@ class Employee extends CI_Controller
         $company_code = $this->input->get('company_code', TRUE);
         $company = $this->employee_model->get_company_name($company_code);
         $products = $this->employee_model->promo_company_products($company->pc_name);
-        echo '<option value=""> --Select Product-- </option>';
         foreach ($products as $product) {
             ?>
             <option value="<?= $product->product ?>"><?= $product->product ?></option>
@@ -1226,6 +1225,8 @@ class Employee extends CI_Controller
         $this->employee_model->update_employment_contract($request);
         $this->employee_model->empty_store_value($request);
         $this->employee_model->update_promo_details($request);
+        $this->employee_model->update_promo_products($request);
+        $this->employee_model->update_promo_cutoff($request);
 
         $this->db->trans_complete();
 

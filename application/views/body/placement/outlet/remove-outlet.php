@@ -34,7 +34,7 @@
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
         <li><a href="#">Outlet</a></li>
-        <li class="active">Transfer Outlet</li>
+        <li class="active">Remove Outlet</li>
     </ol>
 </section>
 
@@ -45,13 +45,13 @@
         <div class="col-md-12">
             <div class="box box-primary">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Transfer Outlet</h3>
+                    <h3 class="box-title">Remove Outlet</h3>
                 </div>
 
                 <div class="box-body">
                     <div class="row">
                         <div class="col-md-5">
-                            <input type="hidden" name="action" value="transfer_outlet">
+                            <input type="hidden" name="action" value="remove_outlet">
                             <div class="form-group">
                                 <label>Search Promo</label>
                                 <div class="input-group">
@@ -104,32 +104,13 @@
                         <span aria-hidden="true">×</span></button>
                     <h4 class="modal-title">Upload Clearance</h4>
                 </div>
-                <form id="dataUploadClearance" method="post" enctype="multipart/form-data">
+                <form id="dataUploadClearanceToRemoveOutlet" method="post" enctype="multipart/form-data">
                     <div class="modal-body">
                         <div class="store_clearance"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary">Upload</button>
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- ./Modal -->
-    <div id="transfer_details" class="modal fade">
-        <div class="modal-dialog" style="width: 80%;">
-            <div class="modal-content">
-                <div class="modal-header bg-light-blue color-palette">
-                    <h4 class="modal-title">Transfer Outlet Details</h4>
-                </div>
-                <form id="dataTransferOutlet" method="post">
-                    <div class="modal-body">
-                        <div class="transfer_details"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Transfer Outlet</button>
                     </div>
                 </form>
             </div>

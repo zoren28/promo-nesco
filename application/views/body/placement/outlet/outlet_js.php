@@ -206,7 +206,6 @@
             var chkNum = 0;
             for (let i = 1; i <= loop; i++) {
 
-                clearances.push()
                 var file = $("input.clearance_" + i).val();
                 if (file != "") {
 
@@ -282,6 +281,86 @@
                                         });
                                     }
 
+                                }
+                            });
+                        } else {
+
+                            console.log(response.message);
+                        }
+                    },
+                    async: false,
+                    cache: false,
+                    contentType: false,
+                    processData: false
+                });
+            }
+        });
+
+        $("form#dataUploadClearanceToRemoveOutlet").submit(function(e) {
+
+            e.preventDefault();
+            let formData = new FormData(this);
+            let clearances = [];
+
+            $("input[name = 'clearances[]']").each(function() {
+                clearances.push(this.value)
+            });
+
+            var loop = $("input[name = 'clearances[]']").length;
+            var chkNum = 0;
+            for (let i = 1; i <= loop; i++) {
+
+                var file = $("input.clearance_" + i).val();
+                if (file != "") {
+
+                    chkNum++;
+                }
+            }
+
+            if (chkNum < loop) {
+
+                $.alert.open({
+                    type: 'warning',
+                    cancel: false,
+                    content: "Please Upload Clearance Needed!",
+                    buttons: {
+                        OK: 'Ok'
+                    },
+
+                    callback: function(button) {
+                        if (button == 'OK') {
+
+                            for (var i = 1; i <= loop; i++) {
+
+                                var file = $(".clearance_" + i).val();
+                                if (file == "") {
+
+                                    $("input.clearance_" + i).css("border-color", "#dd4b39");
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+
+                $.ajax({
+                    url: "<?php echo site_url('remove_outlet'); ?>",
+                    type: 'POST',
+                    data: formData,
+                    success: function(data) {
+
+                        let response = JSON.parse(data);
+                        if (response.message == "success") {
+
+                            $.alert.open({
+                                type: 'warning',
+                                title: 'Info',
+                                icon: 'confirm',
+                                content: 'Successfully Remove the Outlet!',
+
+                                callback: function() {
+
+                                    location.reload();
                                 }
                             });
                         } else {
@@ -393,7 +472,29 @@
 
         } else {
 
+            $.ajax({
+                url: "<?php echo site_url('promo_details'); ?>",
+                data: {
+                    empId: res[0].trim()
+                },
+                success: function(data) {
 
+                    $("div.promo-details").html(data);
+
+                    $("div#loading-gif").show();
+                    $.ajax({
+                        url: "<?php echo site_url('remove_outlet_form'); ?>",
+                        data: {
+                            empId: res[0].trim()
+                        },
+                        success: function(data) {
+
+                            $("div#loading-gif").hide();
+                            $("div.outlet-form").html(data);
+                        }
+                    });
+                }
+            });
         }
     }
 
@@ -451,13 +552,20 @@
         }
     }
 
-    function proceedTransfer(record_no, emp_id) {
+    function proceedTo(record_no, emp_id) {
 
         var stores = [];
+        let bUs = [];
+        let current_store = $("input[name = 'current_store']").val();
         $('input[name="stores[]"]:checked').each(function() {
 
             stores.push($(this).val());
         });
+
+        $("input[name = 'bUs[]']").each(function() {
+
+            bUs.push($(this).val());
+        })
 
         $("div#store_clearance").modal({
             backdrop: 'static',
@@ -468,9 +576,11 @@
         $.ajax({
             url: "<?php echo site_url('store_clearance_form'); ?>",
             data: {
+                current_store,
                 record_no,
                 emp_id,
-                stores
+                stores,
+                bUs
             },
             success: function(data) {
 
@@ -570,6 +680,50 @@
             $("button.transfer_now_btn").prop('disabled', true);
         } else {
             $("button.transfer_now_btn").prop('disabled', false);
+        }
+    }
+
+    function removeThisStore(id) {
+
+        var checkedNum = $('input[name="stores[]"]:checked').length;
+        var storeNum = $('input[name="stores[]"]').length;
+
+        if ($("input#store-" + id).is(':checked')) {
+
+            $("span.remove_" + id).css({
+                "color": "red",
+                "font-style": "italic"
+            });
+
+        } else {
+
+            $("span.remove_" + id).css({
+                "color": "black",
+                "font-style": "normal"
+            });
+        }
+
+        if ((storeNum === 1 || storeNum > 1) && checkedNum === 0) {
+
+            $("button.remove_btn").prop("disabled", true);
+
+        } else if (storeNum > 1 && checkedNum === storeNum) {
+
+            if ($("input#store-" + id).is(':checked')) {
+
+                $("span.remove_" + id).css({
+                    "color": "black",
+                    "font-style": "normal"
+                });
+
+                $("input#store-" + id).prop("checked", false);
+            }
+
+            $("button.remove_btn").prop("disabled", false);
+
+        } else {
+
+            $("button.remove_btn").prop("disabled", false);
         }
     }
 </script>

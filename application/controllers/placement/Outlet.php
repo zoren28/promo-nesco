@@ -165,4 +165,78 @@ class Outlet extends CI_Controller
             echo json_encode(['message' => 'success']);
         }
     }
+
+    public function remove_outlet_form()
+    {
+        $emp_id = $this->input->get('empId', TRUE);
+        $details = $this->outlet_model->employee_details($emp_id);
+
+        $data['details'] = $details;
+        $data['request'] = "remove_outlet_form";
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function remove_outlet()
+    {
+        $fetch = $this->input->post(NULL, TRUE);
+
+        $stores = array();
+        foreach ($fetch['bUs'] as $key => $value) {
+            $bU = explode('/', $value);
+
+            if (!in_array(end($bU), $fetch['fields'])) {
+                $stores[] = $value;
+            }
+        }
+
+        $fetch['store'] = $stores;
+        $fetch['effective_on'] = date('Y-m-d');
+
+        $clearanceFlag = "";
+        foreach ($fetch['clearances'] as $key => $value) {
+
+            $destination_path = "";
+            if (!empty($_FILES[$value]['name'])) {
+
+                $image_name   = addslashes($_FILES[$value]['name']);
+                $array     = explode(".", $image_name);
+
+                $filename     = $fetch['emp_id'] . "=" . date('Y-m-d') . "=" . $value . "=" . date('H-i-s-A') . "." . end($array);
+                $destination_path    = "../document/clearance/" . $filename;
+
+                if (move_uploaded_file($_FILES[$value]['tmp_name'], $destination_path)) {
+
+                    $this->employee_model->upload_scanned_file('promo_record', $value, $destination_path, $fetch['emp_id'], $fetch['record_no']);
+                    $clearanceFlag = "true";
+                }
+            }
+        }
+
+        $name = $this->employee_model->employee_name($fetch['emp_id'])['name'];
+
+        if ($clearanceFlag == 'true') {
+
+            $activity = "Uploaded the scanned Clearance for Remove Outlet of " . $name . " Record No." . $fetch['record_no'];
+            $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), $activity);
+
+            $this->db->trans_start();
+
+            $this->contract_model->update_employment_history($fetch['emp_id'], date('Y-m-d'), '', $stores);
+            $this->contract_model->change_outlet_record($fetch['emp_id'], $fetch);
+
+            $this->db->trans_complete();
+
+            if ($this->db->trans_status() === FALSE) {
+                echo json_encode(['message' => 'Opps! Something went wrong.']);
+                // generate an error... or use the log_message() function to log your error
+            } else {
+
+                echo json_encode(['message' => 'success']);
+            }
+        } else {
+
+            echo json_encode(['message' => 'Opps! Something went wrong.']);
+        }
+    }
 }

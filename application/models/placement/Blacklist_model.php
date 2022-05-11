@@ -58,10 +58,13 @@ class Blacklist_model extends CI_Model
             $birthday = date("Y-m-d", strtotime($fetch['birthday']));
         }
 
+        $date_blacklisted = date('Y-m-d', strtotime($fetch['dateBlacklisted']));
+        $date_today = date('Y-m-d');
+
         $data = array(
             'app_id' => $app_id,
             'name' => $name,
-            'date_blacklisted' => date("Y-m-d", strtotime($fetch['dateBlacklisted'])),
+            'date_blacklisted' => date("Y-m-d", strtotime($date_blacklisted)),
             'date_added' => date("Y-m-d"),
             'reportedby' => $fetch['reportedBy'],
             'reason' => $fetch['reason'],
@@ -73,13 +76,34 @@ class Blacklist_model extends CI_Model
 
         $query = $this->db->insert('blacklist', $data);
 
-        $set = array(
-            'current_status' => 'blacklisted'
-        );
+        if (strtotime($date_blacklisted) > strtotime($date_today)) {
 
-        $this->db->set($set);
-        $this->db->where('emp_id', $app_id);
-        $this->db->update('employee3');
+            $set1 = array(
+                'current_status' => 'Active'
+            );
+
+            $set2 = array(
+                'user_status' => 'active'
+            );
+        } else {
+
+            $set1 = array(
+                'current_status' => 'blacklisted'
+            );
+
+            $set2 = array(
+                'user_status' => 'inactive'
+            );
+        }
+
+
+        $this->db->set($set1)
+            ->where('emp_id', $app_id)
+            ->update('employee3');
+
+        $this->db->set($set2)
+            ->where('emp_id', $app_id)
+            ->update('users');
 
         return $query;
     }

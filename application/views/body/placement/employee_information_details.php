@@ -1275,9 +1275,9 @@ if ($request == 'basic_info') {
                             <tr>
                                 <td>" . $no . ".</td>
                                 <td>" . $row['position'] . "</td>
-                                <td>" . $promo_details->promo_company . "</td>
+                                <td>" . @$promo_details->promo_company . "</td>
                                 <td>" . $storeName . "</td>
-                                <td>" . $promo_details->promo_department . "</td>
+                                <td>" . @$promo_details->promo_department . "</td>
                                 <td>" . $row['current_status'] . "</td>
                                 <td>" . $startdate . "</td>
                                 <td>" . $eocdate . "</td>
@@ -1386,9 +1386,9 @@ if ($request == 'basic_info') {
                             <tr>
                                 <td>" . $no . ".</td>
                                 <td>" . $row['position'] . "</td>
-                                <td>" . $promo_details->promo_company . "</td>
+                                <td>" . @$promo_details->promo_company . "</td>
                                 <td>" . $storeName . "</td>
-                                <td>" . $promo_details->promo_department . "</td>
+                                <td>" . @$promo_details->promo_department . "</td>
                                 <td>" . $row2['current_status'] . "</td>
                                 <td>" . $startdate . "</td>
                                 <td>" . $eocdate . "</td>

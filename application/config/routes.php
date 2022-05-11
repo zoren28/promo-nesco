@@ -14,6 +14,8 @@ $route['store_clearance_form'] = 'placement/outlet/store_clearance_form';
 $route['uploadClearance'] = 'placement/outlet/uploadClearance';
 $route['transfer_details_form'] = 'placement/outlet/transfer_details_form';
 $route['transfer_outlet'] = 'placement/outlet/transfer_outlet';
+$route['remove_outlet_form'] = 'placement/outlet/remove_outlet_form';
+$route['remove_outlet'] = 'placement/outlet/remove_outlet';
 
 // for report module
 $route['view_stat_BU'] = 'placement/report/view_stat_BU';
@@ -132,6 +134,11 @@ $route['candidate_for_blacklisted'] = 'placement/blacklist/candidate_for_blackli
 $route['browseNames'] = 'placement/blacklist/browse_names';
 $route['add_blacklist'] = 'placement/blacklist/add_blacklist';
 
+// for initial requirement in recruitment process
+$route['check_applicant_duplicate_or_blacklist'] = 'recruitment/initial/check_applicant_duplicate_or_blacklist';
+$route['upload_initial'] = 'recruitment/initial/upload_initial';
+$route['applicant_information'] = 'recruitment/initial/applicant_information';
+$route['proceed_record_applicants'] = 'recruitment/initial/proceed_record_applicants';
 // for menu module
 $route['logout'] = 'logout';
 $route['placement/page/menu/(:any)/(:any)/(:any)'] = 'placement/page/menu/$1/$2/$3';

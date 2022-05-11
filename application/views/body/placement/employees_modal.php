@@ -271,7 +271,7 @@
                     <span aria-hidden="true">×</span></button>
                 <h4 class="modal-title">Edit Contract</h4>
             </div>
-            <form action="" id="dataPromoContractDetails" method="post">
+            <form action="" id="dataPromoContractDetails" method="post" autocomplete="off">
                 <div class="modal-body">
                     <div class="updatePromoContractDetails"></div>
                 </div>
