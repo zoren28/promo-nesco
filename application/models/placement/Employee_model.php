@@ -6,6 +6,7 @@ class Employee_model extends CI_Model
     public $date = '';
     public $loginId = '';
     public $db2 = '';
+    public $hr = 'nesco';
 
     function __construct()
     {
@@ -305,7 +306,7 @@ class Employee_model extends CI_Model
 
     public function employee_info($emp_id)
     {
-        $query = $this->db->select('employee3.record_no, employee3.emp_id, name, emp_no, emp_type, agency_code, promo_company, promo_department, vendor_code, al_tag, al_tal, icm, pm, abenson_tag, abenson_icm, cdc, berama, al_tub, colc, colm, alta_citta, bq, shoppers, promo_type, type, current_status, position, startdate, eocdate')
+        $query = $this->db->select('employee3.record_no, employee3.emp_id, name, emp_no, emp_type, agency_code, promo_company, promo_department, vendor_code, promo_type, type, current_status, position, startdate, eocdate')
             ->from('employee3')
             ->join('promo_record', 'promo_record.record_no = employee3.record_no', 'left')
             ->where('emp_type', 'Promo-NESCO')
@@ -956,7 +957,7 @@ class Employee_model extends CI_Model
 
     public function position_level($position)
     {
-        $query = $this->db->select('lvlno')
+        $query = $this->db->select('level, lvlno')
             ->get_where('position_leveling', array('position_title' => $position));
         return $query->row();
     }
@@ -1041,8 +1042,12 @@ class Employee_model extends CI_Model
 
     public function agency_list()
     {
-        $query = $this->db2->order_by('agency_name', 'ASC')
-            ->get_where('promo_locate_agency', array('status' => 1));
+        if ($this->hr == 'nesco') {
+            $this->db2->where('agency_code', 29);
+        }
+
+        $this->db2->order_by('agency_name', 'ASC');
+        $query = $this->db2->get_where('promo_locate_agency', array('status' => 1));
         return $query->result();
     }
 
@@ -1556,7 +1561,7 @@ class Employee_model extends CI_Model
 
     public function get_promo_details($emp_id)
     {
-        $query = $this->db->select('employee3.record_no, employee3.emp_id, name, startdate, eocdate, position, agency_code, promo_company, promo_department, promo_type, type, company_duration')
+        $query = $this->db->select('employee3.record_no, employee3.emp_id, name, startdate, eocdate, duration, emp_type, position, poslevel, agency_code, vendor_code, promo_company, promo_department, promo_type, type, company_duration')
             ->from('employee3')
             ->join('promo_record', 'employee3.record_no = promo_record.record_no AND employee3.emp_id = promo_record.emp_id')
             ->where('employee3.emp_id', $emp_id)
@@ -1568,6 +1573,23 @@ class Employee_model extends CI_Model
     {
         $query = $this->db2->select('startFC, endFC, startSC, endSC, statCut')
             ->get_where('promo_schedule', array('remark' => 'active'));
+        return $query->result();
+    }
+
+    public function cutoff_details($statCut)
+    {
+        $query = $this->db2->get_where('promo_schedule', array('statCut' => $statCut));
+        return $query->row();
+    }
+
+    public function select_departments($bunit_ids)
+    {
+        $query = $this->db->select('DISTINCT(dept_name) AS dept_name')
+            ->from('locate_promo_department')
+            ->where_in('bunit_id', $bunit_ids)
+            ->where('status', 'active')
+            ->order_by('dept_name', 'ASC')
+            ->get();
         return $query->result();
     }
 }

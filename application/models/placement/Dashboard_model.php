@@ -17,7 +17,7 @@ class Dashboard_model extends CI_Model
 
     public function businessUnit_list()
     {
-        $query = $this->db->select('bunit_id, bunit_name, bunit_field, bunit_acronym, bunit_epascode, bunit_clearance, bunit_contract, bunit_intro')
+        $query = $this->db->select('bunit_id, bunit_name, bunit_field, bunit_acronym, bunit_epascode, bunit_permit, bunit_clearance, bunit_contract, bunit_intro, bunit_dutySched, bunit_dutyDays, bunit_specialSched, bunit_specialDays')
             ->get_where('locate_promo_business_unit', array('status' => 'active', 'hrd_location' => $this->hrd_location));
         return $query->result();
     }

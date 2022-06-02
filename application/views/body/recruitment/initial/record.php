@@ -32,23 +32,42 @@
 	
 	
 <div class="modal fade" id="record_applicants" >
-		<div class="modal-dialog modal-lg" style='width:90%;'>
-			<div class="modal-content">
-				<div class="modal-header bg-light-blue color-palette">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">×</span></button>
-					<h5 class="modal-title">Record Applicants Information</h5>
-				</div>
-				<form id='applicant_information' method='post' enctype="multipart/form-data">
-					<div class="modal-body record_applicants" style='font-size=10px;'>
-							
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn" data-dismiss="modal">Close</button>
-						<button type="submit" class="btn btn-primary">Submit</button>
-					</div>
-				</form>
+	<div class="modal-dialog modal-lg" style='width:90%;'>
+		<div class="modal-content">
+			<div class="modal-header bg-light-blue color-palette">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">×</span></button>
+				<h5 class="modal-title">Record Applicants Information</h5>
 			</div>
+			<form id='applicant_information' method='post' enctype="multipart/form-data">
+				<div class="modal-body record_applicants" style='font-size=10px;'>
+						
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn" data-dismiss="modal">Close</button>
+					<button type="submit" class="btn btn-primary">Submit</button>
+				</div>
+			</form>
 		</div>
 	</div>
+</div>
+
+<div class="modal fade" id="applicant_record_success" >
+	<div class="modal-dialog modal-md">
+		<div class="modal-content">
+			<div class="modal-header bg-light-blue color-palette">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">×</span></button>
+				<h5 class="modal-title">Record Applicants Information</h5>
+			</div>
+			
+				<div class="modal-body applicant_record_success" style='font-size=10px;'>
+						
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn" data-dismiss="modal">Close</button>
+				</div>
+		</div>
+	</div>
+</div>
     

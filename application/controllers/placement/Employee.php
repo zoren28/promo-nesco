@@ -1043,6 +1043,109 @@ class Employee extends CI_Controller
         die("success||" . $message);
     }
 
+    public function select_agency()
+    {
+        $agency_code = $this->input->get('agency', TRUE);
+
+        echo "<option value=''> --Select-- </option>";
+        $agencies = $this->employee_model->agency_list();
+        foreach ($agencies as $agency) {
+
+            if ($agency->agency_code == $agency_code) {
+
+                echo '<option value="' . $agency->agency_code . '" selected>' . $agency->agency_name . '</option>';
+            } else {
+
+                echo '<option value="' . $agency->agency_code . '">' . $agency->agency_name . '</option>';
+            }
+        }
+    }
+
+    public function select_department()
+    {
+        $data = $this->input->get(NULL, TRUE);
+
+        $bunit_ids = array();
+        foreach ($data['stores'] as $key => $value) {
+
+            $s = explode('/', $value);
+            $bunit_ids[] = $s[0];
+        }
+
+        echo "<option value=''> --Select-- </option>";
+        $departments = $this->employee_model->select_departments($bunit_ids);
+        foreach ($departments as $dept) {
+
+            if ($dept->dept_name == $data['department']) {
+
+                echo '<option value="' . $dept->dept_name . '" selected>' . $dept->dept_name . '</option>';
+            } else {
+                echo '<option value="' . $dept->dept_name . '">' . $dept->dept_name . '</option>';
+            }
+        }
+    }
+
+    public function select_cutoff()
+    {
+        $statCut = $this->input->get('statCut', TRUE);
+        $cutoffs = $this->employee_model->cutoff_list();
+        foreach ($cutoffs as $co) {
+
+            $endFC = ($co->endFC != '') ? $co->endFC : 'last';
+            if ($statCut == $co->statCut) {
+
+                echo '<option value="' . $co->statCut . '" selected>' . $co->startFC . '-' . $endFC . ' / ' . $co->startSC . '-' . $co->endSC . '</option>';
+            } else {
+
+                echo '<option value="' . $co->statCut . '">' . $co->startFC . '-' . $endFC . ' / ' . $co->startSC . '-' . $co->endSC . '</option>';
+            }
+        }
+    }
+
+    public function select_position()
+    {
+        $position = $this->input->get('position', TRUE);
+
+        echo '<option value=""> --Select-- </position>';
+        $positions = $this->employee_model->list_of_positions();
+        foreach ($positions as $pos) {
+
+            if (strtolower($pos['position_title']) == strtolower($position)) {
+
+                echo '<option value="' . $pos['position_title'] . '" selected>' . $pos['position_title'] . '</option>';
+            } else {
+
+                echo '<option value="' . $pos['position_title'] . '">' . $pos['position_title'] . '</option>';
+            }
+        }
+    }
+
+    public function select_position_level()
+    {
+        $position = $this->input->get('position', TRUE);
+
+        $pos = $this->employee_model->position_level($position);
+        echo json_encode(array('level' => $pos->level, 'level_no' => $pos->lvlno));
+    }
+
+    public function select_employee_type()
+    {
+        $emp_type = $this->input->get('empType', TRUE);
+
+        echo '<option value=""> --Select-- </position>';
+        $emp_types = $this->employee_model->emp_type();
+        foreach ($emp_types as $emp) {
+
+            if ($emp->emp_type == $emp_type) {
+
+                echo '<option value="' . $emp->emp_type . '" selected>' . $emp->emp_type . '</option>';
+            } else {
+
+                echo '<option value="' . $emp->emp_type . '">' . $emp->emp_type . '</option>';
+            }
+        }
+    }
+
     public function select_company()
     {
         $fetch = $this->input->get(NULL, TRUE);
@@ -1082,6 +1185,61 @@ class Employee extends CI_Controller
             <option value="<?= $product->product ?>"><?= $product->product ?></option>
         <?php
         }
+    }
+
+    public function load_products()
+    {
+        $data = $this->input->get(NULL, TRUE);
+
+        $company = $this->employee_model->get_company_name($data['company']);
+        $emp_products = explode("|", $data['product']);
+
+        ?>
+        <select name="product_select[]" class="form-control select2" multiple="multiple">
+
+            <?php
+            $products = $this->employee_model->locate_promo_products($company->pc_name);
+            foreach ($products as $product) {
+
+                if (in_array($product->product, $emp_products)) {
+
+                    echo '<option value="' . $product->product . '" selected>' . $product->product . '</option>';
+                } else {
+
+                    echo '<option value="' . $product->product . '">' . $product->product . '</option>';
+                }
+            }
+            ?>
+        </select>
+        <script type="text/javascript">
+            $('.select2').select2();
+            $("span.select2").css("width", "100%");
+        </script>
+    <?php
+    }
+
+    public function select_promo_products()
+    {
+        $data = $this->input->get(NULL, TRUE);
+
+        $company = $this->employee_model->get_company_name($data['company']);
+
+    ?>
+        <select name="product_select[]" class="form-control select2" multiple="multiple">
+
+            <?php
+            $products = $this->employee_model->locate_promo_products($company->pc_name);
+            foreach ($products as $product) {
+
+                echo '<option value="' . $product->product . '">' . $product->product . '</option>';
+            }
+            ?>
+        </select>
+        <script type="text/javascript">
+            $('.select2').select2();
+            $("span.select2").css("width", "100%");
+        </script>
+        <?php
     }
 
     public function select_business_unit()
@@ -1185,6 +1343,27 @@ class Employee extends CI_Controller
         ?>
             <option value="<?= $vendor->vendor_code ?>"><?= $vendor->vendor_name ?></option>
         <?php
+        }
+    }
+
+    public function load_vendor()
+    {
+        $data = $this->input->get(NULL, TRUE);
+        if ($data['department'] == "EASY FIX") {
+            $data['department'] = 'FIXRITE';
+        }
+
+        echo '<option value=""> --Select Vendor-- </option>';
+        $vendors = $this->employee_model->locate_vendor($data['department']);
+        foreach ($vendors as $vendor) {
+
+            if ($vendor->vendor_code == $data['vendor']) {
+
+                echo '<option value="' . $vendor->verdor_name . '" selected>' . $vendor->verdor_name . '</option>';
+            } else {
+
+                echo '<option value="' . $vendor->verdor_name . '">' . $vendor->verdor_name . '</option>';
+            }
         }
     }
 
@@ -1596,6 +1775,65 @@ class Employee extends CI_Controller
         $account = $this->employee_model->insert_users($fetch_data);
         if ($account) {
             die("success");
+        }
+    }
+
+    public function load_business_unit()
+    {
+        $data['promo_type'] = $this->input->get('promo_type', TRUE);
+        $data['request'] = 'load_business_unit';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function load_department()
+    {
+        $data = $this->input->get(NULL, TRUE);
+
+        $bunit_ids = array();
+        foreach ($data['stores'] as $key => $value) {
+
+            $s = explode('/', $value);
+            $bunit_ids[] = $s[0];
+        }
+
+        echo "<option value=''> --Select-- </option>";
+        $departments = $this->employee_model->select_departments($bunit_ids);
+        foreach ($departments as $dept) {
+
+            echo '<option value="' . $dept->dept_name . '">' . $dept->dept_name . '</option>';
+        }
+    }
+
+    public function load_promo_business_unit()
+    {
+        $data['fetch_data'] = $this->input->get(NULL, TRUE);
+        $data['request'] = 'load_promo_business_unit';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function load_promo_intro()
+    {
+        $data['empId'] = $this->input->get('empId', TRUE);
+        $data['request'] = 'load_promo_intro';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function select_promo_type()
+    {
+        $promo_type = $this->input->get('promoType', TRUE);
+        $promo_types = array('STATION', 'ROVING');
+
+        foreach ($promo_types as $key => $value) {
+            if ($promo_type == $value) {
+
+                echo '<option value="' . $value . '" selected>' . $value . '</option>';
+            } else {
+
+                echo '<option value="' . $value . '">' . $value . '</option>';
+            }
         }
     }
 }

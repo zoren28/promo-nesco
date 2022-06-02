@@ -21,26 +21,184 @@ class Initial extends CI_Controller
 		$fetch_data = $this->input->post(NULL, TRUE);
         $data['request'] = "applicant_duplicate_or_blacklist";
         $data['fetch'] = $this->initial_model->check_applicant_duplicate_or_blacklist($fetch_data);
-		
 		$this->load->view('body/recruitment/function_query',$data);
 	}
 	
 	public function proceed_record_applicants() 
 	{
-		$fetch_data 	= $this->input->post(NULL, TRUE);
-		
+		$fetch_data 			= $this->input->post(NULL, TRUE);
 		$data['check_record'] 	= $this->initial_model->record_applicant_info($fetch_data);
-		
-		$data['request'] = "applicant_record";
-		
+		$data['request'] 		= "applicant_record";
 		$this->load->view('body/recruitment/function_query',$data);
+	}
+	
+	public function view_exam_setup()  
+	{
+		$fetch_data 			= $this->input->post(NULL, TRUE);
+		$data['request'] 		= "applicant_examination_view";
+		$data['view_exam'] 		= $this->initial_model->applicant_examinee($fetch_data);
+		$data['exam_pos'] 		= $this->initial_model->applicant_position_apply($data['view_exam']['appcode']);
+		$data['exam_cat']		= $this->initial_model->applicant_exam_cat($fetch_data);
+		$data['exam_score']		= $this->initial_model->application_exam_score($data['exam_cat']['exam_cat']);
+		$this->load->view('body/recruitment/function_query',$data);
+	}
+	
+	public function applicant_examination_setup()  
+	{
+		$fetch_data 			= $this->input->post(NULL, TRUE);
+		$data['examinee'] 		= $this->initial_model->applicant_examinee($fetch_data);
+		$data['examinee_app'] 	= $this->initial_model->applicant_position_apply($data['examinee']['appcode']);
+		$data['request'] 		= "applicant_examination";
+		$this->load->view('body/recruitment/function_query',$data);
+	}
+	
+	public function save_examination()
+	{
+		$fetch_data = 	$this->input->post(NULL, TRUE);
+		
+		$this->db->trans_start();
+		$this->initial_model->save_exam_scores($fetch_data);
+		$this->db->trans_complete();
+		if ($this->db->trans_status() === TRUE)
+		{ 
+			echo json_encode(array('status'=> 1, 'message' => "Applicant examination successfully save!")); 
+		}
+		else
+		{ 
+			echo json_encode(array('status'=> 0, 'message' => "Error Found!")); 
+		}
+	}
+	
+	public function setup_examination()
+	{
+		$fetch_data 				= 	$this->input->post(NULL, TRUE);
+		$fetch_data['app_status']  	= 	'for exam';
+		
+		$this->db->trans_start();
+		$this->initial_model->setup_examination_info_append($fetch_data);
+		// $this->initial_model->setup_textfile($fetch_data); // create text file for examination
+		$this->initial_model->applicant_status($fetch_data);
+		$this->initial_model->history_info_append($fetch_data);
+		$this->db->trans_complete();
+		
+		if ($this->db->trans_status() === TRUE)
+		{ 
+			echo json_encode(array('status'=> 1, 'message' => "Applicant successfully set-up examination!")); 
+		}
+		else
+		{ 
+			echo json_encode(array('status'=> 0, 'message' => "Error Found!")); 
+		}
 	}
 	
 	public function applicant_information()
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
-		print_r($fetch_data);
-		//echo json_encode(array('status'=> 1, 'message' => "Resume/Transcript/Application successfully uploaded.."));
+
+		$temp 				= 	'jpg';
+		$target_seminar		=	"../document/seminar_certificate/";
+		$target_employment	=	"../document/employment_certificate/";
+		
+		$errors     = array();
+		$maxsize    = 2097152;
+		$acceptable = array(
+			'image/jpeg',
+			'image/jpg',
+			'image/png'
+		);
+		
+		$explode_Id = explode("|",$this->initial_model->get_appId());
+		$fetch_data['appId'] = $explode_Id[1];
+		$fetch_data['id'] = $explode_Id[0];
+		
+		$this->db->trans_start();
+		$this->initial_model->save_applicant_info($fetch_data);
+		$this->initial_model->save_applicant_character_ref($fetch_data);
+		
+		// saving application seminar/training/eligibility
+		for($i= 0 ; $i< count($fetch_data['seminar_name']);$i++)
+		{
+			if(isset($_FILES['seminar_certificate']['name'][$i])) 
+			{
+				$filesize 		= 	$_FILES['seminar_certificate']['size'][$i];
+				$filename		=	$_FILES['seminar_certificate']['name'][$i];
+				$filetype		=	$_FILES['seminar_certificate']['type'][$i];
+				$seminar_cert 	= 	"seminar_certificate_".$i."_".$fetch_data['appId']."_".date("Y-m-d").".".$temp;
+				$location 		= 	$target_seminar.$seminar_cert;
+				
+				$fetch_data['location'] = $location;
+				
+				if($_FILES['seminar_certificate']['size'][$i] >= $maxsize) 
+				{
+					echo 'File too large. File must be less than 2 megabytes.';
+				}
+				else
+				{
+					if((!in_array($filetype, $acceptable)) && (!empty($filetype))) 
+					{
+						echo 'File is invalid file type. Only PDF, JPG, GIF and PNG types are accepted.';
+					}
+					else
+					{
+						if(move_uploaded_file($_FILES["seminar_certificate"]["tmp_name"][$i], $target_seminar.$seminar_cert))
+						{
+							$this->initial_model->save_applicant_seminar_training_eligibility($fetch_data, $i);
+						}
+					}	
+				}
+			}
+			else
+			{
+				$fetch_data['location'] = "";
+				$this->initial_model->save_applicant_seminar_training_eligibility($fetch_data, $i);
+			}
+		}
+		
+		// saving application history
+		for($z= 0; $z< count($fetch_data['company_name']);$z++)
+		{
+			if(isset($_FILES['certificate']['name'][$z])) 
+			{
+				$f_size 		= 	$_FILES['certificate']['size'][$z];
+				$f_name			=	$_FILES['certificate']['name'][$z];
+				$f_type			=	$_FILES['certificate']['type'][$z];
+				$f_cert 		= 	"certificate".$z."_".$fetch_data['appId']."_".date("Y-m-d").".".$temp;
+				$location 		= 	$target_employment.$f_cert;
+				
+				$fetch_data['location'] = $location;
+				
+				if($f_size >= $maxsize ) 
+				{
+					echo 'test File too large. File must be less than 2 megabytes.';
+				}
+				else
+				{
+					if((!in_array($f_type, $acceptable)) && (!empty($f_type))) 
+					{
+						echo 'File is invalid file type. Only PDF, JPG, GIF and PNG types are accepted.';
+					}
+					else
+					{
+						if(move_uploaded_file($_FILES["certificate"]["tmp_name"][$z], $target_employment.$f_cert))
+						{
+							echo $this->initial_model->save_applicant_employment_history($fetch_data, $z);
+						}
+					}	
+				}
+			}	
+		}
+		
+		$this->initial_model->update_applicant_status($fetch_data);
+		$this->db->trans_complete();
+
+		if ($this->db->trans_status() === TRUE)
+		{
+			echo json_encode(array('status'=> 1, 'message' => "Applicant successfully recorded. You can proceed and set-up examination!"));	
+		}
+		else
+		{
+			echo json_encode(array('status'=> 0, 'message' => "Error Found!"));	
+		}
 	}
 	
 	public function upload_initial() 
@@ -186,6 +344,12 @@ class Initial extends CI_Controller
 		{
 			echo json_encode(array('status'=> 0, 'message' => "Error file not uploaded.."));
 		}
+	}
+	
+	public function append_character_ref() {
+		
+		$data['request'] = 'append_character_ref';
+		$this->load->view('body/recruitment/function_query', $data);
 	}
 	
 }

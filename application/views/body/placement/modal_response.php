@@ -3997,5 +3997,377 @@ if ($request == "update_blacklist_form") {
         </div>
     </div>
 <?php
+} else if ($request == 'extend_contract') {
+?>
+    <div class="form-group"> <i class="text-red">*</i>
+        <label>Search Promo</label>
+        <div class="input-group">
+            <input class="form-control" name="employee" onkeyup="search_name(this.value)" autocomplete="off" type="text">
+            <span class="input-group-addon"><i class="fa fa-user"></i></span>
+        </div>
+        <div class="search-results" style="display: none;"></div>
+    </div>
+    <?php
+} else if ($request == 'load_business_unit') {
+
+    if ($promo_type == 'ROVING') {
+    ?>
+        <table class="table table-bordered">
+            <tr>
+                <th colspan="2"> Business Unit</th>
+            </tr>
+            <?php
+
+            $bUs = $this->dashboard_model->businessUnit_list();
+            foreach ($bUs as $bu) {
+
+                echo '
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="checkedEnable" name="stores[]" value="' . $bu->bunit_id . '/' . $bu->bunit_field . '" onchange="load_department()">
+                            </td>
+                            <td>' . $bu->bunit_name . '</td>
+                        </tr>
+                    ';
+            }
+
+            ?>
+        </table>
+    <?php
+    } else {
+
+    ?>
+        <table class="table table-bordered">
+            <tr>
+                <th colspan="2"> Business Unit</th>
+            </tr>
+            <?php
+
+            $bUs = $this->dashboard_model->businessUnit_list();
+            foreach ($bUs as $bu) {
+
+                echo '
+                        <tr>
+                            <td>
+                                <input type="radio" class="checkedEnable" name="stores[]" value="' . $bu->bunit_id . '/' . $bu->bunit_field . '" onchange="load_department()">
+                            </td>
+                            <td>' . $bu->bunit_name . '</td>
+                        </tr>
+                    ';
+            }
+
+            ?>
+        </table>
+    <?php
+    }
+} else if ($request == 'show_intro') {
+
+    if (is_array($stores)) {
+
+        foreach ($stores as $key => $value) {
+
+            $s = explode('/', $value);
+            $bunit_id = $s[0];
+
+            $bu = $this->contract_model->show_bu_details($bunit_id);
+            echo '
+                <tr>
+                    <td><i class="text-red">*</i> ' . $bu->bunit_name . '</td>
+                    <td>
+                        <input type="hidden" name="bunit_intro[]" value="' . $bu->bunit_intro . '">
+                        <input type="file" name="' . $bu->bunit_intro . '" id="' . $bu->bunit_intro . '" class="form-control" required onchange="validateForm(this.id)">
+                    </td>
+                </tr>
+            ';
+        }
+    }
+} else if ($request == 'load_promo_business_unit') {
+
+    if ($fetch_data['promoType'] == 'ROVING') {
+    ?>
+        <table class="table table-bordered">
+            <tr>
+                <th colspan="2"> Business Unit</th>
+            </tr>
+            <?php
+
+            $bUs = $this->dashboard_model->businessUnit_list();
+            foreach ($bUs as $bu) {
+
+                $hasBU = $this->dashboard_model->promo_has_bu($fetch_data['empId'], $bu->bunit_field);
+                if ($hasBU > 0) {
+
+                    echo '
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="checkedEnable" name="stores[]" value="' . $bu->bunit_id . '/' . $bu->bunit_field . '" disabled checked onchange="load_department()">
+                            </td>
+                            <td>' . $bu->bunit_name . '</td>
+                        </tr>
+                    ';
+                } else {
+
+                    echo '
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="checkedEnable" name="stores[]" value="' . $bu->bunit_id . '/' . $bu->bunit_field . '" disabled onchange="load_department()">
+                            </td>
+                            <td>' . $bu->bunit_name . '</td>
+                        </tr>
+                    ';
+                }
+            }
+
+            ?>
+        </table>
+    <?php
+    } else {
+
+    ?>
+        <table class="table table-bordered">
+            <tr>
+                <th colspan="2"> Business Unit</th>
+            </tr>
+            <?php
+
+            $bUs = $this->dashboard_model->businessUnit_list();
+            foreach ($bUs as $bu) {
+
+                $hasBU = $this->dashboard_model->promo_has_bu($fetch_data['empId'], $bu->bunit_field);
+                if ($hasBU > 0) {
+
+                    echo '
+                        <tr>
+                            <td>
+                                <input type="radio" class="checkedEnable" name="stores[]" value="' . $bu->bunit_id . '/' . $bu->bunit_field . '" disabled checked onchange="load_department()">
+                            </td>
+                            <td>' . $bu->bunit_name . '</td>
+                        </tr>
+                    ';
+                } else {
+
+                    echo '
+                        <tr>
+                            <td>
+                                <input type="radio" class="checkedEnable" name="stores[]" value="' . $bu->bunit_id . '/' . $bu->bunit_field . '" disabled onchange="load_department()">
+                            </td>
+                            <td>' . $bu->bunit_name . '</td>
+                        </tr>
+                    ';
+                }
+            }
+
+            ?>
+        </table>
+    <?php
+    }
+} else if ($request == 'load_promo_intro') {
+
+    $counter = 0;
+    $bUs = $this->dashboard_model->businessUnit_list();
+    foreach ($bUs as $bu) {
+
+        $hasBU = $this->dashboard_model->promo_has_bu($empId, $bu->bunit_field);
+        if ($hasBU > 0) {
+
+            echo '
+                <tr>
+                    <td><i class="text-red">*</i> ' . $bu->bunit_name . '</td>
+                    <td>
+                        <input type="hidden" name="bunit_intro[]" value="' . $bu->bunit_intro . '">
+                        <input type="file" name="' . $bu->bunit_intro . '" id="' . $bu->bunit_intro . '" class="form-control" required onchange="validateForm(this.id)">
+                    </td>
+                </tr>
+            ';
+        }
+        $counter++;
+    }
+} else if ($request == 'print_contract_permit') {
+
+    $fullname = $this->employee_model->employee_name($emp_id)['name'];
+    ?>
+    <p style="font-size: 15px;">
+        Contract of Employment of <code><?php echo $fullname; ?></code> was successfully added.<br>
+        Please Proceed on <code>Printing of Contract</code> and <code>Permit-to-Work</code>. &nbsp;Thank You!
+    </p>
+    <br><br>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-6">
+                <button class="btn btn-primary btn-block" onclick="printPermit('<?= $emp_id; ?>')"> Permit-To-Work </button>
+            </div>
+            <div class="col-md-6">
+                <button class="btn btn-primary btn-block" onclick="printContract('<?= $emp_id; ?>')"> Contract of Employment </button>
+            </div>
+        </div>
+    </div>
+<?php
+} else if ($request == 'print_permit_renewal') {
+
+    $emp = $this->employee_model->employee_info($emp_id);
+    $cO = $this->contract_model->get_promo_cutoff($emp->record_no, $emp->emp_id);
+
+    if ($cO->endFC == "") {
+        $endFC = "last";
+    } else {
+        $endFC = $cO->endFC;
+    }
+
+    $cut_off = $cO->startFC . ' - ' . $endFC . ' / ' . $cO->startSC . ' - ' . $cO->endSC;
+
+    $duty_days = ($emp->promo_type == 'STATION') ? 'DAILY' : '';
+?>
+    <style type="text/css">
+        .ui-autocomplete {
+            padding: 0;
+            list-style: none;
+            background-color: #fff;
+            width: 218px;
+            border: 1px solid #B0BECA;
+            max-height: 350px;
+            overflow-x: hidden;
+        }
+
+        .ui-autocomplete .ui-menu-item {
+            border-top: 1px solid #B0BECA;
+            display: block;
+            padding: 4px 6px;
+            color: #353D44;
+            cursor: pointer;
+        }
+
+        .ui-autocomplete .ui-menu-item:first-child {
+            border-top: none;
+        }
+
+        .ui-autocomplete .ui-menu-item.ui-state-focus {
+            background-color: #D5E5F4;
+            color: #161A1C;
+        }
+
+        .ui-autocomplete {
+            z-index: 9999;
+        }
+    </style>
+    <input type="hidden" name="empId" value="<?= $emp_id; ?>">
+    <input type="hidden" name="record_no" value="<?= $emp->record_no; ?>">
+    <div class="form-group"> <i class="text-red">*</i>
+        <label>Search Promo</label>
+        <div class="input-group">
+            <input class="form-control" name="employee" disabled="" value="<?= $emp_id . ' * ' . $emp->name; ?>" autocomplete="off" type="text">
+            <span class="input-group-addon"><i class="fa fa-user"></i></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group"> <i class="text-red">*</i>
+                <label>Business Unit</label>
+                <select name="storeName" class="form-control" required onchange="inputField(this.name)">
+                    <option value=""> --Select-- </option>
+                    <?php
+                    $bUs = $this->dashboard_model->businessUnit_list();
+                    foreach ($bUs as $bu) {
+
+                        $hasBU = $this->dashboard_model->promo_has_bu($emp_id, $bu->bunit_field);
+                        if ($hasBU > 0) {
+                            echo '<option value="' . $bu->bunit_name . '|' . $bu->bunit_permit . '|' . $bu->bunit_dutySched . '|' . $bu->bunit_dutyDays . '|' . $bu->bunit_specialSched . '|' . $bu->bunit_specialDays . '">' . $bu->bunit_name . '</option>';
+                        }
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="form-group"> <i class="text-red">*</i>
+                <label>Duty Schedule</label>
+                <select name="dutySched" class="form-control selects2 dutySched" required onchange="inputDutySched()">
+                    <option value=""> --Select-- </option>
+                    <?php
+
+                    $shift_codes = $this->contract_model->get_shiftcodes();
+                    foreach ($shift_codes as $sc) {
+
+                        $shiftCode  = $sc['shiftCode'];
+                        $In1        = $sc['1stIn'];
+                        $Out1       = $sc['1stOut'];
+                        $In2        = $sc['2ndIn'];
+                        $Out2       = $sc['2ndOut'];
+
+                        if ($In2 == "") {
+
+                            echo "<option value = '$shiftCode'>$shiftCode = $In1-$Out1 </option>";
+                        } else {
+
+                            echo "<option value = '$shiftCode'>$shiftCode = $In1-$Out1, $In2-$Out2</option>";
+                        }
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Special Schedule</label>
+                <select name="specialSched" class="form-control selects2" onchange="inputSpecialDays(this.value)">
+                    <option value=""> --Select-- </option>
+                    <?php
+
+                    $shift_codes = $this->contract_model->get_shiftcodes();
+                    foreach ($shift_codes as $sc) {
+
+                        $shiftCode  = $sc['shiftCode'];
+                        $In1        = $sc['1stIn'];
+                        $Out1       = $sc['1stOut'];
+                        $In2        = $sc['2ndIn'];
+                        $Out2       = $sc['2ndOut'];
+
+                        if ($In2 == "") {
+
+                            echo "<option value = '$shiftCode'>$shiftCode = $In1-$Out1 </option>";
+                        } else {
+
+                            echo "<option value = '$shiftCode'>$shiftCode = $In1-$Out1, $In2-$Out2</option>";
+                        }
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group"> <i class="text-red">*</i>
+                <label>Day Off</label>
+                <select name="dayOff" class="form-control" required onchange="inputField(this.name)">
+                    <option value=""> --Select-- </option>
+                    <?php
+
+                    $days = array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'No Day Off');
+                    foreach ($days as $key => $value) {
+
+                        echo '<option value="' . $value . '">' . $value . '</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="form-group"> <i class="text-red">*</i>
+                <label>Duty Days</label>
+                <input type="text" name="dutyDays" class="form-control" value="<?= $duty_days ?>" onkeyup="inputField(this.name)" style="text-transform: uppercase;" required>
+            </div>
+            <div class="form-group">
+                <label>Special Days</label>
+                <input type="text" name="specialDays" class="form-control" disabled="" onkeyup="inputField(this.name)" style="text-transform: uppercase;">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <label>Cut-off</label>
+            <input type="hidden" name="cutOff" value="<?= $cO->statCut . '|' . $cut_off ?>">
+            <input type="text" class="form-control" value="<?= $cut_off ?>" readonly>
+        </div>
+    </div>
+    <script src="<?= base_url('assets/plugins/autoSuggest/js/jquery.select-to-autocomplete.js') ?>"></script>
+    <script type="text/javascript">
+        $(function() {
+            $('select.selects2').selectToAutocomplete();
+        });
+    </script>
+<?php
+
 }
 ?>

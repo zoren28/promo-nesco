@@ -62,6 +62,220 @@ class Initial_model extends CI_Model
 		return $this->db->insert_id(); 
 	}
 	
+	public function get_appId()
+	{
+		$year 			= 	date('Y');
+		
+		$query = $this->db->from('applicant')
+							->where('year',$year)
+							->get();
+				$r =  $query->row_array();
+				
+		if(is_array($r))
+		{
+			$yr		= $r['year'];
+			$id    	= $r['id'] + 1;
+				 			
+			 if($id =="")
+				{ 
+					$id = "1"; 
+				}
+			 else
+				{ 
+					$id = $r['id'] + 1; 
+				}	
+		}
+		if(@$yr != $year)
+		{ 
+			$id = "1"; 
+		}
+				
+		return $id."|".sprintf("%'.05d-" . date('Y'), $id);
+	}
+	public function save_applicant_info($fetch_data)
+	{
+		$year 			= 	date('Y');
+		$contactNuber 	= 	$fetch_data['contact1'].",".$fetch_data['contact2'];
+		
+		
+		$town_explode = explode(",",$fetch_data['address']);
+		
+		
+		$data = array(
+				'app_id'					=> $fetch_data['appId'],
+				'no'						=> '',
+				'id'						=> $fetch_data['id'],
+				'year'						=> $year,
+				'lastname'					=> trim(ucfirst($fetch_data['lastname'])),
+				'firstname'					=> trim(ucfirst($fetch_data['firstname'])),
+				'middlename'				=> trim(ucfirst($fetch_data['middlename'])),
+				'birthdate'					=> trim($fetch_data['birthdate']),
+				'home_address'				=> $fetch_data['address'],
+				'city_address'				=> $fetch_data['city_address'],
+				'province'					=> trim(ucfirst($town_explode[2])),
+				'town'						=> trim(ucfirst($town_explode[1])),
+				'brgy'						=> trim(ucfirst($town_explode[0])),
+				'religion'					=> $fetch_data['religion'],
+				'civilstatus'				=> trim(ucfirst($fetch_data['civilstatus'])),
+				'spouse'					=> $fetch_data['spouse'],
+				'noofSiblings'				=> $fetch_data['no_of_siblings'],
+				'siblingOrder'				=> $fetch_data['sibling_order'],
+				'gender'					=> $fetch_data['gender'],
+				'school'					=> $fetch_data['school'],
+				'attainment'				=> $fetch_data['education'],
+				'course'					=> $fetch_data['course'],
+				'contactno'					=> $contactNuber,
+				'telno'						=> $fetch_data['telephone_number'],
+				'email'						=> $fetch_data['email_add'],
+				'facebookAcct'				=> $fetch_data['facebook'],
+				'twitterAcct'				=> $fetch_data['twitter'],
+				'citizenship'				=> $fetch_data['citizenship'],
+				'bloodtype'					=> '',
+				'weight'					=> $fetch_data['weight'],
+				'height'					=> $fetch_data['height'],
+				'contact_person'			=> $fetch_data['contact_person'],
+				'contact_person_address' 	=> $fetch_data['contact_person_address'],
+				'contact_person_number'		=> $fetch_data['contact_person_number'],
+				'mother'					=> $fetch_data['mother'],
+				'father'					=> $fetch_data['father'],
+				'guardian'					=> $fetch_data['guardian'],
+				'hobbies'					=> $fetch_data['hobbies'],
+				'specialSkills'				=> $fetch_data['special_skill'],
+				'photo'						=> '',
+				'suffix'					=> $fetch_data['suffix'],
+				'appcode'					=> $fetch_data['application_code'],
+				'source_app_vacant'			=> $fetch_data['vacancy_source']
+			); 
+			
+			$this->db->insert('applicant', $data);
+	}
+	
+	public function save_exam_scores($fetch_data)
+	{
+		
+		$query = $this->db->from('application_exams2take')
+							->where("app_id = '".$fetch_data['appid']."'")
+							->order_by('no', 'DESC')
+							->get();
+        return $query->row_array();
+		
+		/* echo $fetch_data['appid'];
+		echo "\n";
+		echo $fetch_data['name'];
+		echo "\n";
+		echo $fetch_data['attainment'];
+		echo "\n";
+		echo $fetch_data['applying'];
+		echo "\n";
+		echo $fetch_data['exam_category'];
+		echo "\n";
+		print_r($fetch_data['examType']);
+		echo "\n";
+		print_r($fetch_data['inputscore']);
+		echo $fetch_data['exam_stat'];
+		echo "\n"; */
+	}
+	public function setup_examination_info_append($fetch_data)
+	{
+		$data = array(
+							'app_id'		=> $fetch_data['appid'],
+							'exam_cat'		=> $fetch_data['exam_type'],
+							'stats'			=> '',
+							'result'		=> ''
+						);				
+		$this->db->insert('application_exams2take', $data);
+	}
+	
+	public function history_info_append($fetch_data)
+	{
+		$description = "exam setup done, ".$fetch_data['exam_type']." exam";
+		
+		$data = array(
+							'app_id'		=> $fetch_data['appid'],
+							'date_time'		=> date("Y-m-d"),
+							'description'	=> $description,
+							'position'		=> $fetch_data['applying'],
+							'phase'			=> 'Examination',
+							'status'		=> 'completed',
+						);
+		$this->db->insert('application_history', $data);
+	}
+	
+	public function setup_textfile($fetch_data)
+	{
+		$que = $this->db->get_where('applicant', array('app_id' => $fetch_data['appid']));
+		$rw = $que->row_array();
+
+		$file = fopen("../document/examfiles/".$rw['app_id'].".txt","w");
+		fwrite($file,$rw['app_id']."%".$rw['lastname']."%".$rw['firstname']."%".$rw['middlename']."%".$rw['suffix']."%".$rw['gender']."%".$rw['school']."%".$rw['attainment']."%".$rw['course']."%".ucwords(strtolower($fetch_data['applying']))."%".$fetch_data['attainment']."%");
+		fclose($file);
+	}
+	
+	public function applicant_status($fetch_data)
+	{
+		$this->db->set('status', $fetch_data['app_status']);
+		$this->db->where(array('app_code' => $fetch_data['appcode']));
+		$this->db->update('applicants'); 
+	}
+	public function update_applicant_status($fetch_data)
+	{
+		$data_condition = array(
+									'lastname'		=> trim(ucfirst($fetch_data['lastname'])),
+									'firstname'		=> trim(ucfirst($fetch_data['firstname'])),
+									'middlename'	=> trim(ucfirst($fetch_data['middlename'])),
+									'suffix' 		=> trim(ucfirst($fetch_data['suffix']))
+									);
+		
+		$this->db->set('status', "initialreq completed");
+		$this->db->where($data_condition);
+		$this->db->update('applicants');
+	}
+	public function save_applicant_character_ref($fetch_data)
+	{
+		for($i= 0 ; $i< count($fetch_data['character_name']);$i++)
+		{
+			if(count($fetch_data['character_name']) > 0)
+			{
+				$data = array(
+										'no'			=> '',
+										'app_id'		=> $fetch_data['appId'],
+										'name'			=> $fetch_data['character_name'][$i],
+										'position'		=> $fetch_data['character_position'][$i],
+										'contactno'		=> $fetch_data['character_contact'][$i],
+										'company'		=> $fetch_data['character_address'][$i]
+									);
+									
+				$this->db->insert('application_character_ref', $data);
+			}
+		} 
+	}
+	
+	public function save_applicant_seminar_training_eligibility($fetch_data, $i)
+	{
+		$data = array(
+							'app_id'			=> $fetch_data['appId'],
+							'name'				=> $fetch_data['seminar_name'][$i],
+							'dates'				=> $fetch_data['seminar_location'][$i],
+							'location'			=> $fetch_data['seminar_year'][$i],
+							'sem_certificate'	=> $fetch_data['location']
+						);
+		$this->db->insert('application_seminarsandeligibility', $data);
+	}
+	
+	public function save_applicant_employment_history($fetch_data, $z)
+	{
+		$data = array(
+							'app_id'			=> $fetch_data['appId'],
+							'company'			=> $fetch_data['company_name'][$z],
+							'position'			=> $fetch_data['position'][$z],
+							'yr_start'			=> $fetch_data['year_start'][$z],
+							'yr_ends'			=> $fetch_data['year_end'][$z],
+							'address'			=> $fetch_data['company_address'][$z],
+							'emp_certificate'	=> $fetch_data['location']
+						);
+		$this->db->insert('application_employment_history', $data);
+	}
+	
 	public function insert_initial_applicant_info($fetch_data)
 	{	
 		$date_added = date("Y-m-d");
@@ -140,6 +354,23 @@ class Initial_model extends CI_Model
         return $query->result_array();
     }
 	
+	public function examtype()
+    {
+        $query = $this->db->select('DISTINCT(exam_code)')
+							->from('application_examtypes')
+							->get();
+        return $query->result_array();
+    }
+	
+	public function examtype_codename($data)
+    {
+		$query = $this->db->select('DISTINCT(exam_codename)')
+							->where("exam_code = '$data'")
+							->from('application_examtypes')
+							->get();
+        return $query->result_array();
+    }
+	
 	public function record_applicants()
     {
 		$query = $this->db->from('applicants')
@@ -151,8 +382,10 @@ class Initial_model extends CI_Model
 	
 	public function applicants_for_exam()
     {
-		$query = $this->db->from('applicants')
-							->where("(status = 'for exam' OR status = 'exam passed' OR status = 'exam failed') AND (tagged_to = 'nesco')")
+		$query = $this->db->select('applicants.status,applicant.app_id,applicants.lastname,applicants.firstname,applicants.middlename,applicants.position,applicants.date_time,applicants.suffix')
+							->from('applicants')
+							->join('applicant', 'applicants.app_code = applicant.appcode')
+							->where("(applicants.status = 'for exam' OR applicants.status = 'exam passed' OR applicants.status = 'exam failed' OR applicants.status = 'initialreq completed' OR applicants.status = 'assessment') AND (applicants.tagged_to = 'nesco')")
 							->order_by('app_code', 'ASC')
 							->get();
         return $query->result_array();
@@ -230,6 +463,29 @@ class Initial_model extends CI_Model
         return $query->result_array();
 	}
 	
+	public function application_exam_score($data)
+	{
+		$que = $this->db->get_where('application_examtypes', array('exam_code' => $data));
+		return $que->result_array();
+	}
+	public function applicant_exam_cat($fetch_data)
+	{
+		$que = $this->db->select('exam_cat')
+					->get_where('application_exams2take', array('app_id' => $fetch_data['id']));
+		return $que->row_array();	
+	}
+	
+	public function applicant_examinee($fetch_data)
+	{
+		$que = $this->db->get_where('applicant', array('app_id' => $fetch_data['id']));
+		return $que->row_array();	
+	}
+	
+	public function applicant_position_apply($data)
+	{
+		$que = $this->db->get_where('applicants', array('app_code' => $data));
+		return $que->row_array();	
+	}
 	// process for recording applicants
 	public function record_applicant_info($fetch_data)
 	{

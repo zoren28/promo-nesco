@@ -164,14 +164,142 @@
 						backdrop: 'static',
 						keyboard: false,
 						show: true
-					});
-				//alert(response);	
-				$("div.record_applicants").html(response);
+					});	
+					$("div.record_applicants").html(response);
 				}
 			});
 		});
 		
+		const tableViewEmp_one = $('#tableViewEmp_one').DataTable();
 		
+		// event on clicking set-up examination applicant
+		$('#tableViewEmp_one').on('click', 'button.setup_exam', function() 
+		{
+            var id = this.id;
+			
+            if (!$(this).parents('tr').hasClass('selected')) 
+			{
+                tableViewEmp_one.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+			
+			$.ajax({
+				url: "<?php echo site_url('applicant_examination_setup'); ?>",
+				type: 'POST',
+				data:{id},
+				success: function(response)
+				{
+					
+					$("div#applicantsetup").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});	
+					$("div.applicantsetup").html(response);
+				}
+			});
+		});
+		
+		// event on clicking view detail examination applicant
+		$('#tableViewEmp_one').on('click', 'button.view_detail', function() 
+		{
+            var id = this.id;
+			
+            if (!$(this).parents('tr').hasClass('selected')) 
+			{
+                tableViewEmp_one.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+			
+			$.ajax({
+				url: "<?php echo site_url('view_exam_setup'); ?>",
+				type: 'POST',
+				data:{id},
+				success: function(response)
+				{
+					//alert(response);
+					$("div#view_examination").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});	
+					$("div.view_examination").html(response);
+				}
+			});
+		});
+		
+		$("form#setup_examination").submit(function(e) {
+
+            e.preventDefault();
+			
+            var formData = new FormData(this);
+
+			console.log(formData);
+			$.ajax({
+				url: "<?php echo site_url('setup_examination'); ?>",
+				type: 'POST',
+				data:formData,
+				success: function(response) {
+					
+					$("div#applicantsetup_success").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});	
+					
+					response = JSON.parse(response);
+					
+					if(response.status === 1)
+					{
+						$("div.applicantsetup_success").html(response.message);
+					}
+					location.reload();;
+				},
+				async: false,
+				cache: false,
+				contentType: false,
+				processData: false
+			});
+        });
+		
+		// save exam result form 
+		$("form#save_examination").submit(function(e) {
+
+            e.preventDefault();
+			
+            var formData = new FormData(this);
+
+			console.log(formData);
+			$.ajax({
+				url: "<?php echo site_url('save_examination'); ?>",
+				type: 'POST',
+				data:formData,
+				success: function(response) {
+					
+					//alert(response);
+					
+					$("div#info_exam").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});	
+					response = JSON.parse(response);
+					$("div.info_exam").html(response.message);
+					
+					/* response = JSON.parse(response);
+					
+					if(response.status === 1)
+					{
+						$("div.applicantsetup_success").html(response.message);
+					} */
+					//location.reload();
+				},
+				async: false,
+				cache: false,
+				contentType: false,
+				processData: false
+			});
+        });
 		
 		$("form#applicant_information").submit(function(e) {
 
@@ -186,7 +314,12 @@
 				data:formData,
 				success: function(response) {
 					
-					alert(response);
+					$("div#applicant_record_success").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});	
+					$("div.applicant_record_success").html(response);
 				},
 				async: false,
 				cache: false,

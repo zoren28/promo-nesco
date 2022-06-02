@@ -36,9 +36,10 @@ class Page extends CI_Controller
         $activeBU = $this->dashboard_model->businessUnit_list();
         $data['activeBUs']  = $activeBU;
 
-        if (($menu == "employee" && $page == "profile") || ($menu == "contract" && $page == "renewal") || ($menu == "blacklisted" && $page == "add-blacklisted") || ($menu == "termination" && $page == "resignation_termination")) {
+        if (($menu == "employee" && $page == "profile") || ($menu == "contract" && $page == "process-renewal") || ($menu == "blacklisted" && $page == "add-blacklisted") || ($menu == "termination" && $page == "resignation_termination")) {
 
             $data['empId']  = $empId;
+            $data['emp_details'] = $this->employee_model->get_promo_details($empId);
         } else if ($menu == "employee" && $page == "masterfile") {
 
             $data['filters'] = $empId;
@@ -52,7 +53,7 @@ class Page extends CI_Controller
 
         $this->load->view('template/header', $data);
         $this->load->view('template/menu', $data);
-        $this->load->view("body/placement/$menu/$page");
+        $this->load->view("body/placement/$menu/$page", $data);
 
         if ($menu == "employee" && $page == "profile") {
 

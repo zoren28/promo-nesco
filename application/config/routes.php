@@ -1,6 +1,16 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+// for contract module
+$route['extend_contract'] = 'placement/contract/extend_contract';
+$route['show_intro'] = 'placement/contract/show_intro';
+$route['find_witness'] = 'placement/contract/find_witness';
+$route['process_renewal'] = 'placement/contract/process_renewal';
+$route['print_contract_permit/(:any)'] = 'placement/contract/print_contract_permit/$1';
+$route['print_permit_renewal/(:any)'] = 'placement/contract/print_permit_renewal/$1';
+$route['store_duty_details'] = 'placement/contract/store_duty_details';
+$route['print_contract_renewal/(:any)'] = 'placement/contract/print_contract_renewal/$1';
+
 // for outlet module
 $route['find_active_promo'] = 'placement/employee/find_active_promo';
 $route['promo_details'] = 'placement/outlet/promo_details';
@@ -120,6 +130,21 @@ $route['uploadProfilePic'] = 'placement/employee/uploadProfilePic';
 $route['addContract'] = 'placement/employee/addContract';
 
 // select company, business_unit, department, vendor, product
+$route['select_agency'] = 'placement/employee/select_agency';
+$route['select_department'] = 'placement/employee/select_department';
+$route['select_cutoff'] = 'placement/employee/select_cutoff';
+$route['select_position'] = 'placement/employee/select_position';
+$route['select_position_level'] = 'placement/employee/select_position_level';
+$route['select_employee_type'] = 'placement/employee/select_employee_type';
+$route['select_promo_products'] = 'placement/employee/select_promo_products';
+$route['select_promo_type'] = 'placement/employee/select_promo_type';
+$route['load_vendor'] = 'placement/employee/load_vendor';
+$route['load_products'] = 'placement/employee/load_products';
+$route['load_business_unit'] = 'placement/employee/load_business_unit';
+$route['load_department'] = 'placement/employee/load_department';
+$route['load_promo_business_unit'] = 'placement/employee/load_promo_business_unit';
+$route['load_promo_intro'] = 'placement/employee/load_promo_intro';
+
 $route['select_company'] = 'placement/employee/select_company';
 $route['select_product'] = 'placement/employee/select_product';
 $route['select_business_unit'] = 'placement/employee/select_business_unit';
@@ -139,6 +164,12 @@ $route['check_applicant_duplicate_or_blacklist'] = 'recruitment/initial/check_ap
 $route['upload_initial'] = 'recruitment/initial/upload_initial';
 $route['applicant_information'] = 'recruitment/initial/applicant_information';
 $route['proceed_record_applicants'] = 'recruitment/initial/proceed_record_applicants';
+$route['applicant_examination_setup'] = 'recruitment/initial/applicant_examination_setup';
+$route['view_exam_setup'] = 'recruitment/initial/view_exam_setup';
+$route['setup_examination'] = 'recruitment/initial/setup_examination';
+$route['save_examination'] = 'recruitment/initial/save_examination';
+$route['append_character_ref'] = 'recruitment/initial/append_character_ref';
+
 // for menu module
 $route['logout'] = 'logout';
 $route['placement/page/menu/(:any)/(:any)/(:any)'] = 'placement/page/menu/$1/$2/$3';
