@@ -43,6 +43,87 @@ class Initial extends CI_Controller
 		$this->load->view('body/recruitment/function_query',$data);
 	}
 	
+	public function tag_applicant_interview()  
+	{
+		$fetch_data 				= $this->input->post(NULL, TRUE);
+		$explode_val				= explode("|",$fetch_data['id']);
+		$fetch_data['app_status']  	= 	'for interview';
+		$fetch_data['appcode']  	= 	$explode_val[1];
+		//print_r($fetch_data);
+		$this->db->trans_start();
+		$data['tag_interview'] 		= $this->initial_model->applicant_status($fetch_data);
+		$this->db->trans_complete();
+		if ($this->db->trans_status() === TRUE)
+		{ 
+			echo json_encode(array('status'=> 1, 'message' => "Applicant successfully tag for interview!")); 
+		}
+		else
+		{ 
+			echo json_encode(array('status'=> 0, 'message' => "Error Found!")); 
+		} 	
+	}
+	
+	public function save_initial_interview()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		$this->db->trans_start();
+		$this->initial_model->save_initial_interview($fetch_data);
+		$this->db->trans_complete();
+		if ($this->db->trans_status() === TRUE)
+		{ 
+			echo json_encode(array('status'=> 1, 'message' => "Applicant Initial Interview Done!")); 
+		}
+		else
+		{ 
+			echo json_encode(array('status'=> 0, 'message' => "Error Found!")); 
+		}
+	}
+	
+	// selecting an final interviewer
+	public function setup_interviewee()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		print_r($fetch_data);
+	}
+	// modal for setup interview
+	public function setup_interview()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		$data['request'] = "setup_interviewer";
+		$this->load->view('body/recruitment/function_query', $data);
+	}
+	
+	public function initial_interview()  
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		$explode_val = explode("|",$fetch_data['id']);
+		$fetch_data['id'] = $explode_val[1];
+		$data['request'] = "applicant_initial_interview";
+		//print_r($fetch_data);
+		$data['initial_interview'] = $this->initial_model->applicant_examinee($fetch_data);
+		$this->load->view('body/recruitment/function_query', $data);
+	}
+	
+	public function tag_applicant_transfer()  
+	{
+		$fetch_data 				= $this->input->post(NULL, TRUE);
+		$explode_val				= explode("|",$fetch_data['id']);
+		$fetch_data['app_status']  	= 	'failed exam';
+		$fetch_data['appcode']  	= 	$explode_val[1];
+		//print_r($fetch_data);
+		$this->db->trans_start();
+		$data['tag_transfer'] 		= $this->initial_model->applicant_status($fetch_data);
+		$this->db->trans_complete();
+		if ($this->db->trans_status() === TRUE)
+		{ 
+			echo json_encode(array('status'=> 1, 'message' => "Applicant successfully tag for transfer!")); 
+		}
+		else
+		{ 
+			echo json_encode(array('status'=> 0, 'message' => "Error Found!")); 
+		}
+	}
+	
 	public function applicant_examination_setup()  
 	{
 		$fetch_data 			= $this->input->post(NULL, TRUE);

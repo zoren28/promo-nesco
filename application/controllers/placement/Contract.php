@@ -65,8 +65,6 @@ class Contract extends CI_Controller
     {
         $data = $this->input->post(NULL, TRUE);
 
-        $this->db->trans_start();
-
         $intros_path = array();
         $errors     = array();
         $maxsize    = 2097152;
@@ -75,7 +73,8 @@ class Contract extends CI_Controller
             'image/jpg',
             'image/png'
         );
-        /* foreach ($data['bunit_intro'] as $key => $value) {
+
+        foreach ($data['bunit_intro'] as $key => $value) {
 
             if (isset($_FILES[$value]['name'])) {
 
@@ -115,6 +114,8 @@ class Contract extends CI_Controller
             }
         }
 
+        $this->db->trans_start();
+
         $record_no = $this->contract_model->update_employment_contract($data, $intros_path);
 
         $this->db->trans_complete();
@@ -128,9 +129,7 @@ class Contract extends CI_Controller
             $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), 'Added a new Contract of Employment of ' . $row['name'] . 'Record No:' . $record_no);
 
             echo json_encode(array('status' => 'success', 'message' => 'Added a new Contract of Employment of ' . $row['name']));
-        } */
-
-        echo json_encode(array('status' => 'success', 'message' => 'Added a new Contract of Employment'));
+        }
     }
 
     public function print_contract_permit($emp_id)
@@ -196,5 +195,42 @@ class Contract extends CI_Controller
         $data['request'] = 'print_contract_renewal';
 
         $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function store_witness_otherdetails()
+    {
+        $data = $this->input->post(NULL, TRUE);
+
+        $this->db->trans_start();
+
+        // update or insert employment witness
+        $witness = $this->contract_model->get_employment_witness($data['contract_recordNo'], $data['empId']);
+        if ($witness > 0) {
+
+            $this->contract_model->update_employment_witness($data);
+        } else {
+
+            $this->contract_model->store_employment_witness($data);
+        }
+
+        // update or insert applicant other details
+        $other_details = $this->contract_model->get_application_otherdetails($data['empId']);
+        if ($other_details) {
+
+            $this->contract_model->update_applicant_otherdetails($data);
+        } else {
+
+            $this->contract_model->store_applicant_otherdetails($data);
+        }
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) {
+            echo json_encode(array('status' => 'failure', 'message' => 'Opps! Something went wrong.'));
+            // generate an error... or use the log_message() function to log your error
+        } else {
+
+            echo json_encode(array('status' => 'success', 'message' => 'Contract Successfully Saved'));
+        }
     }
 }

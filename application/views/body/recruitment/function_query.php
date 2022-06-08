@@ -15,6 +15,28 @@
 			echo json_encode(array('status'=> 0, 'proceed'=>1, 'message' => "You can proceed and Add applicant's data/initial requirements.."));
 		}	
 	}
+	else if($request == "applicant_initial_interview")
+	{
+		?>
+		<div class="panel-body">
+			<div class="form-group">
+				 <label for="hrmsId">APPLICANT ID</label>
+				 <input type="text" name='appid' class="form-control" id="appid"  value='<?=$initial_interview['app_id']?>' readonly required>
+			</div>
+			
+			<div class="form-group">
+				 <label for="hrmsId">APPLICANT NAME</label>
+				 <input type="text" name='name' class="form-control" id="name"  value='<?=$initial_interview['lastname'].", ".$initial_interview['firstname']." ".$initial_interview['middlename']." ".$initial_interview['suffix']?>' readonly required>
+			</div>
+			
+			<div class="form-group">
+				 <label for="hrmsId">Initial Remarks</label>
+				 <textarea name='initialRemark' class="form-control" id="initialRemark" style='resize:none; height:250px;' required> </textarea>
+			</div>
+		</div>
+	<?php
+	}
+	
 	else if($request == "applicant_record")
 	{
 		?>
@@ -534,6 +556,17 @@
 			</script>
 		<?php
 	} 
+	else if($request == "setup_interviewer")
+	{
+		?>
+		<div class="panel-body">
+			<div class="form-group">
+				 <label for="hrmsId">APPLICANT ID</label>
+				 <input type="text" name='appid' class="form-control" id="appid"  value='' readonly required>
+			</div>	
+		</div>
+	<?php
+	}
 	else if($request == "applicant_examination")
 	{
 	?>
@@ -657,9 +690,9 @@
 								<td style='text-align:center; width:40%;'>
 									<select class="form-control" name="exam_stat" required>
 									<option value=''>Select Status</option>
-									<option value='PASS'>Pass</option>
-									<option value='FOR ASSESMENT'>For Assessment</option>
-									<option value='FAIL'>Fail</option>
+									<option value='passed'>Pass</option>
+									<option value='assessment'>For Assessment</option>
+									<option value='failed'>Fail</option>
 									</select>
 								</td>
 							</tr>

@@ -108,7 +108,7 @@
                 company = $("select[name = 'company_select']").val();
                 promo_type = $("select[name = 'promoType_select']").val();
                 department = $("select[name = 'department_select']").val();
-                vendor = $("select[name = 'vendor_select']").val();
+                vendor = $("[name = 'vendor_select']").val();
                 position = $("select[name = 'position_select']").val();
                 position_level = $("input[name = 'positionlevel_select']").val();
                 emp_type = $("select[name = 'empType_select']").val();
@@ -116,15 +116,15 @@
             } else {
 
                 department = $("input[name = 'department']").val();
-                contractType = $("input[name = 'contractType']").val();
+                contract_type = $("input[name = 'contractType']").val();
             }
 
-            if ((edited == 'true' && (company == '' || promo_type == '' || department == '' || vendor == '' || position == '' || position_level == '' || emp_type == '' || contract_type == '' || statCut == '')) || intro_msg == 'true' || stores.length == 0 || companyDuration == '' || startdate == '' || eocdate == '' || duration == '') {
+            if ((edited == 'true' && (company == '' || promo_type == '' || department == '' || vendor == '' || position == '')) || intro_msg == 'true' || stores.length == 0 || (companyDuration == "" && (contract_type == "Seasonal" || department == "HOME AND FASHION" || department == "FIXRITE" || department == "EASY FIX")) || startdate == '' || eocdate == '' || duration == '') {
 
-                if (store.length == 0) {
+                if (stores.length == 0) {
 
                     errDup("Please select Business Unit!");
-                } else if (edited == "true" && promo_type == 'ROVING' && store.length < 2) {
+                } else if (edited == "true" && promo_type == 'ROVING' && stores.length < 2) {
 
                     errDup("Please add another Business Unit for setup!");
                 } else {
@@ -145,12 +145,22 @@
                                     $("select[name = 'company_select']").css("border-color", "#dd4b39");
                                 }
 
+                                if (edited == "true" && promo_type == "") {
+
+                                    $("select[name = 'promoType_select']").css("border-color", "#dd4b39");
+                                }
+
+                                if (edited == "true" && vendor == "") {
+
+                                    $("span.select2-selection--single").css("border-color", "#dd4b39");
+                                }
+
                                 if (edited == "true" && position == "") {
 
                                     $("select[name = 'position_select']").css("border-color", "#dd4b39");
                                 }
 
-                                if ((companyDuration == "" && (contractType == "Seasonal" || department == "HOME AND FASHION" || department == "FIXRITE" || department == "EASY FIX"))) {
+                                if ((companyDuration == "" && (contract_type == "Seasonal" || department == "HOME AND FASHION" || department == "FIXRITE" || department == "EASY FIX"))) {
 
                                     $("input[name = 'companyDuration']").css("border-color", "#dd4b39");
                                 }
@@ -170,7 +180,7 @@
                                     $("input[name = 'duration']").css("border-color", "#dd4b39");
                                 }
 
-                                if (introMsg == "true") {
+                                if (intro_msg == "true") {
 
                                     intros.forEach(i => {
 
@@ -193,7 +203,7 @@
                     data: formData,
                     success: function(data) {
 
-                        response = JSON.parse(data);
+                        let response = JSON.parse(data);
                         if (response.status == "success") {
 
                             $("div#printContractAndPermit").modal({
@@ -319,11 +329,200 @@
 
                             window.open("http://172.16.43.134:81/hrms/report/promo_permit_towork.php?recordNo=" + recordNo + "&empId=" + empId + "&store=" + store + "&dutySched=" + dutySched + "&specialSched=" + specialSched + "&dutyDays=" + dutyDays + "&specialDays=" + specialDays + "&dayoff=" + dayOff + "&table1=" + table1 + "&table2=" + table2);
                         } else {
-                            alert(data);
+                            console.log(data);
                         }
                     }
                 });
 
+            }
+        });
+
+        $("form#generate_contract").submit(function(e) {
+
+            e.preventDefault();
+            let formData = $(this).serialize();
+
+            let empId = $("input[name = 'empId']").val();
+            let recordNo = $("input[name = 'contract_recordNo']").val();
+            let witness1 = $("input[name = 'witness1Renewal']").val();
+            let witness2 = $("input[name = 'witness2Renewal']").val();
+            let contractHeader = $("select[name = 'contractHeader']").val();
+            let contractDate = $("input[name = 'contractDate']").val();
+            let clear = $("input[name = 'clear']").val();
+
+            let clear1 = "";
+            let clear2 = "";
+            let table1 = "employee3";
+            let table2 = "promo_record";
+
+            if ($("input#clear1").is(':checked')) {
+
+                clear1 = "true";
+            }
+
+            if ($("input#clear2").is(':checked')) {
+
+                clear2 = "true";
+            }
+
+            let issuedOn = "";
+            let sss = "";
+            let cedula = "";
+            let issuedAt = "";
+            if (clear1 == "true") {
+
+                cedula = $("input[name = 'cedula']").val();
+                issuedOn = $("input[name = 'issuedOn']").val();
+                issuedAt = $("input[name = 'issuedAt']").val();
+            } else {
+
+                sss = $("input[name = 'sss']").val();
+                issuedAt = $("input[name = 'issuedAt']").val();
+            }
+
+            if (witness1 == "" || witness2 == "" || (clear1 == "" && clear2 == "") || contractHeader == "" || contractDate == "") {
+
+                $.alert.open({
+                    type: 'warning',
+                    cancel: false,
+                    content: "Please Fill-up Required Fields!",
+                    buttons: {
+                        OK: 'Ok'
+                    },
+
+                    callback: function(button) {
+                        if (button == 'OK') {
+
+                            if (witness1 == "") {
+
+                                $("input[name = 'witness1Renewal']").css("border-color", "#dd4b39");
+                            }
+
+                            if (witness2 == "") {
+
+                                $("input[name = 'witness2Renewal']").css("border-color", "#dd4b39");
+                            }
+
+                            if (contractHeader == "") {
+
+                                $("select[name = 'contractHeader']").css("border-color", "#dd4b39");
+                            }
+
+                            if (contractDate == "") {
+
+                                $("input[name = 'contractDate']").css("border-color", "#dd4b39");
+                            }
+                        }
+
+                    }
+                });
+            } else {
+
+                var chk = "false";
+                if (clear1 == "true") {
+
+
+                    if (cedula == "" || issuedOn == "" || issuedAt == "") {
+
+                        chk = "true";
+                        $.alert.open({
+                            type: 'warning',
+                            cancel: false,
+                            content: "Please Fill-up Required Fields!",
+                            buttons: {
+                                OK: 'Ok'
+                            },
+
+                            callback: function(button) {
+                                if (button == 'OK') {
+
+                                    if (cedula == "") {
+
+                                        $("input[name = 'cedula']").css("border-color", "#dd4b39");
+                                    }
+
+                                    if (issuedOn == "") {
+
+                                        $("input[name = 'issuedOn']").css("border-color", "#dd4b39");
+                                    }
+
+                                    if (issuedAt == "") {
+
+                                        $("input[name = 'issuedAt']").css("border-color", "#dd4b39");
+                                    }
+                                }
+
+                            }
+                        });
+                    }
+                }
+
+                if (clear2 == "true") {
+
+                    if (sss == "" || issuedAt == "") {
+
+                        chk = "true";
+                        $.alert.open({
+                            type: 'warning',
+                            cancel: false,
+                            content: "Please Fill-up Required Fields!",
+                            buttons: {
+                                OK: 'Ok'
+                            },
+
+                            callback: function(button) {
+                                if (button == 'OK') {
+
+                                    if (sss == "") {
+
+                                        $("input[name = 'sss']").css("border-color", "#dd4b39");
+                                    }
+
+                                    if (issuedAt == "") {
+
+                                        $("input[name = 'issuedAt']").css("border-color", "#dd4b39");
+                                    }
+                                }
+
+                            }
+                        });
+                    }
+                }
+
+                if (chk == "false") {
+
+                    $.ajax({
+                        type: "POST",
+                        url: "<?= site_url('store_witness_otherdetails') ?>",
+                        data: formData,
+                        success: function(data) {
+
+                            response = JSON.parse(data);
+                            if (response.status == 'success') {
+
+                                $.alert.open({
+                                    type: 'warning',
+                                    title: 'Info',
+                                    icon: 'confirm',
+                                    cancel: false,
+                                    content: response.message,
+                                    buttons: {
+                                        OK: 'Yes'
+                                    },
+
+                                    callback: function(button) {
+                                        if (button == 'OK') {
+
+                                            window.open("http://172.16.43.134:81/hrms/report/promo_contract.php?empId=" + empId + "&&recordNo=" + recordNo + "&&table1=" + table1 + "&&table2=" + table2);
+                                        }
+                                    }
+                                });
+                            } else {
+                                console.log(data);
+                            }
+                        }
+                    });
+                }
             }
         });
     });
@@ -780,32 +979,39 @@
     function search_witness(witness, key) {
 
         let str = key.trim();
+        let renewal = $("input.renewContract").val();
+
         if (str) {
             $.ajax({
                 type: "POST",
                 url: "<?= site_url('find_witness') ?>",
+
                 data: {
                     str,
                     witness
                 },
                 success: function(data) {
 
-                    if (data) {
-                        $(`div.${witness}`).show().html(data);
+                    if (data.trim() == 'No Result Found') {
+                        $(`div.${witness}${renewal}`).hide();
+                    } else {
+                        $(`div.${witness}${renewal}`).show().html(data);
                     }
                 }
             });
         } else {
 
-            $(`div.${witness}`).hide();
+            $(`div.${witness}${renewal}`).hide();
         }
     }
 
     function getWitness(name, witness) {
 
-        $(`input[name = '${witness}']`).val(name);
-        $(`div.${witness}`).hide();
-        $(`input[name = '${witness}']`).css("border-color", "#ccc");
+        let renewal = $("input.renewContract").val();
+
+        $(`input[name = '${witness}${renewal}']`).val(name);
+        $(`div.${witness}${renewal}`).hide();
+        $(`input[name = '${witness}${renewal}']`).css("border-color", "#ccc");
     }
 
     function validateForm(imgid) {
@@ -859,6 +1065,7 @@
             show: true
         });
 
+        $("input.renewContract").val('Renewal');
         $.ajax({
             url: "<?= site_url('print_contract_renewal/') ?>" + empId,
             success: function(data) {
@@ -883,5 +1090,24 @@
     function inputDutySched() {
 
         $("select.dutySched").css("border-color", "#ccc");
+    }
+
+    function sssctc(type) {
+
+        if (type == "ctc") {
+
+            $("[name = 'cedula']").show();
+            $(".issuedOn").show();
+            $(".issuedAt").show();
+
+            $("[name = 'sss']").hide();
+        } else {
+
+            $("[name = 'cedula']").hide();
+            $(".issuedOn").hide();
+
+            $(".issuedAt").show();
+            $("[name = 'sss']").show();
+        }
     }
 </script>

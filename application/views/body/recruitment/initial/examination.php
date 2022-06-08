@@ -22,16 +22,24 @@
 										<td><?= $i['position'] ?></td>
 										<td><?= $i['date_time'] ?></td>
 										<td>
-										<?php if($i['status'] == 'initialreq completed') {?>
-										<button id="<?= $i['app_id'] ?>" type="button" class="btn btn-primary btn-sm setup_exam">Set-Up Examination</button>
-										<?php } else if($i['status'] == 'for exam') {?>
-										<button id="<?= $i['app_id'] ?>" type="button" class="btn btn-success btn-sm view_detail">View Exam Details</button>
-										<?php } else if($i['status'] == 'exam passed' || $i['status'] == 'assessment') {?>
-										<button id="<?= $i['app_id'] ?>" type="button" class="btn btn-success btn-sm record">Tag to Interview</button>
-										<?php } else if($i['status'] == 'exam failed') {?>
-										<button id="<?= $i['app_id'] ?>" type="button" class="btn btn-success btn-sm record">Tag for Transfer</button>
-										<?php } ?>
-										</td>
+										<?php 
+										if($i['status'] == 'initialreq completed') 
+										{
+											?><button id="<?= $i['app_id'] ?>" type="button" class="btn btn-primary btn-sm setup_exam">Set-Up Examination</button><?php 
+										} 
+										else if($i['status'] == 'for exam') 
+										{
+											?><button id="<?= $i['app_id'] ?>" type="button" class="btn btn-success btn-sm view_detail">View Exam Details</button><?php	
+										} 
+										else if($i['status'] == 'exam passed' || $i['status'] == 'assessment') 
+										{
+											?><button id="<?= $i['app_id']."|".$i['app_code'] ?>" type="button" class="btn btn-success btn-sm tag_interview">Tag to Interview</button><?php 
+										} 
+										else if($i['status'] == 'exam failed') 
+										{
+											?><button id="<?= $i['app_id']."|".$i['app_code'] ?>" type="button" class="btn btn-danger btn-sm tag_transfer">Tag for Transfer</button><?php 
+										} 
+										?></td>
 									</tr><?php } ?>
 							</tbody>
 						</table>
@@ -88,11 +96,11 @@
 						<span aria-hidden="true">×</span></button>
 					<h5 class="modal-title">Set-Up Examination</h5>
 				</div>
-						<div class="modal-body applicantsetup_success" style='font-size=10px;'>		
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn" data-dismiss="modal">Close</button>
-						</div>
+				<div class="modal-body applicantsetup_success" style='font-size=10px;'>		
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn" data-dismiss="modal" id='reloadpage'>Close</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -106,11 +114,11 @@
 						<span aria-hidden="true">×</span></button>
 					<h5 class="modal-title">Examination Info</h5>
 				</div>
-						<div class="modal-body info_exam" style='font-size=10px;'>		
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn" data-dismiss="modal">Close</button>
-						</div>
+				<div class="modal-body info_exam_msg" style='font-size=10px;'>		
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn" data-dismiss="modal" id='reloadpage'>Close</button>
+				</div>
 			</div>
 		</div>
 	</div>

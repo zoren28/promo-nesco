@@ -10,6 +10,7 @@ $route['print_contract_permit/(:any)'] = 'placement/contract/print_contract_perm
 $route['print_permit_renewal/(:any)'] = 'placement/contract/print_permit_renewal/$1';
 $route['store_duty_details'] = 'placement/contract/store_duty_details';
 $route['print_contract_renewal/(:any)'] = 'placement/contract/print_contract_renewal/$1';
+$route['store_witness_otherdetails'] = 'placement/contract/store_witness_otherdetails';
 
 // for outlet module
 $route['find_active_promo'] = 'placement/employee/find_active_promo';
@@ -169,6 +170,13 @@ $route['view_exam_setup'] = 'recruitment/initial/view_exam_setup';
 $route['setup_examination'] = 'recruitment/initial/setup_examination';
 $route['save_examination'] = 'recruitment/initial/save_examination';
 $route['append_character_ref'] = 'recruitment/initial/append_character_ref';
+
+$route['tag_applicant_interview'] = 'recruitment/initial/tag_applicant_interview';
+$route['tag_applicant_transfer'] = 'recruitment/initial/tag_applicant_transfer';
+$route['initial_interview'] = 'recruitment/initial/initial_interview'; 
+$route['save_initial_interview'] = 'recruitment/initial/save_initial_interview';
+$route['setup_interview'] = 'recruitment/initial/setup_interview';
+$route['setup_interviewee'] = 'recruitment/initial/setup_interviewee';
 
 // for menu module
 $route['logout'] = 'logout';

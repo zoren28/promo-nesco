@@ -5,7 +5,7 @@
 					<?php
 					$result_applicants = $this->initial_model->applicants_for_interview();
 					?>
-						<table id="tableViewEmp" class="table table-bordered">
+						<table id="tableViewEmp_interview" class="table table-bordered">
 							<thead>
 								<th>Code</th>
 								<th>Name</th>
@@ -15,16 +15,105 @@
 							</thead>
 							<tbody>
 								<?php // $result_applicants->lastname //
-								foreach ($result_applicants as $i) { ?>
+								foreach ($result_applicants as $i) 
+								{ 
+									$result_interview = $this->initial_model->applicants_interview($i['app_id']);
+									$result_interview_lvl = $this->initial_model->applicants_interview_level($i['app_id']);
+									?>
 									<tr>
-										<td><?= $i['app_code'] ?></td>
+										<td><?= $i['app_id'] ?></td>
 										<td><?= $i['lastname'].", ".$i['firstname']." ".$i['middlename']." ".$i['suffix'] ?></td>
 										<td><?= $i['position'] ?></td>
 										<td><?= $i['date_time'] ?></td>
-										<td><button id="<?= $i['app_code'] ?>" type="button" class="btn btn-primary btn-sm record">Set-Up Interview</button></td>
-									</tr><?php } ?>
+										<td>
+											<?php 
+											if($result_interview < 1) 
+											{	
+												?><button id="<?= $i['app_code']."|".$i['app_id'] ?>" type="button" class="btn btn-primary btn-sm initial_interview">
+												<?php echo  $result_interview." ".$result_interview_lvl?>
+												Start Initial Interview
+												</button><?php 
+											}
+											else 
+											{ 
+												if($result_interview_lvl > 0)
+												{
+												?><button id="<?= $i['app_code']."|".$i['app_id'] ?>" type="button" class="btn btn-success btn-sm check_interview">
+												<?php echo  $result_interview." ".$result_interview_lvl?>
+												Check Interview Details
+												</button><?php 
+												}
+												else
+												{
+												?><button id="<?= $i['app_code']."|".$i['app_id'] ?>" type="button" class="btn btn-success btn-sm setup_interview">
+												<?php echo  $result_interview." ".$result_interview_lvl?>
+												Setup Interview
+												</button><?php 
+												}
+											}
+										?></td>
+									</tr><?php 
+								} ?>
 							</tbody>
 						</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div class="modal fade" id="initial_interview_modal" >
+		<div class="modal-dialog modal-md">
+			<div class="modal-content">
+				<div class="modal-header bg-light-blue color-palette">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span></button>
+					<h5 class="modal-title">Initial Interview</h5>
+				</div>
+					<form id='save_initial_interview' method='post' enctype="multipart/form-data">
+						<div class="modal-body initial_interview_display" style='font-size=10px;'>		
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn" data-dismiss="modal">Close</button>
+							<button type="submit" class="btn btn-primary">Submit</button>
+						</div>
+					</form>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="setup_interview_modal" >
+		<div class="modal-dialog modal-md">
+			<div class="modal-content">
+				<div class="modal-header bg-light-blue color-palette">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span></button>
+					<h5 class="modal-title">Set-up Interview</h5>
+				</div>
+					<form id='setup_interviewee' method='post' enctype="multipart/form-data">
+						<div class="modal-body setup_interview_display" style='font-size=10px;'>		
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn" data-dismiss="modal">Close</button>
+							<button type="submit" class="btn btn-primary">Submit</button>
+						</div>
+					</form>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="interview_modal" >
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-header bg-light-blue color-palette">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span></button>
+					<h5 class="modal-title">Initial Interview</h5>
+				</div>
+				<div class="modal-body interview_display" style='font-size=10px;'>		
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn" data-dismiss="modal" id='reloadpage'>Close</button>
 				</div>
 			</div>
 		</div>

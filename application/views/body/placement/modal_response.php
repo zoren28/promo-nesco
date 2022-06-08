@@ -4369,5 +4369,156 @@ if ($request == "update_blacklist_form") {
     </script>
 <?php
 
+} else if ($request == 'print_contract_renewal') {
+
+    $emp = $this->employee_model->employee_info($emp_id);
+
+    $witness = $this->contract_model->show_employment_witness($emp->record_no, $emp_id);
+    $chNo       = $witness->contract_header_no;
+    $contractDate = ($witness->date_generated == '' || $witness->date_generated == '0000-00-00') ? date("m/d/Y") : date("m/d/Y", strtotime($witness->date_generated));
+    $w1         = $witness->witness1;
+    $w2         = $witness->witness2;
+    $issuedon   = date("m/d/Y", strtotime($witness->issuedon));
+    $issuedat   = $witness->issuedat;
+
+    $cs = $this->contract_model->show_applicant_otherdetails($emp_id);
+    $cedulaNo       = $cs->cedula_no;
+    $sssNum         = $cs->sss_no;
+    $cedula_date    = date("m/d/Y", strtotime($cs->cedula_date));
+    $cedula_place   = $cs->cedula_place;
+?>
+    <style>
+        .issued {
+            display: none;
+        }
+
+        .datepicker {
+            z-index: 9999 !important
+        }
+    </style>
+    <input type="hidden" name="empId" value="<?php echo $emp_id; ?>">
+    <input type="hidden" name="contract_recordNo" value="<?php echo $emp->record_no; ?>">
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group"> <i class="text-red">*</i>
+                <label>Witness(1)</label>
+                <input type="text" name="witness1Renewal" class="form-control" placeholder="Firstname Lastname" required style="text-transform: uppercase;" value="<?= $w1 ?>" onkeyup="search_witness('witness1', this.value)">
+                <div class="witness1Renewal" style="display: none;"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group"> <i class="text-red">*</i>
+                <label>Witness(2)</label>
+                <input type="text" name="witness2Renewal" class="form-control" placeholder="Firstname Lastname" required style="text-transform: uppercase;" value="<?= $w2 ?>" onkeyup="search_witness('witness2', this.value)">
+                <div class="witness2Renewal" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group"> <i class="text-red">*</i>
+        <label>Contract Header</label>
+        <select name="contractHeader" class="form-control" required onchange="inputField(this.name)">
+            <option value=""> --Select-- </option>
+            <?php
+
+            $headers = $this->contract_model->contract_header_list();
+            foreach ($headers as $header) {
+                if ($header->ccode_no == $chNo) {
+
+                    echo '<option value="' . $header->ccode_no . '" selected> ' . $header->company . ' ----- ' . $header->address . '</option>';
+                } else {
+
+                    echo '<option value="' . $header->ccode_no . '"> ' . $header->company . ' ----- ' . $header->address . '</option>';
+                }
+            }
+            ?>
+        </select>
+    </div>
+    <div class="form-group"> <i class="text-red">*</i>
+        <label>Please choose either to use Cedula (CTC No.) or SSS No.</label>
+        <div style="margin-left:40px;">
+            <p>
+            <div class="row">
+                <div class="col-md-4">
+                    <input type='radio' name='clear' required style="border-color: red;" id="clear1" value='Cedula' onclick="sssctc('ctc')"> Cedula (CTC No.)
+                </div>
+                <div class="col-md-8">
+                    <input type='text' name='cedula' required value="<?= $cedulaNo; ?>" class="form-control issued" onkeyup="inputField(this.name)" data-inputmask='"mask": "CCI9999 99999999"' data-mask>
+                </div>
+            </div>
+            </p>
+            <p>
+            <div class="row">
+                <div class="col-md-4">
+                    <input type='radio' name='clear' required id="clear2" value='SSS' onclick="sssctc('sss')"> SSS No.
+                </div>
+                <div class="col-md-8">
+                    <input type='text' name='sss' required value="<?= $sssNum; ?>" class="form-control issued" onkeyup="inputField(this.name)" data-inputmask='"mask": "99-9999999-9"' data-mask>
+                </div>
+            </div>
+            </p>
+            <p>
+            <div class="row">
+                <div class="col-md-6 issuedOn issued">
+                    <div class="form-group"> <i class="text-red">*</i>
+                        <label>Issued On</label>
+                        <div class="input-group date">
+                            <div class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </div>
+                            <?php
+                            if (!empty($issuedon)) {
+                                $issued_on = $issuedon;
+                            } else if (!empty($cedula_date)) {
+                                $issued_on = $cedula_date;
+                            } else {
+                                $issued_on = date('m/d/Y');
+                            }
+                            ?>
+                            <input type="text" name="issuedOn" class="form-control pull-right datepicker" required value="<?= $issued_on ?>" onchange="inputField(this.name)">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 issuedAt issued">
+                    <div class="form-group"> <i class="text-red">*</i>
+                        <label>Issued At</label>
+                        <?php
+                        if (!empty($issuedat)) {
+                            $issued_at = $issuedat;
+                        } else if (!empty($cedula_place)) {
+                            $issued_at = $cedula_place;
+                        } else {
+                            $issued_at = date('m/d/Y');
+                        }
+                        ?>
+                        <input type="text" name="issuedAt" class="form-control" value="<?= $issued_at ?>" required onkeyup="inputField(this.name)">
+                    </div>
+                </div>
+            </div>
+            </p>
+        </div>
+    </div>
+    <div class="form-group"> <i class="text-red">*</i>
+        <label>Date of Signing the Contract</label>
+        <div class="input-group date">
+            <div class="input-group-addon">
+                <i class="fa fa-calendar"></i>
+            </div>
+            <input type="text" name="contractDate" class="form-control pull-right datepicker" required value="<?= $contractDate ?>" onchange="inputField(this.name)">
+        </div>
+    </div>
+    <script type="text/javascript">
+        //Date picker
+        $(".datepicker").datepicker({
+
+            inline: true,
+            changeYear: true,
+            changeMonth: true
+        });
+
+        // Input mask
+        $("[data-mask]").inputmask();
+    </script>
+<?php
 }
 ?>

@@ -99,8 +99,7 @@
 						$("[name='hidden_middlename']").val(middlename); 
 						$("[name='hidden_lastname']").val(lastname); 
 						$("[name='hidden_suffix']").val(suffix);
-					}
-					
+					}	
 				}
 				});	
 			}
@@ -135,10 +134,74 @@
 		});
 		
 		
+		$("button#reloadpage").click(function() {
+			setTimeout(function(){
+			location.reload();
+			},500);
+		});
+		
 		$("button#record").click(function() {
 			setTimeout(function(){
             window.location = "<?php echo base_url('recruitment/page/menu/initial/record'); ?>";
             },500);
+		});
+		
+		const tableViewEmp_interview = $('#tableViewEmp_interview').DataTable();
+		
+		// event on clicking record applicant
+		$('#tableViewEmp_interview').on('click', 'button.initial_interview', function() 
+		{
+            var id = this.id;
+			
+            if (!$(this).parents('tr').hasClass('selected')) 
+			{
+                tableViewEmp_interview.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+			
+			$.ajax({
+				url: "<?php echo site_url('initial_interview'); ?>",
+				type: 'POST',
+				data:{id},
+				success: function(response)
+				{
+					$("div#initial_interview_modal").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});	
+					
+					$("div.initial_interview_display").html(response);
+				}
+			});
+		});
+		
+		$('#tableViewEmp_interview').on('click', 'button.setup_interview', function() 
+		{
+            var id = this.id;
+			
+            if (!$(this).parents('tr').hasClass('selected')) 
+			{
+                tableViewEmp_interview.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+			
+			$.ajax({
+				url: "<?php echo site_url('setup_interview'); ?>",
+				type: 'POST',
+				data:{id},
+				success: function(response)
+				{
+					
+					$("div#setup_interview_modal").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});	
+					
+					$("div.setup_interview_display").html(response);
+				}
+			});
 		});
 		
 		const tableViewEmp = $('#tableViewEmp').DataTable();
@@ -228,6 +291,140 @@
 			});
 		});
 		
+		// tag for interview button
+		$('#tableViewEmp_one').on('click', 'button.tag_interview', function() 
+		{
+            var id = this.id;
+			
+            if (!$(this).parents('tr').hasClass('selected')) 
+			{
+                tableViewEmp_one.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+				$.ajax({
+					url: "<?php echo site_url('tag_applicant_interview'); ?>",
+					type: 'POST',
+					data:{id},
+					success: function(response)
+					{
+						response = JSON.parse(response);
+						
+						$("div#info_exam").modal({
+							backdrop: 'static',
+							keyboard: false,
+							show: true
+						});	
+						
+						if(response.status === 1)
+						{
+							$("div.info_exam_msg").html(response.message);
+						}
+						
+					}
+				});
+		});
+		
+		// tag for transfer button
+		$('#tableViewEmp_one').on('click', 'button.tag_transfer', function() 
+		{
+            var id = this.id;
+			
+            if (!$(this).parents('tr').hasClass('selected')) 
+			{
+                tableViewEmp_one.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+				$.ajax({
+					url: "<?php echo site_url('tag_applicant_transfer'); ?>",
+					type: 'POST',
+					data:{id},
+					success: function(response)
+					{
+						response = JSON.parse(response);
+						
+						$("div#info_exam").modal({
+							backdrop: 'static',
+							keyboard: false,
+							show: true
+						});	
+						
+						if(response.status === 1)
+						{
+							$("div.info_exam_msg").html(response.message);
+						}
+					}
+				});
+		});
+		
+		
+		$("form#setup_interviewee").submit(function(e) {
+
+            e.preventDefault();
+			
+            var formData = new FormData(this);
+
+			console.log(formData);
+			$.ajax({
+				url: "<?php echo site_url('setup_interviewee'); ?>",
+				type: 'POST',
+				data:formData,
+				success: function(response) {
+					
+					alert(response);
+					/* $("div#interview_modal").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});	
+					
+					response = JSON.parse(response);
+					
+					if(response.status === 1)
+					{
+						$("div.interview_display").html(response.message);
+					} */
+				},
+				async: false,
+				cache: false,
+				contentType: false,
+				processData: false
+			});
+        });
+		
+		$("form#save_initial_interview").submit(function(e) {
+
+            e.preventDefault();
+			
+            var formData = new FormData(this);
+
+			console.log(formData);
+			$.ajax({
+				url: "<?php echo site_url('save_initial_interview'); ?>",
+				type: 'POST',
+				data:formData,
+				success: function(response) {
+					
+					//alert(response);
+					$("div#interview_modal").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});	
+					
+					response = JSON.parse(response);
+					
+					if(response.status === 1)
+					{
+						$("div.interview_display").html(response.message);
+					}
+				},
+				async: false,
+				cache: false,
+				contentType: false,
+				processData: false
+			});
+        });
+		
 		$("form#setup_examination").submit(function(e) {
 
             e.preventDefault();
@@ -253,7 +450,8 @@
 					{
 						$("div.applicantsetup_success").html(response.message);
 					}
-					location.reload();;
+					
+					//location.reload();;
 				},
 				async: false,
 				cache: false,
@@ -283,16 +481,15 @@
 						keyboard: false,
 						show: true
 					});	
-					response = JSON.parse(response);
-					$("div.info_exam").html(response.message);
 					
-					/* response = JSON.parse(response);
+					$("div.info_exam").html(response);
+					
+					response = JSON.parse(response);
 					
 					if(response.status === 1)
 					{
-						$("div.applicantsetup_success").html(response.message);
-					} */
-					//location.reload();
+						$("div.info_exam").html(response.message);
+					}
 				},
 				async: false,
 				cache: false,
@@ -314,12 +511,19 @@
 				data:formData,
 				success: function(response) {
 					
+					response = JSON.parse(response);
+					
 					$("div#applicant_record_success").modal({
 						backdrop: 'static',
 						keyboard: false,
 						show: true
 					});	
-					$("div.applicant_record_success").html(response);
+					
+					if(response.status === 1)
+					{
+						$("div.applicant_record_success").html(response.message);
+					} 
+					
 				},
 				async: false,
 				cache: false,
@@ -333,7 +537,6 @@
 	function check_status(val)
 	{
 		let status = ['Widowed','Married'];
-		
 		
 		if(status.includes(val))
 		{

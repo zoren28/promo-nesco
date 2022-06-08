@@ -369,12 +369,19 @@ class Contract_model extends CI_Model
 
         if ($data['edited'] == "true") {
 
+            $stores      = $data['stores'];
             $agency_code = $data['agency_select'];
             $pc_code     = $data['company_select'];
-            $promo_type   = $data['promoType_select'];
+            $promo_type  = $data['promoType_select'];
             $department  = $data['department_select'];
             $vendor_code = $data['vendor_select'];
-            $products    = $data['product_select'];
+
+            if (isset($data['product_select'])) {
+                $products  = $data['product_select'];
+            } else {
+                $products  = array();
+            }
+
             $position    = $data['position_select'];
             $positionlevel = $data['level'];
             $emp_type    = $data['empType_select'];
@@ -382,6 +389,7 @@ class Contract_model extends CI_Model
             $statCut     = $data['cutoff_select'];
         } else {
 
+            $stores      = $data['business_units'];
             $agency_code = $data['agency'];
             $pc_code     = $data['company'];
             $promo_type  = $data['promoType'];
@@ -395,7 +403,7 @@ class Contract_model extends CI_Model
             $statCut     = $data['cutoff'];
         }
 
-        $company_name = $this->employee_model->get_company_name($pc_code);
+        $company_name = $this->employee_model->get_company_name($pc_code)->pc_name;
 
         // fetch employee3
         $query = $this->db->get_where('employee3', array('record_no' => $data['recordNo'], 'emp_id' => $data['empId']));
@@ -460,7 +468,7 @@ class Contract_model extends CI_Model
         // delete promo_record
         $this->db->delete('promo_record', array('record_no' => $old_data->record_no, 'emp_id' => $old_data->emp_id));
 
-        $data = array(
+        $insert = array(
             'emp_id'    => $data['empId'],
             'emp_no'    => $old_data->emp_no,
             'emp_pins'  => $old_data->emp_pins,
@@ -482,7 +490,7 @@ class Contract_model extends CI_Model
             'duration'  => $duration
         );
 
-        $this->db->insert('employee3', $data);
+        $this->db->insert('employee3', $insert);
         $record_no = $this->db->insert_id();
 
         // update employment_witness table
@@ -494,7 +502,7 @@ class Contract_model extends CI_Model
         $this->db->where(array('rec_no' => $old_data->record_no, 'emp_id' => $old_data->emp_id))
             ->update('employment_witness', $update);
 
-        foreach ($data['stores'] as $key => $value) {
+        foreach ($stores as $key => $value) {
 
             $bunit_field = explode('/', $value);
             $this->db->set(end($bunit_field), 'T');
@@ -502,7 +510,7 @@ class Contract_model extends CI_Model
 
         foreach ($data['bunit_intro'] as $key => $value) {
 
-            $this->db->set(end($bunit_field), $intros_path[$value]);
+            $this->db->set($value, $intros_path[$value]);
         }
 
         $this->db->set('record_no', $record_no);
@@ -529,12 +537,12 @@ class Contract_model extends CI_Model
             // $this->db->delete('promo_products', array('record_no' => $record_no, 'emp_id' => $data['empId']));
             foreach ($products as $key => $value) {
 
-                $data = array(
+                $insert = array(
                     'record_no' => $record_no,
                     'emp_id' => $data['empId'],
                     'product' => $value
                 );
-                $this->db->insert('promo_products', $data);
+                $this->db->insert('promo_products', $insert);
             }
         }
 
@@ -632,5 +640,125 @@ class Contract_model extends CI_Model
 
         $this->db->where(array('record_no' => $data['record_no'], 'emp_id' => $data['empId']));
         return $this->db->update('promo_record', $update);
+    }
+
+    public function show_employment_witness($record_no, $emp_id)
+    {
+        $query = $this->db->get_where('employment_witness', array('rec_no' => $record_no, 'emp_id' => $emp_id));
+        return $query->row();
+    }
+
+    public function show_applicant_otherdetails($app_id)
+    {
+        $query = $this->db->get_where('applicant_otherdetails', array('app_id' => $app_id));
+        return $query->row();
+    }
+
+    public function contract_header_list()
+    {
+        $query = $this->db->order_by('company', 'ASC')
+            ->get_where('contract_header', array('hr_location' => $this->hrd_location));
+        return $query->result();
+    }
+
+    public function get_employment_witness($record_no, $emp_id)
+    {
+        $query = $this->db->select('COUNT(ew_no) AS witness')
+            ->get('employment_witness', array('rec_no' => $record_no, 'emp_id' => $emp_id));
+        return $query->row()->witness;
+    }
+
+    public function update_employment_witness($data)
+    {
+        $this->db->set('witness1', $data['witness1Renewal']);
+        $this->db->set('witness2', $data['witness2Renewal']);
+        $this->db->set('contract_header_no', $data['contractHeader']);
+
+        if ($data['clear'] == 'Cedula') {
+
+            $this->db->set('sss_ctc', $data['clear']);
+            $this->db->set('sssno_ctcno', $data['cedula']);
+            $this->db->set('issuedon', date('Y-m-d', strtotime($data['issuedOn'])));
+            $this->db->set('issuedat', $data['issuedAt']);
+        } else {
+
+            $this->db->set('sss_ctc', $data['clear']);
+            $this->db->set('sssno_ctcno', $data['sss']);
+            $this->db->set('issuedat', $data['issuedAt']);
+        }
+
+
+        $this->db->set('date_generated', date("Y-m-d", strtotime($data['contractDate'])));
+        $this->db->set('generated_by', $this->loginId);
+        $this->db->where(array('rec_no' => $data['contract_recordNo'], 'emp_id' => $data['empId']));
+        $this->db->update('employment_witness');
+    }
+
+    public function store_employment_witness($data)
+    {
+        $this->db->set('rec_no', $data['contract']);
+        $this->db->set('emp_id', $data['witness1Renewal']);
+        $this->db->set('witness1', $data['witness1Renewal']);
+        $this->db->set('witness2', $data['witness2Renewal']);
+        $this->db->set('contract_header_no', $data['contractHeader']);
+
+        if ($data['clear'] == 'Cedula') {
+
+            $this->db->set('sss_ctc', $data['clear']);
+            $this->db->set('sssno_ctcno', $data['cedula']);
+            $this->db->set('issuedon', date('Y-m-d', strtotime($data['issuedOn'])));
+            $this->db->set('issuedat', $data['issuedAt']);
+        } else {
+
+            $this->db->set('sss_ctc', $data['clear']);
+            $this->db->set('sssno_ctcno', $data['sss']);
+            $this->db->set('issuedat', $data['issuedAt']);
+        }
+
+        $this->db->set('date_generated', date("Y-m-d", strtotime($data['contractDate'])));
+        $this->db->set('generated_by', $this->loginId);
+        $this->db->insert('employment_witness');
+    }
+
+    public function get_application_otherdetails($app_id)
+    {
+        $query = $this->db->select('COUNT(no) as other_details')
+            ->get_where('applicant_otherdetails', array('app_id' => $app_id));
+        return $query->row()->other_details;
+    }
+
+    public function update_applicant_otherdetails($data)
+    {
+        if ($data['clear'] == 'Cedula') {
+
+            $this->db->set('cedula_no', $data['cedula']);
+        } else {
+
+            $this->db->set('sss_no', $data['sss']);
+        }
+
+        $this->db->set('cedula_date', date('Y-m-d', strtotime($data['issuedOn'])));
+        $this->db->set('cedula_place', $data['issuedAt']);
+        $this->db->set('recordedby', $this->loginId);
+        $this->db->where('app_id', $data['empId']);
+        $this->db->update('applicant_otherdetails');
+    }
+
+    public function store_applicant_otherdetails($data)
+    {
+        $this->db->set('app_id', $data['empId']);
+
+        if ($data['clear'] == 'Cedula') {
+
+            $this->db->set('cedula_no', $data['cedula']);
+        } else {
+
+            $this->db->set('sss_no', $data['sss']);
+        }
+
+        $this->db->set('cedula_date', date('Y-m-d', strtotime($data['issuedOn'])));
+        $this->db->set('cedula_place', $data['issuedAt']);
+        $this->db->set('recordedby', $this->loginId);
+        $this->db->insert('applicant_otherdetails');
     }
 }

@@ -68,6 +68,7 @@ class Initial_model extends CI_Model
 		
 		$query = $this->db->from('applicant')
 							->where('year',$year)
+							->order_by('id', 'desc')
 							->get();
 				$r =  $query->row_array();
 				
@@ -103,13 +104,12 @@ class Initial_model extends CI_Model
 		
 		$data = array(
 				'app_id'					=> $fetch_data['appId'],
-				'no'						=> '',
 				'id'						=> $fetch_data['id'],
 				'year'						=> $year,
 				'lastname'					=> trim(ucfirst($fetch_data['lastname'])),
 				'firstname'					=> trim(ucfirst($fetch_data['firstname'])),
 				'middlename'				=> trim(ucfirst($fetch_data['middlename'])),
-				'birthdate'					=> trim($fetch_data['birthdate']),
+				'birthdate'					=> trim(date('Y-m-d',strtotime($fetch_data['birthdate']))),
 				'home_address'				=> $fetch_data['address'],
 				'city_address'				=> $fetch_data['city_address'],
 				'province'					=> trim(ucfirst($town_explode[2])),
@@ -152,28 +152,53 @@ class Initial_model extends CI_Model
 	
 	public function save_exam_scores($fetch_data)
 	{
+		if($fetch_data['exam_stat'] == 'passed')
+		{
+			$stat_value = 'exam passed';
+		}
+		else if($fetch_data['exam_stat'] == 'failed')
+		{
+			$stat_value = 'exam failed';
+		}
+		else if($fetch_data['exam_stat'] == 'assessment')
+		{
+			$stat_value = 'assessment';
+		}
 		
-		$query = $this->db->from('application_exams2take')
+		// query for getting the exam category
+		$query = $this->db->select('no,exam_cat')
+							->from('application_exams2take')
 							->where("app_id = '".$fetch_data['appid']."'")
 							->order_by('no', 'DESC')
 							->get();
-        return $query->row_array();
+        $resultN = $query->row_array();
 		
-		/* echo $fetch_data['appid'];
-		echo "\n";
-		echo $fetch_data['name'];
-		echo "\n";
-		echo $fetch_data['attainment'];
-		echo "\n";
-		echo $fetch_data['applying'];
-		echo "\n";
-		echo $fetch_data['exam_category'];
-		echo "\n";
-		print_r($fetch_data['examType']);
-		echo "\n";
-		print_r($fetch_data['inputscore']);
-		echo $fetch_data['exam_stat'];
-		echo "\n"; */
+		// loop for saving the exam scores
+		for($i= 0 ; $i< count($fetch_data['examType']);$i++)
+		{
+			if(count($fetch_data['examType']) > 0)
+			{
+				$data = array(
+										'record_no'		=> '',
+										'exam_ref'		=> $resultN['no']."/".$fetch_data['appid'],
+										'exam_type'		=> $fetch_data['examType'][$i],
+										'exam_score'	=> $fetch_data['inputscore'][$i],
+										'exam_code'		=> 'manual'
+									);
+									
+				$this->db->insert('application_examdetails', $data);
+			}
+		}
+		// set data for updating
+		$data_1 = array('stats' => 'done','result' 	=> $fetch_data['exam_stat']);				
+		$data_2 = array('status' => $stat_value);	
+		//query for updating exam status // application_exams2take table
+		$this->db->where('app_id', $fetch_data['appid']);
+		$this->db->update('application_exams2take', $data_1); 
+		//query for updating applicants status // applicants table
+		$this->db->where('app_code', $fetch_data['appcode']);
+		$this->db->update('applicants', $data_2); 
+		
 	}
 	public function setup_examination_info_append($fetch_data)
 	{
@@ -184,6 +209,22 @@ class Initial_model extends CI_Model
 							'result'		=> ''
 						);				
 		$this->db->insert('application_exams2take', $data);
+	}
+	
+	public function save_initial_interview($fetch_data)
+	{
+		$data = array(
+						'interviewee_id'		=> $fetch_data['appid'],
+						'interviewee_level'		=> '',
+						'interviewer_id'		=> $_SESSION['emp_id'],
+						'interview_status'		=> 'passed',
+						'interviewer_remarks'	=> $fetch_data['initialRemark'],
+						'date_interviewed'		=> date("Y-m-d"),
+						'group'					=> '0',
+						'chosen'				=> '1'
+						);
+		//print_r($data);
+		$this->db->insert('application_interview_details', $data);
 	}
 	
 	public function history_info_append($fetch_data)
@@ -237,7 +278,6 @@ class Initial_model extends CI_Model
 			if(count($fetch_data['character_name']) > 0)
 			{
 				$data = array(
-										'no'			=> '',
 										'app_id'		=> $fetch_data['appId'],
 										'name'			=> $fetch_data['character_name'][$i],
 										'position'		=> $fetch_data['character_position'][$i],
@@ -382,7 +422,7 @@ class Initial_model extends CI_Model
 	
 	public function applicants_for_exam()
     {
-		$query = $this->db->select('applicants.status,applicant.app_id,applicants.lastname,applicants.firstname,applicants.middlename,applicants.position,applicants.date_time,applicants.suffix')
+		$query = $this->db->select('applicants.status,applicant.app_id,applicants.lastname,applicants.firstname,applicants.middlename,applicants.position,applicants.date_time,applicants.suffix,applicants.app_code')
 							->from('applicants')
 							->join('applicant', 'applicants.app_code = applicant.appcode')
 							->where("(applicants.status = 'for exam' OR applicants.status = 'exam passed' OR applicants.status = 'exam failed' OR applicants.status = 'initialreq completed' OR applicants.status = 'assessment') AND (applicants.tagged_to = 'nesco')")
@@ -393,12 +433,32 @@ class Initial_model extends CI_Model
 	
 	public function applicants_for_interview()
     {
-		$query = $this->db->from('applicants')
-							->where("(status = 'for interview' OR status = 'interview failed') AND (tagged_to = 'nesco')")
+		$query = $this->db->select('applicants.app_code, applicant.app_id, applicants.lastname, applicants.middlename, applicants.firstname, applicants.suffix, applicants.date_time, applicants.position')
+							->from('applicants')
+							->join('applicant', 'applicants.app_code = applicant.appcode')
+							->where("(applicants.status = 'for interview' OR applicants.status = 'interview failed') AND (applicants.tagged_to = 'nesco')")
 							->order_by('app_code', 'ASC')
 							->get();
         return $query->result_array();
     }
+	
+	
+	public function applicants_interview($data)
+	{
+		$que = $this->db->select('count(id) as val')
+					->get_where('application_interview_details', array('interviewee_id' => $data));
+		return $que->row_array()['val'];	
+	}
+	
+	public function applicants_interview_level($data)
+	{
+		//$condition = ;
+		
+		$que = $this->db->select('count(id) as val')
+					->where("interviewee_id = '$data' AND interviewee_level != 0")
+					->get('application_interview_details');
+		return $que->row_array()['val'];		
+	}
 	
 	public function applicants_for_finalcompletion()
     {

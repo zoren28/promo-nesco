@@ -1,5 +1,6 @@
 <style type="text/css">
-    .witness1 {
+    .witness1,
+    .witness1Renewal {
 
         box-shadow: 5px 5px 5px #ccc;
         margin-top: 1px;
@@ -17,7 +18,8 @@
         overflow: auto;
     }
 
-    .witness2 {
+    .witness2,
+    .witness2Renewal {
 
         box-shadow: 5px 5px 5px #ccc;
         margin-top: 1px;
@@ -50,6 +52,7 @@
                         <input type="hidden" name="empId" value="<?= $empId; ?>">
                         <input type="hidden" name="recordNo" value="<?= $emp_details->record_no; ?>">
                         <input type="hidden" name="edited" value="false">
+                        <input type="hidden" class="renewContract" value="">
 
                         <h4><strong><?= "[$empId] " . ucwords(strtolower($emp_details->name)); ?></strong></h4>
                         <table class="table table-bordered">
@@ -116,6 +119,7 @@
                                                         echo '
                                                             <tr>
                                                                 <td>
+                                                                    <input type="hidden" name="business_units[]" value="' . $bu->bunit_id . '/' . $bu->bunit_field . '">
                                                                     <input type="checkbox" name="' . $bu->bunit_field . '" disabled checked>
                                                                 </td>
                                                                 <td>' . $bu->bunit_name . '</td>
@@ -153,6 +157,7 @@
                                                         echo '
                                                             <tr>
                                                                 <td>
+                                                                    <input type="hidden" name="business_units[]" value="' . $bu->bunit_id . '/' . $bu->bunit_field . '">
                                                                     <input type="radio" name="stations" disabled checked>
                                                                 </td>
                                                                 <td>' . $bu->bunit_name . '</td>
@@ -281,7 +286,7 @@
                                     <td>
                                         <input name="vendor" value="<?= $vendor_code ?>" type="hidden">
                                         <span class="inputLabel"><?= $vendor_name; ?></span>
-                                        <select name="vendor_select" class="form-control inputSelect" style="display:none;"></select>
+                                        <select name="vendor_select" class="form-control inputSelect select2" style="display:none;"></select>
                                     </td>
                                 </tr>
                                 <tr>
@@ -389,7 +394,7 @@
                                             <div class="input-group-addon">
                                                 <i class="fa fa-calendar"></i>
                                             </div>
-                                            <input type="text" name="companyDuration" class="form-control datepicker" required placeholder="mm/dd/yyyy" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask="" onchange="inputField(this.name)">
+                                            <input type="text" name="companyDuration" class="form-control datepicker" placeholder="mm/dd/yyyy" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask="" onchange="inputField(this.name)">
                                         </div>
                                     </td>
                                 </tr>
@@ -404,7 +409,7 @@
                                             <div class="input-group-addon">
                                                 <i class="fa fa-calendar"></i>
                                             </div>
-                                            <input type="text" name="startdate" class="form-control datepicker" placeholder="mm/dd/yyyy" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask="" required="" onchange="inputStartdate()">
+                                            <input type="text" name="startdate" class="form-control datepicker" placeholder="mm/dd/yyyy" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask="" required onchange="inputStartdate()">
                                         </div>
                                     </td>
                                 </tr>
@@ -416,7 +421,7 @@
                                             <div class="input-group-addon">
                                                 <i class="fa fa-calendar"></i>
                                             </div>
-                                            <input type="text" name="eocdate" class="form-control datepicker" placeholder="mm/dd/yyyy" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask="" required="" onchange="durationContract(this.value)">
+                                            <input type="text" name="eocdate" class="form-control datepicker" placeholder="mm/dd/yyyy" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask="" required onchange="durationContract(this.value)">
                                         </div>
                                     </td>
                                 </tr>
@@ -579,7 +584,7 @@
                 </div>
                 <div class="modal-footer">
                     <span class="loadingSave"></span>
-                    <button class="btn btn-primary"><i class="fa fa-file-pdf-o"></i> &nbsp;Generate Permit</button>
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-file-pdf-o"></i> &nbsp;Generate Permit</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
             </form>
@@ -597,14 +602,16 @@
                     <span aria-hidden="true">×</span></button>
                 <h4 class="modal-title">Edit & Generate Contract</h4>
             </div>
-            <div class="modal-body">
-                <div class="printContract"></div>
-            </div>
-            <div class="modal-footer">
-                <span class="loadingSave"></span>
-                <button class="btn btn-primary" onclick="genContract()"><i class="fa fa-file-pdf-o"></i> &nbsp;Generate Contract</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
+            <form id="generate_contract">
+                <div class="modal-body">
+                    <div class="printContract"></div>
+                </div>
+                <div class="modal-footer">
+                    <span class="loadingSave"></span>
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-file-pdf-o"></i> &nbsp;Generate Contract</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </form>
         </div>
         <!-- /.modal-content -->
     </div>
