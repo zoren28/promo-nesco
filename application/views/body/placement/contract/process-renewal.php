@@ -37,7 +37,7 @@
         overflow: auto;
     }
 
-    .datepicker {
+    #datepicker {
         z-index: 9999 !important
     }
 </style>
