@@ -4391,10 +4391,6 @@ if ($request == "update_blacklist_form") {
         .issued {
             display: none;
         }
-
-        .datepicker {
-            z-index: 9999 !important
-        }
     </style>
     <input type="hidden" name="empId" value="<?php echo $emp_id; ?>">
     <input type="hidden" name="contract_recordNo" value="<?php echo $emp->record_no; ?>">
@@ -4475,7 +4471,7 @@ if ($request == "update_blacklist_form") {
                                 $issued_on = date('m/d/Y');
                             }
                             ?>
-                            <input type="text" name="issuedOn" class="form-control pull-right datepicker" required value="<?= $issued_on ?>" onchange="inputField(this.name)">
+                            <input type="text" name="issuedOn" class="form-control pull-right datepicker" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask="" required value="<?= $issued_on ?>" onchange="inputField(this.name)">
                         </div>
                     </div>
                 </div>
@@ -4504,7 +4500,7 @@ if ($request == "update_blacklist_form") {
             <div class="input-group-addon">
                 <i class="fa fa-calendar"></i>
             </div>
-            <input type="text" name="contractDate" class="form-control pull-right datepicker" required value="<?= $contractDate ?>" onchange="inputField(this.name)">
+            <input type="text" name="contractDate" class="form-control pull-right datepicker" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask="" required value="<?= $contractDate ?>" onchange="inputField(this.name)">
         </div>
     </div>
     <script type="text/javascript">

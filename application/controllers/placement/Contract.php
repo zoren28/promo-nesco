@@ -50,7 +50,7 @@ class Contract extends CI_Controller
                 if ($val != $name) {
 ?>
                     <a href="javascript:void(0);" onclick="getWitness('<?= $name  ?>', '<?= $data['witness'] ?>')"><?= $name  ?></a></br>
-<?php
+                <?php
                 } else {
                     echo 'No Result Found';
                 }
@@ -231,6 +231,34 @@ class Contract extends CI_Controller
         } else {
 
             echo json_encode(array('status' => 'success', 'message' => 'Contract Successfully Saved'));
+        }
+    }
+
+    public function find_iextend_promo()
+    {
+        $val = "";
+        $fetch = $this->input->post(NULL, TRUE);
+
+        $query = $this->employee_model->find_active_promo($fetch);
+        if ($query->num_rows() > 0) {
+
+            $info = $query->result_array();
+            foreach ($info as $emp) {
+
+                $empId = $emp['emp_id'];
+                $name  = ucwords(strtolower($emp['name']));
+
+                if ($val != $empId) {
+                ?>
+                    <a href="javascript:void(0);" onclick="getExtendEmpId('<?= $emp['emp_id'] . ' * ' . $emp['name']  ?>')"><?= $emp['emp_id'] . ' * ' . $emp['name']  ?></a></br>
+<?php
+                } else {
+                    echo 'No Result Found';
+                }
+            }
+        } else {
+
+            echo 'No Result Found';
         }
     }
 }

@@ -89,6 +89,9 @@ class Initial extends CI_Controller
 	public function setup_interview()
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
+		$explode_val = explode("|",$fetch_data['id']);
+		$fetch_data['id'] = $explode_val[1];
+		$data['setup_interview'] = $this->initial_model->applicant_examinee($fetch_data);
 		$data['request'] = "setup_interviewer";
 		$this->load->view('body/recruitment/function_query', $data);
 	}

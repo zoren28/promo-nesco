@@ -755,7 +755,7 @@
         if (str) {
             $.ajax({
                 type: "POST",
-                url: "<?= site_url('find_active_promo') ?>",
+                url: "<?= site_url('find_iextend_promo') ?>",
                 data: {
                     str: str,
                     promo_type: 'all'
@@ -773,7 +773,7 @@
         }
     }
 
-    function getEmpId(empId) {
+    function getExtendEmpId(empId) {
 
         $("input[name='employee']").val(empId);
         $("div.search-results").hide();
@@ -1109,5 +1109,65 @@
             $(".issuedAt").show();
             $("[name = 'sss']").show();
         }
+    }
+
+    function nameSearch(key) {
+
+        var str = key.trim();
+        if (str == '') {
+
+            $(".search-results").hide();
+        } else {
+
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('find_active_promo'); ?>",
+                data: {
+                    str: str,
+                    promo_type: 'all'
+                },
+                success: function(data) {
+
+                    $(".search-results").show().html(data);
+                }
+            });
+        }
+    }
+
+    function getEmpId(response) {
+
+        let res = response.split('*');
+
+        $(".search-results").hide();
+        $("input[name='employee']").val(response);
+        $("input[name = 'employee']").css("border-color", "#ccc");
+
+        $.ajax({
+            url: "<?php echo site_url('promo_details'); ?>",
+            data: {
+                empId: res[0].trim()
+            },
+            success: function(data) {
+
+                $("div.promo-details").html(data);
+                $("div.otherdetails").show();
+                $("div#loading-gif").show();
+
+                otherDetailsForm(res[0].trim());
+            }
+        });
+
+    }
+
+    function otherDetailsForm(emp_id) {
+
+        $.ajax({
+            url: "<?= site_url('print_contract_renewal/') ?>" + emp_id,
+            success: function(data) {
+
+                $("div#loading-gif").hide();
+                $("div.otherdetails-form").html(data);
+            }
+        });
     }
 </script>

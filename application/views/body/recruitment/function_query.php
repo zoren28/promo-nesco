@@ -562,8 +562,12 @@
 		<div class="panel-body">
 			<div class="form-group">
 				 <label for="hrmsId">APPLICANT ID</label>
-				 <input type="text" name='appid' class="form-control" id="appid"  value='' readonly required>
+				 <input type="text" name='appid' class="form-control" id="appid"  value='<?=$setup_interview['app_id']?>' readonly required>
 			</div>	
+			<div class="form-group">
+				 <label for="hrmsId">APPLICANT NAME</label>
+				 <input type="text" name='name' class="form-control" id="name"  value='<?=$setup_interview['lastname'].", ".$setup_interview['firstname']." ".$setup_interview['middlename']." ".$setup_interview['suffix']?>' readonly required>
+			</div>
 		</div>
 	<?php
 	}

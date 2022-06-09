@@ -360,7 +360,10 @@ class Employee_model extends CI_Model
     {
         $query = $this->db2->select('agency_name')
             ->get_where('promo_locate_agency', array('agency_code' => $agency_code));
-        return $query->row()->agency_name;
+
+        if ($query->num_rows() > 0) {
+            return $query->row()->agency_name;
+        }
     }
 
     public function vendor_name($vendor_code)

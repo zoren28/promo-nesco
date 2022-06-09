@@ -5,12 +5,14 @@ defined('BASEPATH') or exit('No direct script access allowed');
 $route['extend_contract'] = 'placement/contract/extend_contract';
 $route['show_intro'] = 'placement/contract/show_intro';
 $route['find_witness'] = 'placement/contract/find_witness';
+$route['find_iextend_promo'] = 'placement/contract/find_iextend_promo';
 $route['process_renewal'] = 'placement/contract/process_renewal';
 $route['print_contract_permit/(:any)'] = 'placement/contract/print_contract_permit/$1';
 $route['print_permit_renewal/(:any)'] = 'placement/contract/print_permit_renewal/$1';
 $route['store_duty_details'] = 'placement/contract/store_duty_details';
 $route['print_contract_renewal/(:any)'] = 'placement/contract/print_contract_renewal/$1';
 $route['store_witness_otherdetails'] = 'placement/contract/store_witness_otherdetails';
+$route['other_details_form'] = 'placement/contract/other_details_form';
 
 // for outlet module
 $route['find_active_promo'] = 'placement/employee/find_active_promo';
@@ -173,7 +175,7 @@ $route['append_character_ref'] = 'recruitment/initial/append_character_ref';
 
 $route['tag_applicant_interview'] = 'recruitment/initial/tag_applicant_interview';
 $route['tag_applicant_transfer'] = 'recruitment/initial/tag_applicant_transfer';
-$route['initial_interview'] = 'recruitment/initial/initial_interview'; 
+$route['initial_interview'] = 'recruitment/initial/initial_interview';
 $route['save_initial_interview'] = 'recruitment/initial/save_initial_interview';
 $route['setup_interview'] = 'recruitment/initial/setup_interview';
 $route['setup_interviewee'] = 'recruitment/initial/setup_interviewee';

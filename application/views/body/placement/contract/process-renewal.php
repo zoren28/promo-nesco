@@ -36,6 +36,10 @@
         overflow-y: scroll;
         overflow: auto;
     }
+
+    .datepicker {
+        z-index: 9999 !important
+    }
 </style>
 <section class="content">
 
@@ -578,7 +582,7 @@
                     <span aria-hidden="true">×</span></button>
                 <h4 class="modal-title">Print Permit</h4>
             </div>
-            <form id="generate_permit">
+            <form id="generate_permit" autocomplete="off">
                 <div class="modal-body">
                     <div class="printPermit"></div>
                 </div>
@@ -602,7 +606,7 @@
                     <span aria-hidden="true">×</span></button>
                 <h4 class="modal-title">Edit & Generate Contract</h4>
             </div>
-            <form id="generate_contract">
+            <form id="generate_contract" autocomplete="off">
                 <div class="modal-body">
                     <div class="printContract"></div>
                 </div>
