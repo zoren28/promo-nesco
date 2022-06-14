@@ -93,6 +93,8 @@
 					<form id='setup_interviewee' method='post' enctype="multipart/form-data">
 						<div class="modal-body setup_interview_display" style='font-size=10px;'>		
 						</div>
+						<div class="modal-body setup_interview_list_display" style='font-size=10px;'>		
+						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn" data-dismiss="modal">Close</button>
 							<button type="submit" class="btn btn-primary">Submit</button>

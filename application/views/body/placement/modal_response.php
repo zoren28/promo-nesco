@@ -4217,6 +4217,7 @@ if ($request == "update_blacklist_form") {
 
     $duty_days = ($emp->promo_type == 'STATION') ? 'DAILY' : '';
 ?>
+    <link href="<?= base_url('assets/plugins/autoSuggest/css/jquery-ui.css') ?>" rel="stylesheet">
     <style type="text/css">
         .ui-autocomplete {
             padding: 0;
@@ -4361,6 +4362,7 @@ if ($request == "update_blacklist_form") {
             <input type="text" class="form-control" value="<?= $cut_off ?>" readonly>
         </div>
     </div>
+    <script src="<?= base_url('assets/plugins/autoSuggest/js/jquery-ui.min.js') ?>"></script>
     <script src="<?= base_url('assets/plugins/autoSuggest/js/jquery.select-to-autocomplete.js') ?>"></script>
     <script type="text/javascript">
         $(function() {
@@ -4516,5 +4518,280 @@ if ($request == "update_blacklist_form") {
         $("[data-mask]").inputmask();
     </script>
 <?php
-}
+} else if ($request == 'print_current_permit') {
 ?>
+    <div class="form-group"> <i class="text-red">*</i>
+        <label>Search Promo</label>
+        <div class="input-group">
+            <input class="form-control" name="employee" onkeyup="searchDiserPermit(this.value)" autocomplete="off" type="text">
+            <span class="input-group-addon"><i class="fa fa-user"></i></span>
+        </div>
+        <div class="search-results" style="display: none;"></div>
+    </div>
+    <div class="row current-permit-form">
+        <div class="col-md-6">
+            <div class="form-group"> <i class="text-red">*</i>
+                <label>Business Unit</label>
+                <select name="storeName" class="form-control" required disabled onchange="inputField(this.name)"></select>
+            </div>
+            <div class="form-group"> <i class="text-red">*</i>
+                <label>Duty Schedule</label>
+                <select name="dutySched" class="form-control selects2 dutySched" required disabled onchange="inputDutySched()">
+                    <option value=""> --Select-- </option>
+                    <?php
+
+                    $shift_codes = $this->contract_model->get_shiftcodes();
+                    foreach ($shift_codes as $sc) {
+
+                        $shiftCode  = $sc['shiftCode'];
+                        $In1        = $sc['1stIn'];
+                        $Out1       = $sc['1stOut'];
+                        $In2        = $sc['2ndIn'];
+                        $Out2       = $sc['2ndOut'];
+
+                        if ($In2 == "") {
+
+                            echo "<option value = '$shiftCode'>$shiftCode = $In1-$Out1 </option>";
+                        } else {
+
+                            echo "<option value = '$shiftCode'>$shiftCode = $In1-$Out1, $In2-$Out2</option>";
+                        }
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Special Schedule</label>
+                <select name="specialSched" class="form-control selects2" disabled onchange="inputSpecialDays(this.value)">
+                    <option value=""> --Select-- </option>
+                    <?php
+
+                    $shift_codes = $this->contract_model->get_shiftcodes();
+                    foreach ($shift_codes as $sc) {
+
+                        $shiftCode  = $sc['shiftCode'];
+                        $In1        = $sc['1stIn'];
+                        $Out1       = $sc['1stOut'];
+                        $In2        = $sc['2ndIn'];
+                        $Out2       = $sc['2ndOut'];
+
+                        if ($In2 == "") {
+
+                            echo "<option value = '$shiftCode'>$shiftCode = $In1-$Out1 </option>";
+                        } else {
+
+                            echo "<option value = '$shiftCode'>$shiftCode = $In1-$Out1, $In2-$Out2</option>";
+                        }
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Cut-off</label>
+                <select name="cutOff" class="form-control" disabled>
+                    <option value=""> --Select-- </option>
+                    <?php
+
+                    $cutoffs = $this->employee_model->cutoff_list();
+                    foreach ($cutoffs as $co) {
+
+                        $endFC = ($co->endFC != '') ? $co->endFC : 'last';
+                        if ($co->startFC != '') {
+
+                            $cut_off = $co->startFC . '-' . $endFC . ' / ' . $co->startSC . '-' . $co->endSC;
+                        } else {
+
+                            $cut_off = '';
+                        }
+
+                        echo '<option value="' . $co->statCut . '">' . $cut_off . '</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group"> <i class="text-red">*</i>
+                <label>Day Off</label>
+                <select name="dayOff" class="form-control" required disabled onchange="inputField(this.name)">
+                    <option value=""> --Select-- </option>
+                    <?php
+
+                    $days = array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'No Day Off');
+                    foreach ($days as $key => $value) {
+
+                        echo '<option value="' . $value . '">' . $value . '</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+            <div class="form-group"> <i class="text-red">*</i>
+                <label>Duty Days</label>
+                <input type="text" name="dutyDays" class="form-control" onkeyup="inputField(this.name)" style="text-transform: uppercase;" required disabled>
+            </div>
+            <div class="form-group">
+                <label>Special Days</label>
+                <input type="text" name="specialDays" class="form-control" disabled="" disabled onkeyup="inputField(this.name)" style="text-transform: uppercase;">
+            </div>
+        </div>
+    </div>
+<?php
+} else if ($request == 'current_permit_form') {
+
+    $emp = $this->employee_model->employee_info($empId);
+    $cO = $this->contract_model->get_promo_cutoff($emp->record_no, $emp->emp_id);
+
+    if ($cO->endFC == "") {
+        $endFC = "last";
+    } else {
+        $endFC = $cO->endFC;
+    }
+
+    $cut_off = $cO->startFC . ' - ' . $endFC . ' / ' . $cO->startSC . ' - ' . $cO->endSC;
+
+?>
+    <link href="<?= base_url('assets/plugins/autoSuggest/css/jquery-ui.css') ?>" rel="stylesheet">
+    <style type="text/css">
+        .ui-autocomplete {
+            padding: 0;
+            list-style: none;
+            background-color: #fff;
+            width: 218px;
+            border: 1px solid #B0BECA;
+            max-height: 350px;
+            overflow-x: hidden;
+        }
+
+        .ui-autocomplete .ui-menu-item {
+            border-top: 1px solid #B0BECA;
+            display: block;
+            padding: 4px 6px;
+            color: #353D44;
+            cursor: pointer;
+        }
+
+        .ui-autocomplete .ui-menu-item:first-child {
+            border-top: none;
+        }
+
+        .ui-autocomplete .ui-menu-item.ui-state-focus {
+            background-color: #D5E5F4;
+            color: #161A1C;
+        }
+
+        .ui-autocomplete {
+            z-index: 9999;
+        }
+    </style>
+    <input type="hidden" name="empId" value="<?= $empId; ?>">
+    <input type="hidden" name="record_no" value="<?= $emp->record_no; ?>">
+    <div class="col-md-6">
+        <div class="form-group"> <i class="text-red">*</i>
+            <label>Business Unit</label>
+            <select name="storeName" class="form-control" required onchange="inputField(this.name)">
+                <?php
+
+                echo '<option value=""> --Select-- </option>';
+                $bUs = $this->dashboard_model->businessUnit_list();
+                foreach ($bUs as $bu) {
+
+                    $hasBU = $this->dashboard_model->promo_has_bu($empId, $bu->bunit_field);
+                    if ($hasBU > 0) {
+                        echo '<option value="' . $bu->bunit_name . '|' . $bu->bunit_permit . '|' . $bu->bunit_dutySched . '|' . $bu->bunit_dutyDays . '|' . $bu->bunit_specialSched . '|' . $bu->bunit_specialDays . '">' . $bu->bunit_name . '</option>';
+                    }
+                }
+                ?>
+            </select>
+        </div>
+        <div class="form-group"> <i class="text-red">*</i>
+            <label>Duty Schedule</label>
+            <select name="dutySched" class="form-control selects2 dutySched" required onchange="inputDutySched()">
+                <option value=""> --Select-- </option>
+                <?php
+
+                $shift_codes = $this->contract_model->get_shiftcodes();
+                foreach ($shift_codes as $sc) {
+
+                    $shiftCode  = $sc['shiftCode'];
+                    $In1        = $sc['1stIn'];
+                    $Out1       = $sc['1stOut'];
+                    $In2        = $sc['2ndIn'];
+                    $Out2       = $sc['2ndOut'];
+
+                    if ($In2 == "") {
+
+                        echo "<option value = '$shiftCode'>$shiftCode = $In1-$Out1 </option>";
+                    } else {
+
+                        echo "<option value = '$shiftCode'>$shiftCode = $In1-$Out1, $In2-$Out2</option>";
+                    }
+                }
+                ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Special Schedule</label>
+            <select name="specialSched" class="form-control selects2" onchange="inputSpecialDays(this.value)">
+                <option value=""> --Select-- </option>
+                <?php
+
+                $shift_codes = $this->contract_model->get_shiftcodes();
+                foreach ($shift_codes as $sc) {
+
+                    $shiftCode  = $sc['shiftCode'];
+                    $In1        = $sc['1stIn'];
+                    $Out1       = $sc['1stOut'];
+                    $In2        = $sc['2ndIn'];
+                    $Out2       = $sc['2ndOut'];
+
+                    if ($In2 == "") {
+
+                        echo "<option value = '$shiftCode'>$shiftCode = $In1-$Out1 </option>";
+                    } else {
+
+                        echo "<option value = '$shiftCode'>$shiftCode = $In1-$Out1, $In2-$Out2</option>";
+                    }
+                }
+                ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Cut-off</label>
+            <input type="hidden" name="cutOff" value="<?= $cO->statCut . '|' . $cut_off ?>">
+            <input type="text" class="form-control" value="<?= $cut_off ?>" readonly>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group"> <i class="text-red">*</i>
+            <label>Day Off</label>
+            <select name="dayOff" class="form-control" required onchange="inputField(this.name)">
+                <option value=""> --Select-- </option>
+                <?php
+
+                $days = array('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', 'No Day Off');
+                foreach ($days as $key => $value) {
+
+                    echo '<option value="' . $value . '">' . $value . '</option>';
+                }
+                ?>
+            </select>
+        </div>
+        <div class="form-group"> <i class="text-red">*</i>
+            <label>Duty Days</label>
+            <input type="text" name="dutyDays" class="form-control" value="<?php echo ($emp->promo_type == 'STATION') ? 'DAILY' : '' ?>" onkeyup="inputField(this.name)" style="text-transform: uppercase;" required>
+        </div>
+        <div class="form-group">
+            <label>Special Days</label>
+            <input type="text" name="specialDays" class="form-control" disabled="" disabled onkeyup="inputField(this.name)" style="text-transform: uppercase;">
+        </div>
+    </div>
+    <script src="<?= base_url('assets/plugins/autoSuggest/js/jquery-ui.min.js') ?>"></script>
+    <script src="<?= base_url('assets/plugins/autoSuggest/js/jquery.select-to-autocomplete.js') ?>"></script>
+    <script type="text/javascript">
+        $(function() {
+            $('select.selects2').selectToAutocomplete();
+        });
+    </script>
+<?php
+
+}

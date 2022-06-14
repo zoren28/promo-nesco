@@ -221,10 +221,18 @@ class Initial_model extends CI_Model
 						'interviewer_remarks'	=> $fetch_data['initialRemark'],
 						'date_interviewed'		=> date("Y-m-d"),
 						'group'					=> '0',
-						'chosen'				=> '1'
+						'chosen'				=> '1',
+						'for_promo'				=> ''
 						);
-		//print_r($data);
+		
 		$this->db->insert('application_interview_details', $data);
+		$id = $this->db->insert_id();
+		$int_code = date('m')."-".date('d')."-".$id."-".date('Y');
+		
+		//update interview code
+		$this->db->set('interview_code', $int_code);
+		$this->db->where(array('id' => $id));
+		$this->db->update('application_interview_details');
 	}
 	
 	public function history_info_append($fetch_data)

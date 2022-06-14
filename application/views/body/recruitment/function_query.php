@@ -568,6 +568,16 @@
 				 <label for="hrmsId">APPLICANT NAME</label>
 				 <input type="text" name='name' class="form-control" id="name"  value='<?=$setup_interview['lastname'].", ".$setup_interview['firstname']." ".$setup_interview['middlename']." ".$setup_interview['suffix']?>' readonly required>
 			</div>
+			<div class="form-group">
+				<table>
+					<tr>
+						<td style='width:30%;'>INTERVIEWER: </td>
+						<td style='width:60%;'><input type="text" name='nameSearch' class="form-control" id="nameSearch" placeholder='Search Interviewer...'></td>
+						<td style='width:10%;'><button class='form-control'><i class="fa fa-search"></i></button></td>
+					</tr>
+				</table>
+				
+			</div>
 		</div>
 	<?php
 	}

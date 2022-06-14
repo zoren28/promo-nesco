@@ -337,6 +337,88 @@
             }
         });
 
+        $("form#print-current-permit").submit(function(e) {
+
+            e.preventDefault();
+            let formData = $(this).serialize();
+
+            let empId = $("input[name = 'empId']").val();
+            let recordNo = $("input[name = 'record_no']").val();
+            let store = $("select[name = 'storeName']").val();
+            let dutyDays = $("input[name = 'dutyDays']").val();
+            let dutySched = $("[name = 'dutySched']").val();
+            let specialSched = $("select[name = 'specialSched']").val();
+            let specialDays = $("input[name = 'specialDays']").val();
+            let dayOff = $("select[name = 'dayOff']").val();
+            let cutOff = $("input[name = 'cutOff']").val();
+
+            let table1 = "employee3";
+            let table2 = "promo_record";
+
+            if (store == "" || dutyDays == "" || dutySched == "" || dayOff == "" || (specialSched != "" && specialDays == "")) {
+
+                $.alert.open({
+                    type: 'warning',
+                    cancel: false,
+                    content: "Please Fill-up Required Fields!",
+                    buttons: {
+                        OK: 'Ok'
+                    },
+
+                    callback: function(button) {
+                        if (button == 'OK') {
+
+                            if (store == "") {
+
+                                $("select[name = 'storeName']").css("border-color", "#dd4b39");
+                            }
+
+                            if (dutyDays == "") {
+
+                                $("input[name = 'dutyDays']").css("border-color", "#dd4b39");
+                            }
+
+                            if (dutySched == "") {
+
+                                $("[name = 'dutySched']").css("border-color", "#dd4b39");
+                            }
+
+                            if (specialSched != "" && specialDays == "") {
+
+                                $("input[name = 'specialDays']").css("border-color", "#dd4b39");
+                            }
+
+                            if (dayOff == "") {
+
+                                $("select[name = 'dayOff']").css("border-color", "#dd4b39");
+                            }
+                        }
+                    }
+                });
+            } else {
+
+                dutyDays = dutyDays.replace(/ &/g, ",");
+                specialDays = specialDays.replace(/ &/g, ",");
+
+                $.ajax({
+                    type: "POST",
+                    url: "<?= site_url('store_duty_details') ?>",
+                    data: formData,
+                    success: function(data) {
+
+                        let response = JSON.parse(data);
+                        if (response.status == "success") {
+
+                            window.open("http://172.16.43.134:81/hrms/report/promo_permit_towork.php?recordNo=" + recordNo + "&empId=" + empId + "&store=" + store + "&dutySched=" + dutySched + "&specialSched=" + specialSched + "&dutyDays=" + dutyDays + "&specialDays=" + specialDays + "&dayoff=" + dayOff + "&table1=" + table1 + "&table2=" + table2);
+                        } else {
+                            console.log(data);
+                        }
+                    }
+                });
+
+            }
+        });
+
         $("form#generate_contract").submit(function(e) {
 
             e.preventDefault();
@@ -524,6 +606,44 @@
                     });
                 }
             }
+        });
+
+        $("button.current-permit").click(function() {
+
+            $("div#current-permit").modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+
+            $("input[name = 'permit']").val("current");
+            $.ajax({
+                type: "POST",
+                url: "<?= site_url('print_current_permit') ?>",
+                success: function(data) {
+
+                    $("div.current-permit").html(data);
+                }
+            });
+        });
+
+        $("button.previous-permit").click(function() {
+
+            $("div#current-permit").modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+
+            $("input[name = 'permit']").val("current");
+            $.ajax({
+                type: "POST",
+                url: "<?= site_url('print_current_permit') ?>",
+                success: function(data) {
+
+                    $("div.current-permit").html(data);
+                }
+            });
         });
     });
 
@@ -1167,6 +1287,64 @@
 
                 $("div#loading-gif").hide();
                 $("div.otherdetails-form").html(data);
+            }
+        });
+    }
+
+    function searchDiserPermit(key) {
+
+        let str = key.trim();
+        if (str == '') {
+
+            $(".search-results").hide();
+        } else {
+
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('find_iprintpermit_promo'); ?>",
+                data: {
+                    str: str,
+                    promo_type: 'all'
+                },
+                success: function(data) {
+
+                    $(".search-results").show().html(data);
+                }
+            });
+        }
+    }
+
+    function getIprintPermit(response) {
+
+        let permit = $("input[name = 'permit']").val();
+        let res = response.split('*');
+
+        $(".search-results").hide();
+        $("input[name='employee']").val(response);
+        $("input[name = 'employee']").css("border-color", "#ccc");
+
+        if (permit == 'current') {
+
+            displayBUCutoff(res[0].trim());
+        } else {
+
+            printPreviousPermit(res[0].trim());
+        }
+    }
+
+    function displayBUCutoff(empId) {
+
+        $("select[name = 'storeName']").prop('disabled', false);
+        $(".selects2").prop('disabled', false);
+        $("select[name = 'cutOff']").prop('disabled', false);
+        $("select[name = 'dayOff']").prop('disabled', false);
+        $("input[name = 'dutyDays']").prop('disabled', false);
+
+        $.ajax({
+            url: "<?php echo site_url('current_permit_form/'); ?>" + empId,
+            success: function(data) {
+
+                $("div.current-permit-form").html(data);
             }
         });
     }

@@ -13,6 +13,9 @@ $route['store_duty_details'] = 'placement/contract/store_duty_details';
 $route['print_contract_renewal/(:any)'] = 'placement/contract/print_contract_renewal/$1';
 $route['store_witness_otherdetails'] = 'placement/contract/store_witness_otherdetails';
 $route['other_details_form'] = 'placement/contract/other_details_form';
+$route['print_current_permit'] = 'placement/contract/print_current_permit';
+$route['find_iprintpermit_promo'] = 'placement/contract/find_iprintpermit_promo';
+$route['current_permit_form/(:any)'] = 'placement/contract/current_permit_form/$1';
 
 // for outlet module
 $route['find_active_promo'] = 'placement/employee/find_active_promo';

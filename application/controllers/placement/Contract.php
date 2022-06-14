@@ -251,6 +251,41 @@ class Contract extends CI_Controller
                 if ($val != $empId) {
                 ?>
                     <a href="javascript:void(0);" onclick="getExtendEmpId('<?= $emp['emp_id'] . ' * ' . $emp['name']  ?>')"><?= $emp['emp_id'] . ' * ' . $emp['name']  ?></a></br>
+                <?php
+                } else {
+                    echo 'No Result Found';
+                }
+            }
+        } else {
+
+            echo 'No Result Found';
+        }
+    }
+
+    public function print_current_permit()
+    {
+        $data['request'] = 'print_current_permit';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function find_iprintpermit_promo()
+    {
+        $val = "";
+        $fetch = $this->input->post(NULL, TRUE);
+
+        $query = $this->employee_model->find_active_promo($fetch);
+        if ($query->num_rows() > 0) {
+
+            $info = $query->result_array();
+            foreach ($info as $emp) {
+
+                $empId = $emp['emp_id'];
+                $name  = ucwords(strtolower($emp['name']));
+
+                if ($val != $empId) {
+                ?>
+                    <a href="javascript:void(0);" onclick="getIprintPermit('<?= $emp['emp_id'] . ' * ' . $name  ?>')"><?= $emp['emp_id'] . ' * ' . $name  ?></a></br>
 <?php
                 } else {
                     echo 'No Result Found';
@@ -260,5 +295,29 @@ class Contract extends CI_Controller
 
             echo 'No Result Found';
         }
+    }
+
+    public function current_permit_form($empId)
+    {
+        $data['empId'] = $empId;
+        $data['request'] = 'current_permit_form';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function display_business_unit($empId)
+    {
+        $data['empId'] = $empId;
+        $data['request'] = 'display_business_unit';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function display_cutoff($empId)
+    {
+        $data['empId'] = $empId;
+        $data['request'] = 'display_cutoff';
+
+        $this->load->view('body/placement/modal_response', $data);
     }
 }

@@ -46,14 +46,14 @@
                 </div>
 
                 <div class="box-body">
-                    <input type="hidden" name="permit">
+                    <input type="hidden" name="permit" value="current">
                     <p><strong> Current Permit </strong></p>
-                    <p><button class='btn btn-primary btn-sm' onclick="printPermit()"> Print Permit </button></p>
+                    <p><button class='btn btn-primary btn-sm current-permit'> Print Permit </button></p>
                     <i> Allows printing of permit of current contract. </i>
                     <hr>
 
                     <p><strong> Previous Permit </strong></p>
-                    <p><button class='btn btn-primary btn-sm' onclick="previousPermit()"> Print Permit </button></td>
+                    <p><button class='btn btn-primary btn-sm previous-permit'> Print Permit </button></td>
                     </p>
                     <i> Allows printing of permit from previous contract. </i>
                     <hr>
@@ -67,7 +67,7 @@
 
 </section>
 
-<div id="previousPermit" class="modal fade">
+<div id="current-permit" class="modal fade">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header bg-light-blue color-palette">
@@ -76,7 +76,7 @@
                 <h4 class="modal-title">Print Permit</h4>
             </div>
             <div class="modal-body">
-                <div class="previousPermit"></div>
+                <div class="current-permit"></div>
             </div>
             <div class="modal-footer">
                 <span class="loadingSave"></span>
@@ -88,7 +88,7 @@
     <!-- /.modal-dialog -->
 </div>
 
-<div id="printPermit" class="modal fade">
+<div id="current-permit" class="modal fade">
     <div class="modal-dialog" style="width: 50%">
         <div class="modal-content">
             <div class="modal-header bg-light-blue color-palette">
@@ -96,14 +96,16 @@
                     <span aria-hidden="true">×</span></button>
                 <h4 class="modal-title">Print Permit</h4>
             </div>
-            <div class="modal-body">
-                <div class="printPermit"></div>
-            </div>
-            <div class="modal-footer">
-                <span class="loadingSave"></span>
-                <button class="btn btn-primary" onclick="genPermit()"><i class="fa fa-file-pdf-o"></i> &nbsp;Generate Permit</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            </div>
+            <form id="print-current-permit" autocomplete="off">
+                <div class="modal-body">
+                    <div class="current-permit"></div>
+                </div>
+                <div class="modal-footer">
+                    <span class="loadingSave"></span>
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-file-pdf-o"></i> &nbsp;Generate Permit</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </form>
         </div>
         <!-- /.modal-content -->
     </div>
