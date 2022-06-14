@@ -16,6 +16,9 @@ $route['other_details_form'] = 'placement/contract/other_details_form';
 $route['print_current_permit'] = 'placement/contract/print_current_permit';
 $route['find_iprintpermit_promo'] = 'placement/contract/find_iprintpermit_promo';
 $route['current_permit_form/(:any)'] = 'placement/contract/current_permit_form/$1';
+$route['print_previous_permit'] = 'placement/contract/print_previous_permit';
+$route['display_previous_contract/(:any)'] = 'placement/contract/display_previous_contract/$1';
+$route['display_previous_permit'] = 'placement/contract/display_previous_permit';
 
 // for outlet module
 $route['find_active_promo'] = 'placement/employee/find_active_promo';

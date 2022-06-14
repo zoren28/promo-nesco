@@ -761,4 +761,25 @@ class Contract_model extends CI_Model
         $this->db->set('recordedby', $this->loginId);
         $this->db->insert('applicant_otherdetails');
     }
+
+    public function show_previous_contracts($emp_id)
+    {
+        $query = $this->db->select('employmentrecord_.record_no, employmentrecord_.emp_id, startdate, eocdate')
+            ->from('employmentrecord_')
+            ->join('promo_history_record', 'promo_history_record.record_no = employmentrecord_.record_no AND promo_history_record.emp_id = employmentrecord_.emp_id')
+            ->where('employmentrecord_.emp_id', $emp_id)
+            ->order_by('startdate', 'DESC')
+            ->get();
+        return $query->result();
+    }
+
+    public function show_previous_contract($data)
+    {
+        $query = $this->db->select('employmentrecord_.record_no, employmentrecord_.emp_id, names, promo_type')
+            ->from('employmentrecord_')
+            ->join('promo_history_record', 'promo_history_record.record_no = employmentrecord_.record_no AND promo_history_record.emp_id = employmentrecord_.emp_id')
+            ->where(array('employmentrecord_.record_no' => $data['record_no'], 'employmentrecord_.emp_id' => $data['emp_id']))
+            ->get();
+        return $query->row();
+    }
 }

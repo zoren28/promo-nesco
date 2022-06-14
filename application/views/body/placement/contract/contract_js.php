@@ -270,8 +270,16 @@
             let dayOff = $("select[name = 'dayOff']").val();
             let cutOff = $("input[name = 'cutOff']").val();
 
-            let table1 = "employee3";
-            let table2 = "promo_record";
+            var permit = $("input[name = 'permit']").val();
+            if (permit == "current") {
+
+                var table1 = "employee3";
+                var table2 = "promo_record";
+            } else {
+
+                var table1 = "employmentrecord_";
+                var table2 = "promo_history_record";
+            }
 
             if (store == "" || dutyDays == "" || dutySched == "" || dayOff == "" || (specialSched != "" && specialDays == "")) {
 
@@ -334,283 +342,12 @@
                     }
                 });
 
-            }
-        });
-
-        $("form#print-current-permit").submit(function(e) {
-
-            e.preventDefault();
-            let formData = $(this).serialize();
-
-            let empId = $("input[name = 'empId']").val();
-            let recordNo = $("input[name = 'record_no']").val();
-            let store = $("select[name = 'storeName']").val();
-            let dutyDays = $("input[name = 'dutyDays']").val();
-            let dutySched = $("[name = 'dutySched']").val();
-            let specialSched = $("select[name = 'specialSched']").val();
-            let specialDays = $("input[name = 'specialDays']").val();
-            let dayOff = $("select[name = 'dayOff']").val();
-            let cutOff = $("input[name = 'cutOff']").val();
-
-            let table1 = "employee3";
-            let table2 = "promo_record";
-
-            if (store == "" || dutyDays == "" || dutySched == "" || dayOff == "" || (specialSched != "" && specialDays == "")) {
-
-                $.alert.open({
-                    type: 'warning',
-                    cancel: false,
-                    content: "Please Fill-up Required Fields!",
-                    buttons: {
-                        OK: 'Ok'
-                    },
-
-                    callback: function(button) {
-                        if (button == 'OK') {
-
-                            if (store == "") {
-
-                                $("select[name = 'storeName']").css("border-color", "#dd4b39");
-                            }
-
-                            if (dutyDays == "") {
-
-                                $("input[name = 'dutyDays']").css("border-color", "#dd4b39");
-                            }
-
-                            if (dutySched == "") {
-
-                                $("[name = 'dutySched']").css("border-color", "#dd4b39");
-                            }
-
-                            if (specialSched != "" && specialDays == "") {
-
-                                $("input[name = 'specialDays']").css("border-color", "#dd4b39");
-                            }
-
-                            if (dayOff == "") {
-
-                                $("select[name = 'dayOff']").css("border-color", "#dd4b39");
-                            }
-                        }
-                    }
-                });
-            } else {
-
-                dutyDays = dutyDays.replace(/ &/g, ",");
-                specialDays = specialDays.replace(/ &/g, ",");
-
-                $.ajax({
-                    type: "POST",
-                    url: "<?= site_url('store_duty_details') ?>",
-                    data: formData,
-                    success: function(data) {
-
-                        let response = JSON.parse(data);
-                        if (response.status == "success") {
-
-                            window.open("http://172.16.43.134:81/hrms/report/promo_permit_towork.php?recordNo=" + recordNo + "&empId=" + empId + "&store=" + store + "&dutySched=" + dutySched + "&specialSched=" + specialSched + "&dutyDays=" + dutyDays + "&specialDays=" + specialDays + "&dayoff=" + dayOff + "&table1=" + table1 + "&table2=" + table2);
-                        } else {
-                            console.log(data);
-                        }
-                    }
-                });
-
-            }
-        });
-
-        $("form#generate_contract").submit(function(e) {
-
-            e.preventDefault();
-            let formData = $(this).serialize();
-
-            let empId = $("input[name = 'empId']").val();
-            let recordNo = $("input[name = 'contract_recordNo']").val();
-            let witness1 = $("input[name = 'witness1Renewal']").val();
-            let witness2 = $("input[name = 'witness2Renewal']").val();
-            let contractHeader = $("select[name = 'contractHeader']").val();
-            let contractDate = $("input[name = 'contractDate']").val();
-            let clear = $("input[name = 'clear']").val();
-
-            let clear1 = "";
-            let clear2 = "";
-            let table1 = "employee3";
-            let table2 = "promo_record";
-
-            if ($("input#clear1").is(':checked')) {
-
-                clear1 = "true";
-            }
-
-            if ($("input#clear2").is(':checked')) {
-
-                clear2 = "true";
-            }
-
-            let issuedOn = "";
-            let sss = "";
-            let cedula = "";
-            let issuedAt = "";
-            if (clear1 == "true") {
-
-                cedula = $("input[name = 'cedula']").val();
-                issuedOn = $("input[name = 'issuedOn']").val();
-                issuedAt = $("input[name = 'issuedAt']").val();
-            } else {
-
-                sss = $("input[name = 'sss']").val();
-                issuedAt = $("input[name = 'issuedAt']").val();
-            }
-
-            if (witness1 == "" || witness2 == "" || (clear1 == "" && clear2 == "") || contractHeader == "" || contractDate == "") {
-
-                $.alert.open({
-                    type: 'warning',
-                    cancel: false,
-                    content: "Please Fill-up Required Fields!",
-                    buttons: {
-                        OK: 'Ok'
-                    },
-
-                    callback: function(button) {
-                        if (button == 'OK') {
-
-                            if (witness1 == "") {
-
-                                $("input[name = 'witness1Renewal']").css("border-color", "#dd4b39");
-                            }
-
-                            if (witness2 == "") {
-
-                                $("input[name = 'witness2Renewal']").css("border-color", "#dd4b39");
-                            }
-
-                            if (contractHeader == "") {
-
-                                $("select[name = 'contractHeader']").css("border-color", "#dd4b39");
-                            }
-
-                            if (contractDate == "") {
-
-                                $("input[name = 'contractDate']").css("border-color", "#dd4b39");
-                            }
-                        }
-
-                    }
-                });
-            } else {
-
-                var chk = "false";
-                if (clear1 == "true") {
-
-
-                    if (cedula == "" || issuedOn == "" || issuedAt == "") {
-
-                        chk = "true";
-                        $.alert.open({
-                            type: 'warning',
-                            cancel: false,
-                            content: "Please Fill-up Required Fields!",
-                            buttons: {
-                                OK: 'Ok'
-                            },
-
-                            callback: function(button) {
-                                if (button == 'OK') {
-
-                                    if (cedula == "") {
-
-                                        $("input[name = 'cedula']").css("border-color", "#dd4b39");
-                                    }
-
-                                    if (issuedOn == "") {
-
-                                        $("input[name = 'issuedOn']").css("border-color", "#dd4b39");
-                                    }
-
-                                    if (issuedAt == "") {
-
-                                        $("input[name = 'issuedAt']").css("border-color", "#dd4b39");
-                                    }
-                                }
-
-                            }
-                        });
-                    }
-                }
-
-                if (clear2 == "true") {
-
-                    if (sss == "" || issuedAt == "") {
-
-                        chk = "true";
-                        $.alert.open({
-                            type: 'warning',
-                            cancel: false,
-                            content: "Please Fill-up Required Fields!",
-                            buttons: {
-                                OK: 'Ok'
-                            },
-
-                            callback: function(button) {
-                                if (button == 'OK') {
-
-                                    if (sss == "") {
-
-                                        $("input[name = 'sss']").css("border-color", "#dd4b39");
-                                    }
-
-                                    if (issuedAt == "") {
-
-                                        $("input[name = 'issuedAt']").css("border-color", "#dd4b39");
-                                    }
-                                }
-
-                            }
-                        });
-                    }
-                }
-
-                if (chk == "false") {
-
-                    $.ajax({
-                        type: "POST",
-                        url: "<?= site_url('store_witness_otherdetails') ?>",
-                        data: formData,
-                        success: function(data) {
-
-                            response = JSON.parse(data);
-                            if (response.status == 'success') {
-
-                                $.alert.open({
-                                    type: 'warning',
-                                    title: 'Info',
-                                    icon: 'confirm',
-                                    cancel: false,
-                                    content: response.message,
-                                    buttons: {
-                                        OK: 'Yes'
-                                    },
-
-                                    callback: function(button) {
-                                        if (button == 'OK') {
-
-                                            window.open("http://172.16.43.134:81/hrms/report/promo_contract.php?empId=" + empId + "&&recordNo=" + recordNo + "&&table1=" + table1 + "&&table2=" + table2);
-                                        }
-                                    }
-                                });
-                            } else {
-                                console.log(data);
-                            }
-                        }
-                    });
-                }
             }
         });
 
         $("button.current-permit").click(function() {
 
-            $("div#current-permit").modal({
+            $("div#permit").modal({
                 backdrop: 'static',
                 keyboard: false,
                 show: true
@@ -622,26 +359,26 @@
                 url: "<?= site_url('print_current_permit') ?>",
                 success: function(data) {
 
-                    $("div.current-permit").html(data);
+                    $("div.permit").html(data);
                 }
             });
         });
 
         $("button.previous-permit").click(function() {
 
-            $("div#current-permit").modal({
+            $("div#previous-permit").modal({
                 backdrop: 'static',
                 keyboard: false,
                 show: true
             });
 
-            $("input[name = 'permit']").val("current");
+            $("input[name = 'permit']").val("previous");
             $.ajax({
                 type: "POST",
-                url: "<?= site_url('print_current_permit') ?>",
+                url: "<?= site_url('print_previous_permit') ?>",
                 success: function(data) {
 
-                    $("div.current-permit").html(data);
+                    $("div.previous-permit").html(data);
                 }
             });
         });
@@ -1328,7 +1065,7 @@
             displayBUCutoff(res[0].trim());
         } else {
 
-            printPreviousPermit(res[0].trim());
+            displayPreviousContract(res[0].trim());
         }
     }
 
@@ -1345,6 +1082,39 @@
             success: function(data) {
 
                 $("div.current-permit-form").html(data);
+            }
+        });
+    }
+
+    function displayPreviousContract(empId) {
+
+        $.ajax({
+            url: "<?php echo site_url('display_previous_contract/'); ?>" + empId,
+            success: function(data) {
+
+                $("div.previous-contract").html(data);
+            }
+        });
+    }
+
+    function printPreviousPermit(emp_id, record_no) {
+
+        $("div#permit").modal({
+            backdrop: 'static',
+            keyboard: false,
+            show: true
+        });
+
+        $.ajax({
+            type: "GET",
+            url: "<?= site_url('display_previous_permit') ?>",
+            data: {
+                emp_id,
+                record_no
+            },
+            success: function(data) {
+
+                $("div.permit").html(data);
             }
         });
     }

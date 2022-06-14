@@ -305,18 +305,25 @@ class Contract extends CI_Controller
         $this->load->view('body/placement/modal_response', $data);
     }
 
-    public function display_business_unit($empId)
+    public function print_previous_permit()
     {
-        $data['empId'] = $empId;
-        $data['request'] = 'display_business_unit';
+        $data['request'] = 'print_previous_permit';
 
         $this->load->view('body/placement/modal_response', $data);
     }
 
-    public function display_cutoff($empId)
+    public function display_previous_contract($empId)
     {
-        $data['empId'] = $empId;
-        $data['request'] = 'display_cutoff';
+        $data['contracts'] = $this->contract_model->show_previous_contracts($empId);
+        $data['request'] = 'display_previous_contract';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function display_previous_permit()
+    {
+        $data['data'] = $this->input->get(NULL, TRUE);
+        $data['request'] = 'display_previous_permit';
 
         $this->load->view('body/placement/modal_response', $data);
     }

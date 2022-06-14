@@ -569,14 +569,16 @@
 				 <input type="text" name='name' class="form-control" id="name"  value='<?=$setup_interview['lastname'].", ".$setup_interview['firstname']." ".$setup_interview['middlename']." ".$setup_interview['suffix']?>' readonly required>
 			</div>
 			<div class="form-group">
-				<table>
-					<tr>
-						<td style='width:30%;'>INTERVIEWER: </td>
-						<td style='width:60%;'><input type="text" name='nameSearch' class="form-control" id="nameSearch" placeholder='Search Interviewer...'></td>
-						<td style='width:10%;'><button class='form-control'><i class="fa fa-search"></i></button></td>
-					</tr>
-				</table>
-				
+				<label for="hrmsId">INTERVIEWER</label>
+				<select class="form-control" name="interviewer" required>
+					<option value=''>Select Interviewer</option>
+					<?php 
+						$resultype = $this->initial_model->interviewer_list(); 
+						foreach ($resultype as $i)  
+						{ 
+							?><option value='<?=$i['empId']?>'><?=$this->initial_model->getName($i['empId'])?></option><?php 
+						} 	?>
+				</select>	
 			</div>
 		</div>
 	<?php

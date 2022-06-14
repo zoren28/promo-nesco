@@ -67,7 +67,7 @@
 
 </section>
 
-<div id="current-permit" class="modal fade">
+<div id="previous-permit" class="modal fade">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header bg-light-blue color-palette">
@@ -76,7 +76,7 @@
                 <h4 class="modal-title">Print Permit</h4>
             </div>
             <div class="modal-body">
-                <div class="current-permit"></div>
+                <div class="previous-permit"></div>
             </div>
             <div class="modal-footer">
                 <span class="loadingSave"></span>
@@ -88,7 +88,7 @@
     <!-- /.modal-dialog -->
 </div>
 
-<div id="current-permit" class="modal fade">
+<div id="permit" class="modal fade">
     <div class="modal-dialog" style="width: 50%">
         <div class="modal-content">
             <div class="modal-header bg-light-blue color-palette">
@@ -96,9 +96,9 @@
                     <span aria-hidden="true">×</span></button>
                 <h4 class="modal-title">Print Permit</h4>
             </div>
-            <form id="print-current-permit" autocomplete="off">
+            <form id="generate_permit" autocomplete="off">
                 <div class="modal-body">
-                    <div class="current-permit"></div>
+                    <div class="permit"></div>
                 </div>
                 <div class="modal-footer">
                     <span class="loadingSave"></span>

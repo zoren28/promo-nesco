@@ -402,6 +402,13 @@ class Initial_model extends CI_Model
         return $query->result_array();
     }
 	
+	public function interviewer_list()
+    {
+        $query = $this->db->from('interviewer_list')
+						->get();
+        return $query->result_array();
+    }
+	
 	public function examtype()
     {
         $query = $this->db->select('DISTINCT(exam_code)')
@@ -410,6 +417,12 @@ class Initial_model extends CI_Model
         return $query->result_array();
     }
 	
+	public function getName($data)
+	{
+		$que = $this->db->select('name')
+					->get_where('employee3', array('emp_id' => $data));
+		return $que->row_array()['name'];
+	}
 	public function examtype_codename($data)
     {
 		$query = $this->db->select('DISTINCT(exam_codename)')
