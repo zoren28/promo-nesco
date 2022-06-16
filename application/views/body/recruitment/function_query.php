@@ -15,6 +15,53 @@
 			echo json_encode(array('status'=> 0, 'proceed'=>1, 'message' => "You can proceed and Add applicant's data/initial requirements.."));
 		}	
 	}
+	else if($request == "check_interview_detail")
+	{
+		?>
+		<div class="panel-body">
+			<div class="form-group">
+				 <label for="hrmsId">APPLICANT ID</label>
+				 <input type="text" name='appid' class="form-control" id="appid"  value='<?=$applicant_examinee['app_id']?>' readonly >
+			</div>
+			
+			<div class="form-group">
+				 <label for="hrmsId">APPLICANT NAME</label>
+				 <input type="text" name='name' class="form-control" id="name"  value='<?=$applicant_examinee['lastname'].", ".$applicant_examinee['firstname']." ".$applicant_examinee['middlename']." ".$applicant_examinee['suffix']?>' readonly >
+			</div>
+			
+			<div class="form-group">
+				 <label for="hrmsId">Initial Remarks</label>
+				 <textarea name='initialRemark' class="form-control" id="initialRemark"  style='resize:none; height:250px;' readonly><?=$interview_remarks['interviewer_remarks']?> </textarea>
+			</div>
+			
+			<div class="form-group">
+				<label for="hrmsId">FINAL INTERVIEWER</label>
+				<!--table class='table-bordered'>
+					<thead>
+						<th style='border:1px;'>INTERVIEWER</th>
+						<th style='border:1px;'>GRADES</th>
+					</thead>
+					<tbody>
+						<tr>
+							<td>TTT</td>
+							<td>TTT</td>
+						</tr>
+					</tbody>
+				</table-->
+			</div>
+			
+			<div class="form-group">
+				 <label for="religion">INTERVIEW STATUS</label>
+				 <select class="form-control" name="interview_stat" required>
+					<option value=''>Select Status</option>
+					<option value='passed'>PASS</option>
+					<option value='failed'>FAIL</option>
+				  </select>
+			</div>
+								
+		</div>
+		<?php
+	}
 	else if($request == "applicant_initial_interview")
 	{
 		?>
@@ -34,7 +81,7 @@
 				 <textarea name='initialRemark' class="form-control" id="initialRemark" style='resize:none; height:250px;' required> </textarea>
 			</div>
 		</div>
-	<?php
+		<?php
 	}
 	
 	else if($request == "applicant_record")

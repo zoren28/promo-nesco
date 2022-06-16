@@ -86,7 +86,7 @@
                     <div class="row">
                         <form id="generate_contract" autocomplete="off">
                             <div class="col-md-5">
-                                <input type="hidden" name="action" value="add_outlet">
+                                <input type="hidden" name="page" value="print-contract">
                                 <div class="form-group">
                                     <label>Search Promo</label>
                                     <div class="input-group">
@@ -98,11 +98,11 @@
                                 <input type="hidden" class="renewContract" value="Renewal">
                                 <div class="promo-details"></div>
                             </div>
-                            <div class="col-md-7 otherdetails" style="display:none">
-                                <div id="loading-gif" style="text-align: center;">
+                            <div class="col-md-7">
+                                <div id="loading-gif" style="text-align: center; display:none;">
                                     <img src="<?= base_url('assets/images/gif/loader_seq.gif'); ?>" alt="gif">
                                 </div>
-                                <div class="panel panel-default">
+                                <div class="panel panel-default otherdetails" style="display:none;">
                                     <div class="panel-heading">
                                         <strong>Edit & Generate Contract</strong>
                                     </div>

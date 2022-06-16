@@ -782,4 +782,72 @@ class Contract_model extends CI_Model
             ->get();
         return $query->row();
     }
+
+    public function get_appraisal_details($record_no, $emp_id)
+    {
+        return $this->db->select('details_id, rater, numrate, store')
+            ->get_where('appraisal_details', array('record_no' => $record_no, 'emp_id' => $emp_id));
+    }
+
+    public function transfer_rate($data, $record_no)
+    {
+        $this->db->trans_start();
+
+        $error = array();
+        foreach ($data['appraisal'] as $key => $value) {
+
+            $appraisal = explode('|', $value);
+
+            // get bunit_epascode via store name
+            $query = $this->db->select('bunit_epascode')
+                ->get_where('locate_promo_business_unit', array('bunit_name' => $appraisal[2]));
+            $epas = $query->row_array();
+
+            $query = $this->db->select($epas['bunit_epascode'])
+                ->get_where('promo_record', array('emp_id' => $data['emp_id']));
+            $promo = $query->row();
+
+            if ($promo->$epas['bunit_epascode'] != '' && $promo->$epas['bunit_epascode'] == '1') {
+
+                // there is already epas_code assigned
+                $error[] = 'exist';
+            } else {
+
+                // update promo_record table
+                $this->db->set($epas['bunit_epascode'], '1');
+                $this->db->where('emp_id', $data['emp_id']);
+                $this->db->update('promo_record');
+
+                // update promo_history_record table
+                $this->db->set($epas['bunit_epascode'], '');
+                $this->db->where(array('record_no' => $appraisal[1], 'emp_id' => $data['emp_id']));
+                $this->db->update('promo_history_record');
+
+                // update appraisal_details table
+                $this->db->set('record_no', $record_no);
+                $this->db->where('details_id', $appraisal[0]);
+                $this->db->update('appraisal_details');
+            }
+        }
+
+        $this->db->trans_complete();
+
+        if ($this->db->trans_status() === FALSE) {
+            # Something went wrong.
+            $this->db->trans_rollback();
+            return json_encode(array('status' => FALSE, 'message' => "Something's went wrong!"));
+        } else {
+            # Everything is Perfect. 
+            # Committing data to the database.
+            $this->db->trans_commit();
+
+            if (count($data['appraisal']) === count($error)) {
+
+                return json_encode(array('status' => TRUE, 'message' => 'There is already existed rate in the current contract. Please review!'));
+            } else {
+
+                return json_encode(array('status' => TRUE, 'message' => 'Rate was successfully transfered!'));
+            }
+        }
+    }
 }

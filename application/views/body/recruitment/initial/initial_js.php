@@ -204,6 +204,35 @@
 			});
 		});
 		
+		$('#tableViewEmp_interview').on('click', 'button.check_interview', function() 
+		{
+            var id = this.id;
+			
+            if (!$(this).parents('tr').hasClass('selected')) 
+			{
+                tableViewEmp_interview.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+			
+			$.ajax({
+				url: "<?php echo site_url('check_interview'); ?>",
+				type: 'POST',
+				data:{id},
+				success: function(response)
+				{
+					
+					$("div#interviewdetails_modal").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});	
+					
+					$("div.interviewdetails_display").html(response);
+				}
+			});
+		});
+		
+		
 		const tableViewEmp = $('#tableViewEmp').DataTable();
 		
 		// event on clicking record applicant
@@ -370,8 +399,7 @@
 				data:formData,
 				success: function(response) {
 					
-					alert(response);
-					/* $("div#interview_modal").modal({
+					$("div#interview_modal").modal({
 						backdrop: 'static',
 						keyboard: false,
 						show: true
@@ -382,7 +410,7 @@
 					if(response.status === 1)
 					{
 						$("div.interview_display").html(response.message);
-					} */
+					}
 				},
 				async: false,
 				cache: false,

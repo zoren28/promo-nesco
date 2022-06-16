@@ -30,23 +30,23 @@
 											if($result_interview < 1) 
 											{	
 												?><button id="<?= $i['app_code']."|".$i['app_id'] ?>" type="button" class="btn btn-primary btn-sm initial_interview">
-												<?php echo  $result_interview." ".$result_interview_lvl?>
+												<?php //echo  $result_interview." ".$result_interview_lvl?>
 												Start Initial Interview
 												</button><?php 
 											}
 											else 
 											{ 
-												if($result_interview_lvl > 0)
+												if($result_interview_lvl > 0 && $result_interview > 1)
 												{
-												?><button id="<?= $i['app_code']."|".$i['app_id'] ?>" type="button" class="btn btn-success btn-sm check_interview">
-												<?php echo  $result_interview." ".$result_interview_lvl?>
+												?><button id="<?= $i['app_code']."|".$i['app_id'] ?>" type="button" class="btn btn-warning btn-sm check_interview">
+												<?php //echo  $result_interview." ".$result_interview_lvl?>
 												Check Interview Details
 												</button><?php 
 												}
 												else
 												{
 												?><button id="<?= $i['app_code']."|".$i['app_id'] ?>" type="button" class="btn btn-success btn-sm setup_interview">
-												<?php echo  $result_interview." ".$result_interview_lvl?>
+												<?php //echo  $result_interview." ".$result_interview_lvl?>
 												Setup Interview
 												</button><?php 
 												}
@@ -104,12 +104,12 @@
 	</div>
 	
 	<div class="modal fade" id="interview_modal" >
-		<div class="modal-dialog modal-sm">
+		<div class="modal-dialog modal-md">
 			<div class="modal-content">
 				<div class="modal-header bg-light-blue color-palette">
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">×</span></button>
-					<h5 class="modal-title">Initial Interview</h5>
+					<h5 class="modal-title">Interview Info</h5>
 				</div>
 				<div class="modal-body interview_display" style='font-size=10px;'>		
 				</div>
@@ -119,4 +119,25 @@
 			</div>
 		</div>
 	</div>
-    
+	
+	
+    <div class="modal fade" id="interviewdetails_modal" >
+		<div class="modal-dialog modal-md">
+			<div class="modal-content">
+				<div class="modal-header bg-light-blue color-palette">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span></button>
+					<h5 class="modal-title">Interview Details</h5>
+				</div>
+					<form id='setup_interviewee' method='post' enctype="multipart/form-data">
+						<div class="modal-body interviewdetails_display" style='font-size=10px;'>		
+						</div>
+						
+						<div class="modal-footer">
+							<button type="button" class="btn" data-dismiss="modal">Close</button>
+							<button type="submit" class="btn btn-primary">Submit</button>
+						</div>
+					</form>
+			</div>
+		</div>
+	</div>

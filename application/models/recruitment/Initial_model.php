@@ -211,6 +211,30 @@ class Initial_model extends CI_Model
 		$this->db->insert('application_exams2take', $data);
 	}
 	
+	public function save_setUp_interview($fetch_data)
+	{
+		$data = array(
+						'interviewee_id'		=> $fetch_data['appid'],
+						'interviewee_level'		=> '1',
+						'interviewer_id'		=> $fetch_data['interviewer'],
+						'interview_status'		=> '',
+						'interviewer_remarks'	=> '',
+						'date_interviewed'		=> '',
+						'group'					=> '0',
+						'chosen'				=> '1',
+						'for_promo'				=> ''
+						);
+		
+		$this->db->insert('application_interview_details', $data);
+		$id = $this->db->insert_id();
+		$int_code = date('m')."-".date('d')."-".$id."-".date('Y');
+		
+		//update interview code
+		$this->db->set('interview_code', $int_code);
+		$this->db->where(array('id' => $id));
+		$this->db->update('application_interview_details');
+	}
+	
 	public function save_initial_interview($fetch_data)
 	{
 		$data = array(
@@ -471,10 +495,26 @@ class Initial_model extends CI_Model
 		return $que->row_array()['val'];	
 	}
 	
+	public function get_Initial_interviewer_list($data)
+	{
+		$query = $this->db->from('application_interview_details')
+							->where("interviewee_id = '$data' AND interviewee_level = 1")
+							->order_by('id', 'DESC')
+							->get();
+        return $query->row_array();
+	}
+	
+	public function get_Initial_interview_remarks($data)
+	{
+		//$query = $this->db->select('interviewer_remarks')
+		$query = $this->db->from('application_interview_details')
+							->where("interviewee_id = '$data' AND interviewee_level = ''")
+							->order_by('id', 'DESC')
+							->get();
+        return $query->row_array();
+	}
 	public function applicants_interview_level($data)
 	{
-		//$condition = ;
-		
 		$que = $this->db->select('count(id) as val')
 					->where("interviewee_id = '$data' AND interviewee_level != 0")
 					->get('application_interview_details');

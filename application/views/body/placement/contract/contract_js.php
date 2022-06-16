@@ -382,6 +382,71 @@
                 }
             });
         });
+
+        $("form#transfer-rate").submit(function(e) {
+
+            e.preventDefault();
+            let formData = $(this).serialize();
+
+            let num = $("input[name = 'appraisal[]']:checked").length;
+            if (num == 0) {
+
+                errDup('Please choose atleast one rate first!');
+                return;
+            } else {
+
+                $.ajax({
+                    type: "POST",
+                    url: "<?= site_url('transfer_rate') ?>",
+                    data: formData,
+                    success: function(data) {
+
+                        let response = JSON.parse(data);
+                        if (response.status === true) {
+
+                            $.alert.open({
+                                type: 'warning',
+                                title: 'Info',
+                                icon: 'confirm',
+                                cancel: false,
+                                content: response.message,
+                                buttons: {
+                                    OK: 'Yes'
+                                },
+
+                                callback: function(button) {
+                                    if (button == 'OK') {
+
+                                        location.reload();
+                                    }
+
+                                }
+                            });
+                        } else {
+
+                            $.alert.open({
+                                type: 'warning',
+                                title: 'Info',
+                                icon: 'confirm',
+                                cancel: false,
+                                content: response.message,
+                                buttons: {
+                                    OK: 'Yes'
+                                },
+
+                                callback: function(button) {
+                                    if (button == 'OK') {
+
+                                        location.reload();
+                                    }
+
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
     });
 
     function edit_renew_control() {
@@ -994,6 +1059,7 @@
     function getEmpId(response) {
 
         let res = response.split('*');
+        let page = $("input[name = 'page']").val();
 
         $(".search-results").hide();
         $("input[name='employee']").val(response);
@@ -1007,10 +1073,17 @@
             success: function(data) {
 
                 $("div.promo-details").html(data);
-                $("div.otherdetails").show();
                 $("div#loading-gif").show();
 
-                otherDetailsForm(res[0].trim());
+                if (page == 'transfer-rate') {
+
+                    $("div.transfer-rate").hide();
+                    transferRateForm(res[0].trim());
+                } else {
+
+                    $("div.otherdetails").hide();
+                    otherDetailsForm(res[0].trim());
+                }
             }
         });
 
@@ -1023,9 +1096,34 @@
             success: function(data) {
 
                 $("div#loading-gif").hide();
+                $("div.otherdetails").show();
                 $("div.otherdetails-form").html(data);
             }
         });
+    }
+
+    function transferRateForm(emp_id) {
+
+        $.ajax({
+            url: "<?= site_url('transfer_rate_form/') ?>" + emp_id,
+            success: function(data) {
+
+                $("div#loading-gif").hide();
+                $("div.transfer-rate").show().html(data);
+            }
+        });
+    }
+
+    function transferRate() {
+
+        let num = $("input[name = 'appraisal[]']:checked").length;
+        if (num > 0) {
+
+            $("button.transfer-rate").prop('disabled', false);
+        } else {
+
+            $("button.transfer-rate").prop('disabled', true);
+        }
     }
 
     function searchDiserPermit(key) {

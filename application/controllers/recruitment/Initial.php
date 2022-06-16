@@ -79,11 +79,47 @@ class Initial extends CI_Controller
 		}
 	}
 	
+	// check interview details
+	public function check_interview()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		$explode_val = explode("|",$fetch_data['id']);
+		$fetch_data['id'] = $explode_val[1];
+		$data['interview_remarks'] = $this->initial_model->get_Initial_interview_remarks($explode_val[1]);
+		$data['applicant_examinee'] = $this->initial_model->applicant_examinee($fetch_data);
+		$data['interviewer_list'] = $this->initial_model->get_Initial_interviewer_list($explode_val[1]);
+		$data['request'] = "check_interview_detail";
+		$this->load->view('body/recruitment/function_query', $data);
+		
+		//print_r($return_remark);
+		//print_r($return_examinee);
+		//$this->db->trans_start();
+		//$this->initial_model->save_setUp_interview($fetch_data);
+		/* $this->db->trans_complete();
+		if ($this->db->trans_status() === TRUE)
+		{ 
+			echo json_encode(array('status'=> 1, 'message' => "Applicant Set-up Interview Done!")); 
+		}
+		else
+		{ 
+			echo json_encode(array('status'=> 0, 'message' => "Error Found!")); 
+		} */
+	}
 	// selecting an final interviewer
 	public function setup_interviewee()
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
-		print_r($fetch_data);
+		$this->db->trans_start();
+		$this->initial_model->save_setUp_interview($fetch_data);
+		$this->db->trans_complete();
+		if ($this->db->trans_status() === TRUE)
+		{ 
+			echo json_encode(array('status'=> 1, 'message' => "Applicant Set-up Interview Done!")); 
+		}
+		else
+		{ 
+			echo json_encode(array('status'=> 0, 'message' => "Error Found!")); 
+		}
 	}
 	// modal for setup interview
 	public function setup_interview()

@@ -19,6 +19,8 @@ $route['current_permit_form/(:any)'] = 'placement/contract/current_permit_form/$
 $route['print_previous_permit'] = 'placement/contract/print_previous_permit';
 $route['display_previous_contract/(:any)'] = 'placement/contract/display_previous_contract/$1';
 $route['display_previous_permit'] = 'placement/contract/display_previous_permit';
+$route['transfer_rate_form/(:any)'] = 'placement/contract/transfer_rate_form/$1';
+$route['transfer_rate'] = 'placement/contract/transfer_rate';
 
 // for outlet module
 $route['find_active_promo'] = 'placement/employee/find_active_promo';
@@ -185,7 +187,7 @@ $route['initial_interview'] = 'recruitment/initial/initial_interview';
 $route['save_initial_interview'] = 'recruitment/initial/save_initial_interview';
 $route['setup_interview'] = 'recruitment/initial/setup_interview';
 $route['setup_interviewee'] = 'recruitment/initial/setup_interviewee';
-
+$route['check_interview'] = 'recruitment/initial/check_interview';
 // for menu module
 $route['logout'] = 'logout';
 $route['placement/page/menu/(:any)/(:any)/(:any)'] = 'placement/page/menu/$1/$2/$3';

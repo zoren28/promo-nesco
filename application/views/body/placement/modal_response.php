@@ -5036,4 +5036,107 @@ if ($request == "update_blacklist_form") {
         });
     </script>
 <?php
+
+} else if ($request == 'transfer_rate_form') {
+
+    $contracts = $this->contract_model->show_previous_contracts($emp_id);
+    $emp = $this->employee_model->employee_info($emp_id);
+
+?>
+    <input type="hidden" name="emp_id" value="<?php echo $emp_id; ?>">
+    <input type="hidden" name="record_no" value="<?php echo $emp->record_no; ?>">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Previous Rate(s)</strong>
+        </div>
+        <div class="panel-body">
+            <div class="size-emp">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Store</th>
+                            <th>Rate</th>
+                            <th>Rater</th>
+                            <th>Startdate</th>
+                            <th>Eocdate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+
+                        $loop = 1;
+                        if (count($contracts) > 0) {
+
+                            foreach ($contracts as $contract) {
+
+                                $appraisals = $this->contract_model->get_appraisal_details($contract->record_no, $contract->emp_id);
+                                if ($appraisals->num_rows() > 0) {
+
+                                    $numrates = $appraisals->result();
+                                    foreach ($numrates as $numrate) {
+
+                                        if ($loop == 1) {
+
+                                            echo '
+                                            <tr>
+                                                <td>
+                                                    <input type="checkbox" name="appraisal[]" value="' . $numrate->details_id . '|' . $contract->record_no . '|' . $numrate->store . '" onchange="transferRate()">
+                                                </td>
+                                                <td>' . $numrate->store . '</td>
+                                                <td>' . $numrate->numrate . '</td>
+                                                <td>' . ucwords(strtolower($this->employee_model->employee_name($numrate->rater)['name'])) . '</td>
+                                                <td>' . date('m/d/Y', strtotime($contract->startdate)) . '</td>
+                                                <td>' . date('m/d/Y', strtotime($contract->eocdate)) . '</td>
+                                            </tr>
+                                        ';
+                                        } else {
+
+                                            echo '
+                                            <tr>
+                                                <td>
+                                                    <input type="checkbox" value="' . $numrate->details_id . '" disabled>
+                                                </td>
+                                                <td>' . $numrate->store . '</td>
+                                                <td>' . $numrate->numrate . '</td>
+                                                <td>' . ucwords(strtolower($this->employee_model->employee_name($numrate->rater)['name'])) . '</td>
+                                                <td>' . date('m/d/Y', strtotime($contract->startdate)) . '</td>
+                                                <td>' . date('m/d/Y', strtotime($contract->eocdate)) . '</td>
+                                            </tr>
+                                        ';
+                                        }
+                                    }
+                                } else {
+
+                                    if ($loop > 1)
+                                        continue;
+
+                                    echo '
+                                    <tr>
+                                        <td colspan="6" style="text-align:center;">No Records Found!</td>
+                                    </tr>
+                                ';
+                                }
+
+                                $loop++;
+                            }
+                        } else {
+
+                            echo '
+                                <tr>
+                                    <td colspan="6" style="text-align:center;">No Records Found!</td>
+                                </tr>
+                            ';
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="panel-footer">
+            <button type="submit" class="btn btn-primary btn-sm transfer-rate" disabled><i class="fa fa-reply-all"></i> Transfer Rate</button>
+            <span class="loadingSave"></span>
+        </div>
+    </div>
+<?php
 }

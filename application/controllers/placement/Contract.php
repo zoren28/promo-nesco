@@ -327,4 +327,21 @@ class Contract extends CI_Controller
 
         $this->load->view('body/placement/modal_response', $data);
     }
+
+    public function transfer_rate_form($emp_id)
+    {
+        $data['emp_id'] = $emp_id;
+        $data['request'] = 'transfer_rate_form';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function transfer_rate()
+    {
+        $data = $this->input->post(NULL, TRUE);
+        $emp = $this->employee_model->employee_info($data['emp_id']);
+
+        $transfer = $this->contract_model->transfer_rate($data, $emp->record_no);
+        echo $transfer;
+    }
 }

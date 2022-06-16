@@ -19,7 +19,43 @@
 
     .size-emp {
 
-        max-height: 320px;
+        max-height: 450px;
+        overflow: auto;
+    }
+
+    .witness1Renewal {
+
+        box-shadow: 5px 5px 5px #ccc;
+        margin-top: 1px;
+        margin-left: 0px;
+        background-color: #F1F1F1;
+        width: 90%;
+        border-radius: 3px 3px 3px 3px;
+        font-size: 18x;
+        padding: 8px 10px;
+        display: block;
+        position: absolute;
+        z-index: 9999;
+        max-height: 300px;
+        overflow-y: scroll;
+        overflow: auto;
+    }
+
+    .witness2Renewal {
+
+        box-shadow: 5px 5px 5px #ccc;
+        margin-top: 1px;
+        margin-left: 0px;
+        background-color: #F1F1F1;
+        width: 90%;
+        border-radius: 3px 3px 3px 3px;
+        font-size: 18x;
+        padding: 8px 10px;
+        display: block;
+        position: absolute;
+        z-index: 9999;
+        max-height: 300px;
+        overflow-y: scroll;
         overflow: auto;
     }
 </style>
@@ -48,26 +84,26 @@
                 <div class="box-body">
 
                     <div class="row">
-                        <div class="col-md-5">
-                            <!-- <h3>Supervisor Details</h3> -->
-                            <div class="form-group">
-                                <label>Search Promo</label>
-                                <div class="input-group">
-                                    <input class="form-control" type="text" name="employee" onkeyup="nameSearch(this.value)" autocomplete="off">
-                                    <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                        <form id="transfer-rate" autocomplete="off">
+                            <div class="col-md-5">
+                                <input type="hidden" name="page" value="transfer-rate">
+                                <div class="form-group">
+                                    <label>Search Promo</label>
+                                    <div class="input-group">
+                                        <input class="form-control" type="text" name="employee" onkeyup="nameSearch(this.value)">
+                                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                    </div>
+                                    <div class="search-results" style="display: none;"></div>
                                 </div>
-                                <div class="search-results" style="display: none;"></div>
+                                <div class="promo-details"></div>
                             </div>
-                            <div class="promoDetails"></div>
-                        </div>
-                        <div class="col-md-7">
-                            <div class="transferForm">
-                                <div style="width: 5%; margin:0 auto;">
-                                    <br><br><br><br><br><br>
-                                    <img src="../images/system/10.gif" id='loading-gif' style="display: none;">
+                            <div class="col-md-7">
+                                <div id="loading-gif" style="text-align: center; display:none;">
+                                    <img src="<?= base_url('assets/images/gif/loader_seq.gif'); ?>" alt="gif">
                                 </div>
+                                <div class="transfer-rate"></div>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
                 <!-- /.box-body -->
