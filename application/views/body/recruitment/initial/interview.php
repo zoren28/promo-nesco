@@ -103,6 +103,28 @@
 		</div>
 	</div>
 	
+    <div class="modal fade" id="interviewdetails_modal" >
+		<div class="modal-dialog modal-md">
+			<div class="modal-content">
+				<div class="modal-header bg-light-blue color-palette">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span></button>
+					<h5 class="modal-title">Interview Details</h5>
+				</div>
+					<form id='final_interview' method='post' enctype="multipart/form-data">
+						<div class="modal-body interviewdetails_display" style='font-size=10px;'>		
+						</div>
+						
+						<div class="modal-footer">
+							<button type="button" class="btn" data-dismiss="modal">Close</button>
+							<button type="submit" class="btn btn-primary">Submit</button>
+						</div>
+					</form>
+			</div>
+		</div>
+	</div>
+	
+	
 	<div class="modal fade" id="interview_modal" >
 		<div class="modal-dialog modal-md">
 			<div class="modal-content">
@@ -120,24 +142,3 @@
 		</div>
 	</div>
 	
-	
-    <div class="modal fade" id="interviewdetails_modal" >
-		<div class="modal-dialog modal-md">
-			<div class="modal-content">
-				<div class="modal-header bg-light-blue color-palette">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">×</span></button>
-					<h5 class="modal-title">Interview Details</h5>
-				</div>
-					<form id='setup_interviewee' method='post' enctype="multipart/form-data">
-						<div class="modal-body interviewdetails_display" style='font-size=10px;'>		
-						</div>
-						
-						<div class="modal-footer">
-							<button type="button" class="btn" data-dismiss="modal">Close</button>
-							<button type="submit" class="btn btn-primary">Submit</button>
-						</div>
-					</form>
-			</div>
-		</div>
-	</div>

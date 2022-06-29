@@ -62,6 +62,69 @@ class Initial_model extends CI_Model
 		return $this->db->insert_id(); 
 	}
 	
+	public function check_upload_finalcompletion($value)
+	{
+		$maxsize    = 2097152;
+		$acceptable = array(
+			'image/jpeg',
+			'image/jpg',
+			'image/png'
+		); 
+		
+		if($value == 'birthcertificate' || $value == 'otherDoc')
+		{
+			if($value == 'birthcertificate')
+			{
+				$file_name = "Birth Certificate"; 
+			}
+			else
+			{
+				$file_name = "Other Document";
+			}
+			for($i=0; $i< count($_FILES[$value]['name']); $i++)
+			{
+				$filesize 	= 	$_FILES[$value]['size'][$i];
+				$filename	=	$_FILES[$value]['name'][$i];
+				$filetype	=	$_FILES[$value]['type'][$i];
+				
+				//$birthcertificate 	= 	"resumebiodata_".$i."_".$appcode."_".date("Y-m-d").".".$temp;
+				//$location 	= 	$target_dir."birthcertificate/".$birthcertificate;
+				
+				if($filesize >= $maxsize || $filesize == 0) 
+				{
+					echo $file_name." file too large. File must be less than 2 megabytes.";
+				}
+				else
+				{
+					if((!in_array($filetype, $acceptable)) && (!empty($filetype))) 
+					{
+						$file_name." file is invalid file type. Only PDF, JPG, GIF and PNG types are accepted.";
+					}
+					else
+					{
+						
+						echo $value." ".$_FILES[$value]['name'][$i]." ".$_FILES[$value]['size'][$i]." ".$_FILES[$value]['type'][$i];
+						echo "<br>";
+						/* if(move_uploaded_file($_FILES["resume"]["tmp_name"][$i], $target_dir."resume/".$resume))
+						{
+							$resume_upload = $this->initial_model->insert_uploaded_info($value,$location,$appcode);
+							$resume_flag = 1;
+						} */
+					}
+				}
+			}	
+		}
+		else
+		{
+			$filesize 	= 	$_FILES['birthcertificate']['size'];
+			$filename	=	$_FILES['birthcertificate']['name'];
+			$filetype	=	$_FILES['birthcertificate']['type'];
+			
+			echo $value." ".$_FILES[$value]['name']." ".$_FILES[$value]['size']." ".$_FILES[$value]['type'];
+			echo "<br>";
+		}
+	}
+	
 	public function get_appId()
 	{
 		$year 			= 	date('Y');
@@ -226,9 +289,9 @@ class Initial_model extends CI_Model
 						);
 		
 		$this->db->insert('application_interview_details', $data);
+
 		$id = $this->db->insert_id();
 		$int_code = date('m')."-".date('d')."-".$id."-".date('Y');
-		
 		//update interview code
 		$this->db->set('interview_code', $int_code);
 		$this->db->where(array('id' => $id));
@@ -282,6 +345,18 @@ class Initial_model extends CI_Model
 		$file = fopen("../document/examfiles/".$rw['app_id'].".txt","w");
 		fwrite($file,$rw['app_id']."%".$rw['lastname']."%".$rw['firstname']."%".$rw['middlename']."%".$rw['suffix']."%".$rw['gender']."%".$rw['school']."%".$rw['attainment']."%".$rw['course']."%".ucwords(strtolower($fetch_data['applying']))."%".$fetch_data['attainment']."%");
 		fclose($file);
+	}
+	
+	public function get_interview_result($fetch_data)
+	{
+		if($fetch_data['interview_stat'] == 'passed')
+		{
+			return "for final completion";
+		}
+		else if($fetch_data['interview_stat'] == 'failed')
+		{
+			return "interview failed";
+		}
 	}
 	
 	public function applicant_status($fetch_data)
@@ -441,6 +516,12 @@ class Initial_model extends CI_Model
         return $query->result_array();
     }
 	
+	public function getGrade($data)
+	{
+		$que = $this->db->select('num_rate,desc_rate')
+					->get_where('application_interview_totalrates', array('interview_code' => $data));
+		return $que->row_array();
+	}
 	public function getName($data)
 	{
 		$que = $this->db->select('name')
@@ -465,6 +546,15 @@ class Initial_model extends CI_Model
         return $query->result_array();
     }
 	
+	public function transfer_applicants()
+    {
+		$query = $this->db->from('applicants')
+							->where("status = 'interview failed' AND tagged_to = 'nesco'")
+							->order_by('app_code', 'ASC')
+							->get();
+        return $query->result_array();
+    }
+	
 	public function applicants_for_exam()
     {
 		$query = $this->db->select('applicants.status,applicant.app_id,applicants.lastname,applicants.firstname,applicants.middlename,applicants.position,applicants.date_time,applicants.suffix,applicants.app_code')
@@ -481,7 +571,7 @@ class Initial_model extends CI_Model
 		$query = $this->db->select('applicants.app_code, applicant.app_id, applicants.lastname, applicants.middlename, applicants.firstname, applicants.suffix, applicants.date_time, applicants.position')
 							->from('applicants')
 							->join('applicant', 'applicants.app_code = applicant.appcode')
-							->where("(applicants.status = 'for interview' OR applicants.status = 'interview failed') AND (applicants.tagged_to = 'nesco')")
+							->where("(applicants.status = 'for interview') AND (applicants.tagged_to = 'nesco')")
 							->order_by('app_code', 'ASC')
 							->get();
         return $query->result_array();
@@ -523,8 +613,10 @@ class Initial_model extends CI_Model
 	
 	public function applicants_for_finalcompletion()
     {
-		$query = $this->db->from('applicants')
-							->where("status = 'for final completion' AND tagged_to = 'nesco'")
+		$query = $this->db->select('applicants.app_code, applicant.app_id, applicants.lastname, applicants.middlename, applicants.firstname, applicants.suffix, applicants.date_time, applicants.position')
+							->from('applicants')
+							->join('applicant', 'applicants.app_code = applicant.appcode')
+							->where("(applicants.status = 'for final completion') AND (applicants.tagged_to = 'nesco')")
 							->order_by('app_code', 'ASC')
 							->get();
         return $query->result_array();

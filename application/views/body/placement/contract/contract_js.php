@@ -1,6 +1,120 @@
 <script>
     $(function() {
 
+        let page = $("input[name = 'page']").val();
+        let bU = $("select[name = 'filterBU']").val();
+        let date = $("select[name = 'filterDate']").val();
+        let month = $("select[name = 'filterMonth']").val();
+        let year = $("select[name = 'filterYear']").val();
+
+        if (page === 'eoc-list') {
+            eocList(bU, date, month, year);
+        }
+
+        $("select[name = 'filterDate']").change(function() {
+
+            let date = $(this).val();
+            if (date) {
+                $("select.filter-month-year").hide();
+            } else {
+                $("select.filter-month-year").show();
+            }
+        });
+
+        $("button#genEOCList").click(function() {
+
+            let bU = $("select[name = 'filterBU']").val();
+            let date = $("select[name = 'filterDate']").val();
+            let month = $("select[name = 'filterMonth']").val();
+            let year = $("select[name = 'filterYear']").val();
+
+            eocList(bU, date, month, year);
+        });
+
+        $("form#dataUploadClearance").submit(function(e) {
+            e.preventDefault();
+
+            let formData = new FormData(this);
+            let empId = $("[name = 'emp_id']").val();
+            let chkNum = 0;
+            $("input[name = 'clearance[]']").each(function() {
+
+                let clearance = $(this).val();
+                let file = $(`input[name = '${clearance}']`).val();
+                if (file != "") {
+
+                    chkNum++;
+                }
+            });
+
+            if (chkNum != $("input[name = 'clearance[]']").length) {
+
+                $.alert.open({
+                    type: 'warning',
+                    cancel: false,
+                    content: "Please Upload Clearance Needed!",
+                    buttons: {
+                        OK: 'Ok'
+                    },
+
+                    callback: function(button) {
+                        if (button == 'OK') {
+
+                            $("input[name = 'clearance[]']").each(function() {
+
+                                let clearance = $(this).val();
+                                let file = $(`input[name = '${clearance}']`).val();
+                                if (file == "") {
+
+                                    $(`input[name = '${clearance}']`).css("border-color", "#dd4b39");
+                                }
+                            });
+                        }
+                    }
+                });
+            } else {
+
+                $.ajax({
+                    url: "<?= site_url('store_clearance_renewal') ?>",
+                    type: 'POST',
+                    data: formData,
+                    success: function(data) {
+
+                        response = JSON.parse(data);
+                        if (response.message == "success") {
+
+                            $.alert.open({
+                                type: 'warning',
+                                title: 'Info',
+                                icon: 'confirm',
+                                cancel: false,
+                                content: "Successfully Uploaded!<br> You can now proceed to renewal process.",
+                                buttons: {
+                                    OK: 'Yes'
+                                },
+
+                                callback: function(button) {
+                                    if (button == 'OK') {
+
+                                        window.location = "<?= base_url('placement/page/menu/contract/process-renewal/') ?>" + empId;
+                                    }
+
+                                }
+                            });
+                        } else {
+
+                            alert(response);
+                        }
+                    },
+                    async: false,
+                    cache: false,
+                    contentType: false,
+                    processData: false
+
+                });
+            }
+        });
+
         $("button.extend-contract").click(function() {
 
             $("div#extend").modal({
@@ -1213,6 +1327,180 @@
             success: function(data) {
 
                 $("div.permit").html(data);
+            }
+        });
+    }
+
+    function eocList(bU, date, month, year) {
+
+        let cols = 16;
+        // let cols = $('table#eoc-list').DataTable({}).columns().header().length;
+
+        let dataTable = $('table#eoc-list').DataTable({
+            destroy: true,
+            processing: true,
+            serverSide: true,
+            order: [],
+            ajax: {
+                url: "<?= site_url('eoc_list') ?>", // json datasource
+                type: "POST", // method  ,by default get
+                data: {
+                    bU,
+                    date,
+                    month,
+                    year
+                },
+                error: function() { // error handling
+                    $("table#eoc-list").append('<tbody><tr><th colspan="' + cols + '">No data found in the server</th></tr></tbody>');
+                    $("div#eoc-list_processing").css("display", "none");
+                }
+            }
+        });
+    }
+
+    function view_appraisal_details(detailsId) {
+
+        $("#appraisal_form").modal({
+            backdrop: 'static',
+            keyboard: false,
+            show: true
+        });
+
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('appraisal_details'); ?>",
+            data: {
+                detailsId: detailsId
+            },
+            success: function(data) {
+
+                $(".appraisal_form").html(data);
+            }
+        });
+    }
+
+    function proceedTo(data) {
+
+        let emp_id = data.id;
+        let process = data.value
+
+        if (process) {
+
+            $.alert.open({
+                type: 'warning',
+                cancel: false,
+                content: "Are you sure you want to proceed to " + process + "?",
+                buttons: {
+                    OK: 'Ok',
+                    NO: 'Not Now'
+                },
+
+                callback: function(button) {
+                    if (button == 'OK') {
+
+                        if (process == "blacklist") {
+
+                            window.location = "<?= base_url('placement/page/menu/blacklisted/add-blacklisted/') ?>" + emp_id
+                        } else if (process == "resign") {
+
+                            window.location = "<?= base_url('placement/page/menu/resignation-termination/add-resignation-termination/') ?>" + emp_id
+                        } else {
+
+                            $("#uploadClearance").modal({
+                                backdrop: 'static',
+                                keyboard: false,
+                                show: true
+                            });
+
+                            $.ajax({
+                                url: "<?= site_url('upload_clearance_renewal') ?>",
+                                data: {
+                                    emp_id
+                                },
+                                success: function(data) {
+
+                                    $(".uploadClearance").html(data);
+                                }
+                            });
+                        }
+                    }
+
+                }
+            });
+        }
+    }
+
+    function readURL(input, upload) {
+
+        $('#clear' + upload).show();
+        var res = validateForm(upload);
+
+        if (res != 1) {
+
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#photo' + upload).attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        } else {
+            $('#clear' + upload).hide();
+            $('#photo' + upload).removeAttr('src');
+        }
+    }
+
+    function validateForm(imgid) {
+        var img = $("#" + imgid).val();
+        var res = '';
+        var i = img.length - 1;
+        while (img[i] != ".") {
+            res = img[i] + res;
+            i--;
+        }
+
+        //checks the file format
+        if (res != "PNG" && res != "jpg" && res != "JPG" && res != "png") {
+            $("#" + imgid).val("");
+            errDup('Invalid File Format. Take note on the allowed file!');
+            return 1;
+        }
+
+        //checks the filesize- should not be greater than 2MB
+        var uploadedFile = document.getElementById(imgid);
+        var fileSize = uploadedFile.files[0].size < 1024 * 1024 * 2;
+        if (fileSize == false) {
+            $("#" + imgid).val("");
+            errDup('The size of the file exceeds 2MB!')
+            return 1;
+        }
+    }
+
+    function clears(file, preview, clrbtn) {
+
+        $("#" + file).val("");
+        $('#' + preview).removeAttr('src');
+        $('#' + clrbtn).hide();
+    }
+
+    function changePhoto(file, photoid, change) {
+
+        $.alert.open({
+            type: 'warning',
+            cancel: false,
+            content: "You are attempting to change the uploaded " + file + ", <br> Click OK to proceed.",
+            buttons: {
+                OK: 'Ok',
+                NO: 'Not now'
+            },
+
+            callback: function(button) {
+                if (button == 'OK') {
+
+                    $('#' + change).hide();
+                    $('#' + photoid).show();
+                }
+
             }
         });
     }

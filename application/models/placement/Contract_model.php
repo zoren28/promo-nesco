@@ -9,6 +9,9 @@ class Contract_model extends CI_Model
     public $date;
     public $loginId;
     public $hrd_location;
+    public $column_order = array();
+    public $search_column = array();
+    public $order = array();
 
     function __construct()
     {
@@ -22,6 +25,10 @@ class Contract_model extends CI_Model
         $this->date = date('Y-m-d');
         $this->loginId = $_SESSION['emp_id'];
         $this->hrd_location = 'asc';
+
+        $this->column_order = array('record_no', 'emp_id', 'name', 'startdate', 'eocdate');
+        $this->search_column = array('record_no', 'emp_id', 'name', 'startdate', 'eocdate'); //set column field database for datatable searchable 
+        $this->order = array('name' => 'ASC'); // default order 
     }
 
     public function update_employment_history($emp_id, $startdate, $remarks, $stores)
@@ -849,5 +856,139 @@ class Contract_model extends CI_Model
                 return json_encode(array('status' => TRUE, 'message' => 'Rate was successfully transfered!'));
             }
         }
+    }
+
+    public function get_eoclist($data)
+    {
+        $this->make_query($data);
+        if (@$_POST["length"] != -1) {
+            $this->db->limit($_POST['length'], $_POST['start']);
+        }
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+
+    public function get_filtered_data($data)
+    {
+        $this->make_query($data);
+        $query = $this->db->get();
+        return $query->num_rows();
+    }
+
+    public function get_all_data($data)
+    {
+        $this->db->from('employee3');
+        $this->db->join('promo_record', 'promo_record.emp_id = employee3.emp_id AND promo_record.record_no = employee3.record_no');
+        $this->db->where('emp_type', 'Promo-NESCO');
+
+        if (!empty($data['bU'])) {
+            $this->db->where($data['bU'], 'T');
+        }
+
+        if (!empty($data['date'])) {
+
+            $date = date('Y-m-d');
+            if ($data['date'] == 'yesterday') {
+
+                $this->db->where('eocdate', date('Y-m-d', strtotime('-1 days')));
+            } else if ($data['date'] == 'last7days') {
+
+                $date_from = date('Y-m-d', strtotime('-7 days'));
+                $this->db->where("eocdate BETWEEN '$date_from' AND '$date'");
+            } else if ($data['date'] == 'last1month') {
+
+                $date_from = date('Y-m-d', strtotime('-1 month'));
+                $this->db->where("eocdate BETWEEN '$date_from' AND '$date'");
+            } else {
+
+                $this->db->where('eocdate', date('Y-m-d'));
+            }
+        } else {
+
+            $eocdate = $data['year'] . '-' . $data['month'];
+            $this->db->like('eocdate', $eocdate, 'after');
+        }
+
+        return $this->db->count_all_results();
+    }
+
+    private function make_query($data)
+    {
+        $this->db->from('employee3');
+        $this->db->join('promo_record', 'promo_record.emp_id = employee3.emp_id AND promo_record.record_no = employee3.record_no');
+        $this->db->where('emp_type', 'Promo-NESCO');
+
+        if (!empty($data['bU'])) {
+            $this->db->where($data['bU'], 'T');
+        }
+
+        if (!empty($data['date'])) {
+
+            if ($data['date'] == 'yesterday') {
+
+                $this->db->where('eocdate', date('Y-m-d', strtotime('-1 days')));
+            } else if ($data['date'] == 'last7days') {
+
+                $this->db->where('eocdate', date('Y-m-d', strtotime('-7 days')));
+            } else if ($data['date'] == 'last1month') {
+
+                $this->db->where('eocdate', date('Y-m-d', strtotime('-1 month')));
+            } else {
+
+                $this->db->where('eocdate', date('Y-m-d'));
+            }
+        } else {
+
+            $eocdate = $data['year'] . '-' . $data['month'];
+            $this->db->like('eocdate', $eocdate, 'after');
+        }
+
+        $i = 0;
+        foreach ($this->search_column as $item) // loop column 
+        {
+            if ($_POST['search']['value']) // if datatable send POST for search
+            {
+
+                if ($i === 0) // first loop
+                {
+                    $this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+                    $this->db->like('employee3.' . $item, $_POST['search']['value']);
+                } else {
+                    $this->db->or_like('employee3.' . $item, $_POST['search']['value']);
+                }
+
+                if (count($this->search_column) - 1 == $i) //last loop
+                    $this->db->group_end(); //close bracket
+            }
+            $i++;
+        }
+
+        if (isset($_POST['order'])) // here order processing
+        {
+            $this->db->order_by($this->column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } else if (isset($this->order)) {
+            $order = $this->order;
+            $this->db->order_by(key($order), $order[key($order)]);
+        }
+    }
+
+    public function get_blacklist_info($blacklist_no)
+    {
+        $query = $this->db->select('app_id, name, date_blacklisted, reportedby, reason, bday, address')
+            ->get_where('blacklist', array('blacklist_no' => $blacklist_no));
+        return $query->row_array();
+    }
+
+    public function check_appraisal($data, $record_no, $emp_id)
+    {
+        return $this->db->select($data->bunit_epascode)
+            ->get_where('promo_record', array($data->bunit_field => 'T', 'record_no' => $record_no, 'emp_id' => $emp_id));
+    }
+
+    public function get_appraisal($store, $record_no, $emp_id)
+    {
+        $query = $this->db->select('details_id, numrate, descrate, raterSO, rateeSO')
+            ->get_where('appraisal_details', array('record_no' => $record_no, 'emp_id' => $emp_id, 'store' => $store));
+        return $query->row();
     }
 }

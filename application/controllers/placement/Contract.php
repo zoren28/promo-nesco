@@ -344,4 +344,172 @@ class Contract extends CI_Controller
         $transfer = $this->contract_model->transfer_rate($data, $emp->record_no);
         echo $transfer;
     }
+
+    public function eoc_list()
+    {
+        $request = $this->input->post(NULL, TRUE);
+        $fetch_data = $this->contract_model->get_eoclist($request);
+        $data = array();
+        foreach ($fetch_data as $row) {
+
+            $sub_array = array();
+            $sub_array[] = '<a href="' . base_url('placement/page/menu/employee/profile/' . $row['emp_id']) . '" target="_blank">' . $row['name'] . '</a>';
+            $sub_array[] = date("m/d/Y", strtotime($row['startdate']));
+            $sub_array[] = date("m/d/Y", strtotime($row['eocdate']));
+
+            $bUs = $this->dashboard_model->epas_businessUnit_list();
+            $grado = array();
+            $comment = array();
+            foreach ($bUs as $bU) {
+
+                $rate = '';
+                $appraisal = $this->contract_model->check_appraisal($bU, $row['record_no'], $row['emp_id']);
+                if ($appraisal->num_rows() > 0) {
+
+                    $epas = $this->contract_model->get_appraisal($bU->bunit_name, $row['record_no'], $row['emp_id']);
+                    if (!empty($epas)) {
+
+                        if ($epas->raterSO == 1 && $epas->rateeSO == 1) {
+
+                            $rate = "yes";
+                            $label = "label label-success";
+                        } else {
+
+                            $rate = "no";
+                            $label = "label label-warning";
+                        }
+
+                        if ($epas->numrate == 100) {
+                            $label2 = "label label-success";
+                        } else if ($epas->numrate >= 90 && $epas->numrate <= 99.99) {
+                            $label2 = "label label-primary";
+                        } else if ($epas->numrate >= 85 && $epas->numrate <= 89.99) {
+                            $label2 = "label label-info";
+                        } else if ($epas->numrate >= 70 && $epas->numrate <= 84.99) {
+                            $label2 = "label label-danger";
+                        } else if ($epas->numrate >= 0 && $epas->numrate <= 69.99) {
+                            $label2 = "label label-danger";
+                        } else {
+                            $label2 = "label label-danger";
+                        }
+
+                        $grado[] = $epas->numrate;
+                        $comment[] = $rate;
+
+                        $sub_array[] = '<a href="javascript:void(0)" title="Click to view appraisal details" onclick="view_appraisal_details(' . $epas->details_id . ')"> <span class="' . $label2 . '">' . $epas->numrate . '</span> <span class="' . $label . '"> ' . $rate . '</span></a>';
+                    } else {
+
+                        $grado[] = '';
+                        $comment[] = '';
+
+                        $sub_array[] = '<span class="label label-default">none</span>';
+                    }
+                } else {
+
+                    $sub_array[] = '';
+                }
+            }
+
+            $action = $resign = $blacklist = 'no';
+            foreach ($grado as $key => $value) {
+
+                if ($value >= 85 && $comment[$key] == 'yes') {
+
+                    $renew = 'yes';
+                    continue;
+                } else if ($value >= 85 && $comment[$key] == 'no') {
+
+                    $resign = 'yes';
+                    continue;
+                } else {
+
+                    $blacklist = 'yes';
+                    break;
+                }
+            }
+
+            if ($blacklist == 'yes') {
+
+                $sub_array[] = '
+                    <select id="' . $row['emp_id'] . '" onchange="proceedTo(this)">
+                        <option value="">Proceed To</option>
+                        <option value="blacklist">Blacklist</option>
+                    </select>
+                ';
+            } else if ($resign == 'yes') {
+
+                $sub_array[] = '
+                    <select id="' . $row['emp_id'] . '" onchange="proceedTo(this)">
+                        <option value="">Proceed To</option>
+                        <option value="resign">Resign</option>
+                        <option value="blacklist">Blacklist</option>
+                    </select>
+                ';
+            } else {
+
+                $sub_array[] = '
+                    <select id="' . $row['emp_id'] . '" onchange="proceedTo(this)">
+                        <option value="">Proceed To</option>
+                        <option value="renewal">Renewal</option>
+                        <option value="resign">Resign</option>
+                    </select>
+                ';
+            }
+
+            $data[] = $sub_array;
+        }
+        $output = array(
+            "draw"                      =>     intval($_POST["draw"]),
+            "recordsTotal"              =>     $this->contract_model->get_all_data($request),
+            "recordsFiltered"           =>     $this->contract_model->get_filtered_data($request),
+            "data"                      =>     $data
+        );
+        echo json_encode($output);
+    }
+
+    public function upload_clearance_renewal()
+    {
+        $data['emp_id'] = $this->input->get('emp_id', TRUE);
+        $data['request'] = 'upload_clearance_renewal';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function store_clearance_renewal()
+    {
+        $data = $this->input->post(NULL, TRUE);
+
+        $clearanceFlag = "";
+        foreach ($data['clearances'] as $key => $value) {
+
+            $destination_path = "";
+            if (!empty($_FILES[$value]['name'])) {
+
+                $image        = addslashes(file_get_contents($_FILES[$value]['tmp_name']));
+                $image_name   = addslashes($_FILES[$value]['name']);
+                $array     = explode(".", $image_name);
+
+                $filename     = $data['emp_id'] . "=" . date('Y-m-d') . "=" . $value . "=" . date('H-i-s-A') . "." . end($array);
+                $destination_path    = "../document/clearance/" . $filename;
+
+                if (move_uploaded_file($_FILES[$value]['tmp_name'], $destination_path)) {
+
+                    $this->employee_model->upload_scanned_file('promo_record', $value, $destination_path, $data['emp_id'], $data['record_no']);
+                    $clearanceFlag = "true";
+                }
+            }
+        }
+
+        $name = $this->employee_model->employee_name($data['emp_id'])['name'];
+
+        if ($clearanceFlag == 'true') {
+
+            $activity = "Uploaded the Scanned Clearance for Renewal of " . $name . " Record No." . $data['record_no'];
+            $this->employee_model->logs($_SESSION['emp_id'], $_SESSION['username'], date("Y-m-d"), date("H:i:s"), $activity);
+            echo json_encode(['message' => 'success']);
+        } else {
+
+            echo json_encode(['message' => 'Opps! Something went wrong.']);
+        }
+    }
 }

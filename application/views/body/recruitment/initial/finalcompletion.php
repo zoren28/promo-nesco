@@ -21,7 +21,7 @@
 										<td><?= $i['lastname'].", ".$i['firstname']." ".$i['middlename']." ".$i['suffix'] ?></td>
 										<td><?= $i['position'] ?></td>
 										<td><?= $i['date_time'] ?></td>
-										<td><button id="<?= $i['app_code'] ?>" type="button" class="btn btn-primary btn-sm record">Upload</button></td>
+										<td><button id="<?= $i['app_code']."|".$i['app_id'] ?>" type="button" class="btn btn-primary btn-sm upload_final">Upload</button></td>
 									</tr><?php } ?>
 							</tbody>
 						</table>
@@ -30,3 +30,42 @@
 		</div>
 	</div>
     
+	
+	<div class="modal fade" id="final_modal" >
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header bg-light-blue color-palette">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span></button>
+					<h5 class="modal-title">Upload Final Requirement</h5>
+				</div>
+					<form id='save_final_completion' method='post' enctype="multipart/form-data">
+						<div class="modal-body final_display" style='font-size=10px;'>		
+						</div>
+						
+						<div class="modal-footer">
+							<button type="button" class="btn" data-dismiss="modal">Close</button>
+							<button type="submit" class="btn btn-primary">Submit</button>
+						</div>
+					</form>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade" id="final_completion_modal" >
+		<div class="modal-dialog modal-md">
+			<div class="modal-content">
+				<div class="modal-header bg-light-blue color-palette">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span></button>
+					<h5 class="modal-title">Final Completion Info</h5>
+				</div>
+				<div class="modal-body final_completion_display" style='font-size=10px;'>		
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn" data-dismiss="modal">Close</button>
+					<!--button type="button" class="btn" data-dismiss="modal" id='reloadpage'>Close</button-->
+				</div>
+			</div>
+		</div>
+	</div>

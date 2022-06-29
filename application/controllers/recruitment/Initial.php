@@ -78,32 +78,89 @@ class Initial extends CI_Controller
 			echo json_encode(array('status'=> 0, 'message' => "Error Found!")); 
 		}
 	}
+	public function save_final_completion()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		
+		$files = array('birthcertificate',
+						'police_clearance',
+						'fingerprint',
+						'sss',
+						'cedula',
+						'parentconsent',
+						'medical',
+						'house_skecth',
+						'background_investagation',
+						'otherDoc');
+		foreach($files as $file => $value) 
+		{
+			$temp = 'jpg'; 
+			
+			if(isset($_FILES[$value])) 
+			{
+				print_r($this->initial_model->check_upload_finalcompletion($value));
+				
+			}
+		}
+			
+		print_r($fetch_data);
+		
+	}
+	public function final_completion()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		$explode_val = explode("|",$fetch_data['id']);
+		$fetch_data['id'] = $explode_val[1];
+		$data['finale'] = $this->initial_model->applicant_examinee($fetch_data);
+		$data['check_record'] 	= $this->initial_model->record_applicant_info($fetch_data);
+		$data['request'] = "final_completion";
+		$this->load->view('body/recruitment/function_query', $data);
+	}
 	
+	public function final_interview()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		$fetch_data['app_status'] = $this->initial_model->get_interview_result($fetch_data);
+		if(!empty($fetch_data['grade']))
+		{
+			$this->db->trans_start();
+			$this->initial_model->applicant_status($fetch_data);
+			$this->db->trans_complete();
+			if ($this->db->trans_status() === TRUE)
+			{ 
+				if($fetch_data['interview_stat'] == 'passed')
+				{
+					echo json_encode(array('status'=> 1, 'message' => "Applicant Final Interview Done... Proceed to Final Completion"));
+				}
+				else
+				{
+					echo json_encode(array('status'=> 1, 'message' => "Applicant Failed Interview! Proceed to Transfer"));
+				}
+				
+			}
+			else
+			{ 
+				echo json_encode(array('status'=> 2, 'message' => "Error Found!")); 
+			}	 
+		}
+		else
+		{
+			echo json_encode(array('status'=> 0, 'message' => "Sorry! Can't Proceed, No Grades Yet!")); 
+		}
+	}
 	// check interview details
 	public function check_interview()
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
 		$explode_val = explode("|",$fetch_data['id']);
 		$fetch_data['id'] = $explode_val[1];
+		
 		$data['interview_remarks'] = $this->initial_model->get_Initial_interview_remarks($explode_val[1]);
 		$data['applicant_examinee'] = $this->initial_model->applicant_examinee($fetch_data);
 		$data['interviewer_list'] = $this->initial_model->get_Initial_interviewer_list($explode_val[1]);
 		$data['request'] = "check_interview_detail";
 		$this->load->view('body/recruitment/function_query', $data);
-		
-		//print_r($return_remark);
-		//print_r($return_examinee);
-		//$this->db->trans_start();
-		//$this->initial_model->save_setUp_interview($fetch_data);
-		/* $this->db->trans_complete();
-		if ($this->db->trans_status() === TRUE)
-		{ 
-			echo json_encode(array('status'=> 1, 'message' => "Applicant Set-up Interview Done!")); 
-		}
-		else
-		{ 
-			echo json_encode(array('status'=> 0, 'message' => "Error Found!")); 
-		} */
+
 	}
 	// selecting an final interviewer
 	public function setup_interviewee()

@@ -76,7 +76,7 @@
 				
 				<form id='proceed_upload' method='post' enctype="multipart/form-data" >
 				
-					<input type="text" name='updt_or_appnd' class="form-control" id="updt_or_appnd" readonly="readonly">
+					<input type="hidden" name='updt_or_appnd' class="form-control" id="updt_or_appnd" readonly="readonly">
 					<input type="hidden" name='hidden_gender' class="form-control" id="hidden_gender" readonly="readonly">
 					<input type="hidden" name='hidden_civil_status' class="form-control" id="hidden_civil_status" readonly="readonly">
 					<input type="hidden" name='hidden_firstname' class="form-control" id="hidden_firstname" readonly="readonly">

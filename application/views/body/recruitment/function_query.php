@@ -15,12 +15,201 @@
 			echo json_encode(array('status'=> 0, 'proceed'=>1, 'message' => "You can proceed and Add applicant's data/initial requirements.."));
 		}	
 	}
+	else if($request == "final_completion")
+	{
+		?>
+		<div class="panel-body">
+			<div class="box box-primary">
+				<h4 style='padding-left:0px; padding-right:0px;'><u>APPLICANT INFORMATION</u></h4>
+				<div class="panel-body" style='padding-left:0px; padding-right:0px;'>
+					<div class="col-sm-12" style='padding-left:0px; padding-right:0px;'>
+						
+						<div class="col-sm-6" style='padding-left:0px; padding-right:5px;'>
+							<div class="form-group">
+								 <label for="hrmsId">APPLICANT ID</label>
+								 <input type="hidden" name='appcode' class="form-control" id="appcode"  value='<?=$finale['appcode']?>' readonly>
+								 <input type="text" name='appid' class="form-control" id="appid"  value='<?=$finale['app_id']?>' readonly >
+							</div>
+						</div>
+						
+						<div class="col-sm-6" style='padding-left:5px; padding-right:0px;'>
+							<div class="form-group">
+								 <label for="hrmsId">APPLICANT NAME</label>
+								 <input type="text" name='name' class="form-control" id="name"  value='<?=$finale['lastname'].", ".$finale['firstname']." ".$finale['middlename']." ".$finale['suffix']?>' readonly >
+							</div>
+						</div>
+						
+					</div>
+				</div>	
+			</div>
+			
+			<div class="box box-primary">
+				<h4 style='padding-left:0px; padding-right:0px;'><u>FINAL REQUIREMENTS</u></h4>
+				<div class="panel-body" style='padding-left:0px; padding-right:0px;'>
+					<div class="col-sm-12" style='padding-left:0px; padding-right:0px;'>
+						
+						<div class="col-sm-6" style='padding-left:0px; padding-right:5px;'>
+							<div class="form-group">
+								<label for="hrmsId">BLOOD TYPE</label>
+								<select class="form-control" name="bloodtype" required>
+									<option value=''>Select Type</option>
+									<option value='A+'>A+</option>
+									<option value='A-'>A-</option>
+									<option value='B+'>B+</option>
+									<option value='B-'>B-</option>
+									<option value='AB+'>AB+</option>
+									<option value='AB-'>AB-</option>
+									<option value='O+'>O+</option>
+									<option value='O-'>O-</option>
+								</select>
+							</div>
+							
+							
+							<div class="form-group">
+								 <label for="hrmsId">BIRTH CERTIFICATE</label>
+								 <input type="file" name='birthcertificate[]' class="form-control" id="birthcertificate" multiple="" required>
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">POLICE CLEARANCE</label>
+								 <input type="file" name='police_clearance' class="form-control" id="police_clearance" >
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">FINGERPRINT</label>
+								 <input type="file" name='fingerprint' class="form-control" id="fingerprint" >
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">SSS</label>
+								 <input type="file" name='sss' class="form-control" id="sss" >
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">CEDULA</label>
+								 <input type="file" name='cedula' class="form-control" id="cedula" >
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">PARENT CONSENT</label>
+								 <input type="file" name='parentconsent' class="form-control" id="parentconsent" >
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">MEDICAL CERTIFICATE</label>
+								 <input type="file" name='medical' class="form-control" id="medical" >
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">HOUSE ADDRESS SKETCH</label>
+								 <input type="file" name='house_skecth' class="form-control" id="house_skecth" >
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">PAG-IBIG TRACKING</label>
+								 <input type="text" data-inputmask='"mask": "99999999999"' data-mask name='pagibig_track' class="form-control" id="pagibig_track" >
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">PAG-IBIG MID</label>
+								 <input type="text" data-inputmask='"mask": "9999-9999-9999"' data-mask name='pagibig_mid' class="form-control" id="pagibig_mid" >
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId"><a href="#" id="addOtherDocs">* Add other documents</a></label>
+								 <table  id="seminar" class="order-list1">
+									
+									<tbody>
+											<tr>
+											  <td><input name="documentName[]" type="text" class="form-control"></td>
+											  <td><input name="otherDoc[]" id='otherDoc' onchange='validate(this.id)' type="file" class="form-control"></td>
+											  <td><a class="deleteRow"></a></td>
+											</tr>		
+									</tbody>
+									</table>
+							</div>
+						</div>
+						
+						<div class="col-sm-6" style='padding-left:5px; padding-right:0px;'>
+							<div class="form-group">
+								<label for="hrmsId">BACKGROUND INVESTIGATION</label>
+								<input type="file" name='background_investagation' class="form-control" id="background_investagation" >
+							</div>
+							<div class="form-group">
+								<label for="hrmsId">DRUG TEST</label>
+								<input type="file" name='drugtest' class="form-control" id="drugtest" >
+							</div>
+							<div class="form-group">
+								<label for="hrmsId">RECOMMENDATION LETTER</label>
+								<input type="file" name='recommen_leter' class="form-control" id="recommen_leter" >
+							</div>
+							<div class="form-group">
+								<label for="hrmsId">RECOMMENDATION LETTER</label>
+								<input type="file" name='recommen_leter' class="form-control" id="recommen_leter" >
+							</div>
+							<div class="form-group">
+								<label for="hrmsId">MARRIAGE CERTIFICATE</label>
+								<input type="file" name='marriage' class="form-control" id="marriage" >
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">SSS ID</label>
+								 <input type="text" data-inputmask='"mask": "99-9999999-9"' data-mask name='sss_id' class="form-control" id="sss_id" >
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">ID CARD No</label>
+								 <input type="text" data-inputmask='"mask": "99999999"' data-mask name='id_card' class="form-control" id="id_card" >
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">CTC No</label>
+								 <input type="text" data-inputmask='"mask": "CCI9999 99999999"' data-mask name='ctc_no' class="form-control" id="ctc_no" >
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">Issued On (CTC)</label>
+								 <input type="text" data-inputmask='"mask": "9999-99-99"' data-mask name='issued_on_ctc' class="form-control" id="issued_on_ctc" placeholder='yyyy-mm-dd' >
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">Issued At (CTC)</label>
+									<input list="issued_at_ctc" name="issued_at_ctc" autocomplete="off" class="form-control" required>
+									<datalist id="issued_at_ctc">
+									<?php foreach ($check_record['town_brgy'] as $i) { echo "<option value='" . $i['brgy_name'] . ", " . $i['town_name'] . ", " . $i['prov_name'] . "'>" . $i['brgy_name'] . ", " . $i['town_name'] . ", " . $i['prov_name'] . "</option>"; } ?>
+									</datalist>
+							</div>
+							<div class="form-group">
+								 <label for="hrmsId">Philhealth No</label>
+								 <input type="text" data-inputmask='"mask": "99-999999999-9"' data-mask name='philhealth' class="form-control" id="philhealth">
+							</div>_
+						</div>
+						
+					</div>	
+				</div>
+			</div>
+		</div>
+		
+		<script type="text/javascript">
+		var counter1 = 0;
+			
+		$("#addOtherDocs").on("click", function () 
+		{
+			var counter1 = $('#documentName tr').length - 2;
+			var newRow = $("<tr>");
+			var cols = "";
+			cols += '<td><input type="text" name="documentName[]" id="documentName' + counter1 + '" onchange="check(this)" class="form-control" ></td>';
+			cols += '<td><input name="otherDoc[]" id="otherDoc['+counter1+']" onchange="validate(this.id)" type="file" class="form-control" ></td>';
+			cols += '<td><input type="button" class="ibtnDelsem" value="Delete" class="form-control" ></td>';
+			newRow.append(cols);
+			$("table.order-list1").append(newRow);
+			counter1++;
+		});
+		
+		$("table.order-list1").on("click", ".ibtnDelsem", function (event) 
+		{
+			$(this).closest("tr").remove();
+			counter1--;
+			$('#addOtherDocs').prop('disabled', false).prop('value', "Add row");
+		});
+			
+		$("[data-mask]").inputmask();
+		
+		</script>
+		<?php
+	}
 	else if($request == "check_interview_detail")
 	{
 		?>
 		<div class="panel-body">
 			<div class="form-group">
 				 <label for="hrmsId">APPLICANT ID</label>
+				 <input type="hidden" name='appcode' class="form-control" id="appcode"  value='<?=$applicant_examinee['appcode']?>' readonly required>
 				 <input type="text" name='appid' class="form-control" id="appid"  value='<?=$applicant_examinee['app_id']?>' readonly >
 			</div>
 			
@@ -31,23 +220,27 @@
 			
 			<div class="form-group">
 				 <label for="hrmsId">Initial Remarks</label>
-				 <textarea name='initialRemark' class="form-control" id="initialRemark"  style='resize:none; height:250px;' readonly><?=$interview_remarks['interviewer_remarks']?> </textarea>
+				 <textarea name='initialRemark' class="form-control" id="initialRemark"  style='resize:none; height:100px;' readonly><?=$interview_remarks['interviewer_remarks']?> </textarea>
 			</div>
 			
 			<div class="form-group">
 				<label for="hrmsId">FINAL INTERVIEWER</label>
-				<!--table class='table-bordered'>
+				<table class='table table-bordered table-hover dataTable dtr-inline'>
 					<thead>
-						<th style='border:1px;'>INTERVIEWER</th>
-						<th style='border:1px;'>GRADES</th>
+						<th style='width:70%; background-color:lightblue;'>INTERVIEWER</th>
+						<th style='width:30%; background-color:lightblue;'>GRADE</th>
 					</thead>
 					<tbody>
 						<tr>
-							<td>TTT</td>
-							<td>TTT</td>
+							<input type='hidden' name='grade' value='<?=$this->initial_model->getGrade($interviewer_list['interview_code'])['num_rate']?>'>
+							<td style='background-color:lightblue;'><u><?=$this->initial_model->getName($interviewer_list['interviewer_id'])?></u></td>
+							<td style='color:red; background-color:lightblue;'>
+							<?=$this->initial_model->getGrade($interviewer_list['interview_code'])['num_rate']." - ".
+							$this->initial_model->getGrade($interviewer_list['interview_code'])['desc_rate']?></td>
 						</tr>
+						
 					</tbody>
-				</table-->
+				</table>
 			</div>
 			
 			<div class="form-group">

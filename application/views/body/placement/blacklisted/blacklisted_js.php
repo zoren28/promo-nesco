@@ -179,7 +179,7 @@
         });
 
         if ("<?php echo @$empId ?>" != "") {
-            alert('asd')
+
             enabledFields();
         }
 

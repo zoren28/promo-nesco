@@ -22,6 +22,13 @@ class Dashboard_model extends CI_Model
         return $query->result();
     }
 
+    public function epas_businessUnit_list()
+    {
+        $query = $this->db->select('bunit_id, bunit_name, bunit_field, bunit_acronym, bunit_epascode, bunit_permit, bunit_clearance, bunit_contract, bunit_intro, bunit_dutySched, bunit_dutyDays, bunit_specialSched, bunit_specialDays')
+            ->get_where('locate_promo_business_unit', array('appraisal_status' => 'active', 'hrd_location' => $this->hrd_location));
+        return $query->result();
+    }
+
     public function count_per_bu($field)
     {
         $where = array('emp_type' => 'Promo-NESCO', $field => 'T', 'current_status' => 'Active');

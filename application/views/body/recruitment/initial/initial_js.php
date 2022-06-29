@@ -385,6 +385,42 @@
 				});
 		});
 		
+		// tag for transfer button
+		$('#tableViewEmp').on('click', 'button.upload_final', function() 
+		{
+            var id = this.id;
+			
+            if (!$(this).parents('tr').hasClass('selected')) 
+			{
+                tableViewEmp.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+				$.ajax({
+					url: "<?php echo site_url('final_completion'); ?>",
+					type: 'POST',
+					data:{id},
+					success: function(response)
+					{
+						//alert(response);
+						//response = JSON.parse(response);
+						
+						$("div#final_modal").modal({
+							backdrop: 'static',
+							keyboard: false,
+							show: true
+						});	
+						
+						$("div.final_display").html(response);
+						
+						
+						/* if(response.status === 1)
+						{
+							$("div.info_exam_msg").html(response.message);
+						} */
+					}
+				});
+		});
+		
 		
 		$("form#setup_interviewee").submit(function(e) {
 
@@ -411,6 +447,35 @@
 					{
 						$("div.interview_display").html(response.message);
 					}
+				},
+				async: false,
+				cache: false,
+				contentType: false,
+				processData: false
+			});
+        });
+		
+		$("form#save_final_completion").submit(function(e) {
+
+            e.preventDefault();
+			
+            var formData = new FormData(this);
+
+			console.log(formData);
+			$.ajax({
+				url: "<?php echo site_url('save_final_completion'); ?>",
+				type: 'POST',
+				data:formData,
+				
+				success: function(response) {
+					
+					$("div#final_completion_modal").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});	
+					$("div.final_completion_display").html(response);
+					
 				},
 				async: false,
 				cache: false,
@@ -518,6 +583,44 @@
 					{
 						$("div.info_exam").html(response.message);
 					}
+				},
+				async: false,
+				cache: false,
+				contentType: false,
+				processData: false
+			});
+        });
+		
+		$("form#final_interview").submit(function(e) {
+
+            e.preventDefault();
+			
+            var formData = new FormData(this);
+
+			console.log(formData);
+			$.ajax({
+				url: "<?php echo site_url('final_interview'); ?>",
+				type: 'POST',
+				data:formData,
+				success: function(response) {
+					
+					response = JSON.parse(response);
+					
+					$("div#interview_modal").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});	
+					
+					if(response.status === 1)
+					{
+						$("div.interview_display").html(response.message);
+					}
+					else
+					{
+						$("div.interview_display").html(response.message);
+					}
+					
 				},
 				async: false,
 				cache: false,

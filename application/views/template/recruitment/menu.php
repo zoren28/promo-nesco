@@ -60,6 +60,13 @@
 				</a>
 			</li>
 			
+			
+			<li class="treeview">
+				<a href="<?php echo base_url('recruitment/page/menu/initial/transfer'); ?>">
+					<i class="fa fa-arrow-right"></i> <span>Transfer</span>
+				</a>
+			</li>
+			
 		</ul>
     </section>
     <!-- /.sidebar -->

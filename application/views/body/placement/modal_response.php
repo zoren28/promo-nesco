@@ -301,7 +301,8 @@ if ($request == "update_blacklist_form") {
                         }
 
                         echo "
-                            <input type='hidden' id='appName_" . $fetch['app_id'] . "' value='" . ucwords(strtolower($fullname)) . "</td>
+                            <tr>
+                                <td><input type='hidden' id='appName_" . $fetch['app_id'] . "' value='" . ucwords(strtolower($fullname)) . "'>" . ucwords(strtolower($fullname)) . "</td>
                                 <td><span class='btn btn-block btn-sm btn-$label'>$currentStat</span></td>
                                 <td><button class='btn btn-sm btn-secondary choose' $option id='choose_" . $fetch['app_id'] . "'><i class='fa fa-hand-pointer-o'></i> Choose</button></td>
                             </tr>";
@@ -5138,5 +5139,31 @@ if ($request == "update_blacklist_form") {
             <span class="loadingSave"></span>
         </div>
     </div>
+    <?php
+} else if ($request == 'upload_clearance_renewal') {
+
+    $emp = $this->employee_model->employee_info($emp_id);
+    $bUs = $this->dashboard_model->businessUnit_list();
+    foreach ($bUs as $bu) {
+
+        $hasBU = $this->dashboard_model->promo_has_bu($emp_id, $bu->bunit_field);
+        if ($hasBU > 0) {
+    ?>
+            <input type="hidden" name="clearances[]" value="<?= $bu->bunit_clearance ?>">
+            <div class="row">
+                <div class="col-md-12">
+                    <b><?= "Clearance ($bu->bunit_name)" ?></b><br>
+                    <img id="photo<?= $bu->bunit_clearance ?>" class='preview img-responsive' /><br>
+                    <input type='file' name='<?= $bu->bunit_clearance ?>' id='<?= $bu->bunit_clearance ?>' class='btn btn-default' required onchange='readURL(this,"<?= $bu->bunit_clearance ?>")'>
+                    <input type='button' name='clear<?= $bu->bunit_clearance ?>' id='clear<?= $bu->bunit_clearance ?>' style='display:none' class='btn btn-default' value='Clear' onclick="clears('<?= $bu->bunit_clearance ?>','photo<?= $bu->bunit_clearance ?>','clear<?= $bu->bunit_clearance ?>')">
+                    <input type='button' id='<?= $bu->bunit_clearance ?>_change' style='display:none' class='btn btn-primary btn-sm' value='Change Clearance?' onclick='changePhoto("Clearance","<?= $bu->bunit_clearance ?>","<?= $bu->bunit_clearance; ?>_change")'>
+                </div>
+            </div><br>
+    <?php
+        }
+    }
+    ?>
+    <input type="hidden" name="emp_id" id="emp_id" value="<?php echo $emp_id; ?>">
+    <input type="hidden" name="record_no" id="record_no" value="<?php echo $emp->record_no; ?>">
 <?php
 }
