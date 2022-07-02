@@ -1333,8 +1333,8 @@
 
     function eocList(bU, date, month, year) {
 
-        let cols = 16;
-        // let cols = $('table#eoc-list').DataTable({}).columns().header().length;
+        let cols = $('table#eoc-list').DataTable().columns().header().length;
+        $("table#eoc-list").DataTable().destroy();
 
         let dataTable = $('table#eoc-list').DataTable({
             destroy: true,

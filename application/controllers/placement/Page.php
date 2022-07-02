@@ -33,8 +33,7 @@ class Page extends CI_Controller
         $data['title']  = $menu;
         $data['page']  = $page;
 
-        $activeBU = $this->dashboard_model->businessUnit_list();
-        $data['activeBUs']  = $activeBU;
+        $data['activeBUs'] = $this->dashboard_model->businessUnit_list();
 
         if (($menu == "employee" && $page == "profile") || ($menu == "contract" && $page == "process-renewal") || ($menu == "blacklisted" && $page == "add-blacklisted") || ($menu == "termination" && $page == "resignation_termination")) {
 

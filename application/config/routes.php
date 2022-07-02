@@ -1,6 +1,16 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+// for user account module
+$route['create_user_account'] = 'placement/account/create_user_account';
+$route['find_active_hr_staff'] = 'placement/account/find_active_hr_staff';
+$route['create_hr_account'] = 'placement/account/create_hr_account';
+$route['promo_account_list'] = 'placement/account/promo_account_list';
+$route['hr_account_list'] = 'placement/account/hr_account_list';
+$route['update_hr_account'] = 'placement/account/update_hr_account';
+$route['update_hr_status'] = 'placement/account/update_hr_status';
+
+
 // for contract module
 $route['extend_contract'] = 'placement/contract/extend_contract';
 $route['show_intro'] = 'placement/contract/show_intro';

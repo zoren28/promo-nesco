@@ -972,13 +972,6 @@ class Contract_model extends CI_Model
         }
     }
 
-    public function get_blacklist_info($blacklist_no)
-    {
-        $query = $this->db->select('app_id, name, date_blacklisted, reportedby, reason, bday, address')
-            ->get_where('blacklist', array('blacklist_no' => $blacklist_no));
-        return $query->row_array();
-    }
-
     public function check_appraisal($data, $record_no, $emp_id)
     {
         return $this->db->select($data->bunit_epascode)
