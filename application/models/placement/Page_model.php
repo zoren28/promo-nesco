@@ -32,7 +32,7 @@ class Page_model extends CI_Model
 
     public function incharge_menu()
     {
-        $this->db->select('id, menu, route, icon, has_submenu');
+        $this->db->select('id, menu, route, icon, has_submenu, promo1, promo2, nesco');
         $query = $this->db->get_where('promo_placement_menu', array($this->usertype => true, 'status' => true));
         return $query->result_array();
     }
@@ -40,7 +40,7 @@ class Page_model extends CI_Model
     public function incharge_submenu($id)
     {
 
-        $this->db->select('sub_menu, route');
+        $this->db->select('id, sub_menu, route, promo1, promo2, nesco');
         $query = $this->db->get_where('promo_placement_submenu', array($this->usertype => true, 'status' => true, 'menu_id' => $id));
         return $query->result_array();
     }

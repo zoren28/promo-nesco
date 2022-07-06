@@ -357,8 +357,8 @@
         });
     }
 
-    function userStatus(emp_id, status) {
-
+    function userAccess(value, field, table, id) {
+        console.log(value, field, table, id);
         $.ajax({
             type: "POST",
             url: "<?= site_url('update_hr_status') ?>",

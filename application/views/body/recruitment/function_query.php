@@ -131,11 +131,7 @@
 							</div>
 							<div class="form-group">
 								<label for="hrmsId">RECOMMENDATION LETTER</label>
-								<input type="file" name='recommen_leter' class="form-control" id="recommen_leter" >
-							</div>
-							<div class="form-group">
-								<label for="hrmsId">RECOMMENDATION LETTER</label>
-								<input type="file" name='recommen_leter' class="form-control" id="recommen_leter" >
+								<input type="file" name='recommend_letter' class="form-control" id="recommend_letter" >
 							</div>
 							<div class="form-group">
 								<label for="hrmsId">MARRIAGE CERTIFICATE</label>
@@ -159,7 +155,7 @@
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">Issued At (CTC)</label>
-									<input list="issued_at_ctc" name="issued_at_ctc" autocomplete="off" class="form-control" required>
+									<input list="issued_at_ctc" name="issued_at_ctc" autocomplete="off" class="form-control">
 									<datalist id="issued_at_ctc">
 									<?php foreach ($check_record['town_brgy'] as $i) { echo "<option value='" . $i['brgy_name'] . ", " . $i['town_name'] . ", " . $i['prov_name'] . "'>" . $i['brgy_name'] . ", " . $i['town_name'] . ", " . $i['prov_name'] . "</option>"; } ?>
 									</datalist>
@@ -167,7 +163,7 @@
 							<div class="form-group">
 								 <label for="hrmsId">Philhealth No</label>
 								 <input type="text" data-inputmask='"mask": "99-999999999-9"' data-mask name='philhealth' class="form-control" id="philhealth">
-							</div>_
+							</div>
 						</div>
 						
 					</div>	

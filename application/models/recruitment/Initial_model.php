@@ -34,6 +34,74 @@ class Initial_model extends CI_Model
 		return compact("duplicate","blacklist");
 	}
 	
+	public function insert_finalreq_info($fileV,$fileType,$appcode)
+	{
+		if($fileV == "police_clearance")
+		{
+			$requiName = "Police Clearance";
+		}
+		else if($fileV == "fingerprint")
+		{
+			$requiName = "Fingerprint";
+		}
+		else if($fileV == "sss")
+		{
+			$requiName = "SSS";
+		}
+		else if($fileV == "cedula")
+		{
+			$requiName = "Cedula";
+		}
+		else if($fileV == "parentconsent")
+		{
+			$requiName = "Parent Consent";
+		}
+		else if($fileV == "medical")
+		{
+			$requiName = "Medical Certificate";
+		}
+		else if($fileV == "house_skecth")
+		{
+			$requiName = "House Sketch";
+		}
+		else if($fileV == "background_investagation")
+		{
+			$requiName = "Background Investagation";
+		}
+		else if($fileV == "drugtest")
+		{
+			$requiName = "Drug Test";
+		}
+		else if($fileV == "recommend_letter")
+		{
+			$requiName = "Recommendation Letter";
+		}
+		else if($fileV == "marriage")
+		{
+			$requiName = "Marriage Certificate";
+		}
+		else if($fileV == 'birthcertificate')
+		{
+			$requiName = "Birth Certificate";
+		}
+		else if($fileV == 'otherDoc')
+		{
+			$requiName = "Other Docmument";
+		}
+			
+		$data = array(
+				'filename' 				=> $fileType,
+				'app_id'				=> $appcode,
+				'requirement_name' 		=> $requiName,
+				'receiving_staff'		=> $_SESSION['emp_id'],
+				'date_time'				=> date("Y-m-d"),
+				'requirement_status'	=> "passed"
+			);
+			
+		$this->db->insert('application_finalreq', $data); 
+		return $this->db->insert_id(); 
+	}
+	
 	public function insert_uploaded_info($fileV,$fileType,$appcode)
 	{
 		if($fileV == 'resume')
@@ -62,8 +130,11 @@ class Initial_model extends CI_Model
 		return $this->db->insert_id(); 
 	}
 	
-	public function check_upload_finalcompletion($value)
+	public function check_upload_finalcompletion($value,$fetch_data)
 	{
+		$temp 		= 	'jpg';
+		$target_dir	=	"../document/final_requirements/";
+				
 		$maxsize    = 2097152;
 		$acceptable = array(
 			'image/jpeg',
@@ -73,24 +144,28 @@ class Initial_model extends CI_Model
 		
 		if($value == 'birthcertificate' || $value == 'otherDoc')
 		{
-			if($value == 'birthcertificate')
-			{
-				$file_name = "Birth Certificate"; 
-			}
-			else
-			{
-				$file_name = "Other Document";
-			}
+			
 			for($i=0; $i< count($_FILES[$value]['name']); $i++)
 			{
 				$filesize 	= 	$_FILES[$value]['size'][$i];
-				$filename	=	$_FILES[$value]['name'][$i];
 				$filetype	=	$_FILES[$value]['type'][$i];
 				
-				//$birthcertificate 	= 	"resumebiodata_".$i."_".$appcode."_".date("Y-m-d").".".$temp;
-				//$location 	= 	$target_dir."birthcertificate/".$birthcertificate;
+				if($value == 'birthcertificate')
+				{
+					$file_name 		= "Birth Certificate";
+					$target_folder 	= $target_dir."birth_certificate/";
+					$filename 		= $value."_".$i."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+					$location 		= $target_folder.$filename;
+				}
+				else
+				{
+					$file_name 		= "Other Document";
+					$target_folder 	= $target_dir."others/";
+					$filename 		= $fetch_data['documentName'][$i]."_".$value."_".$i."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+					$location 		= $target_folder.$filename;
+				}
 				
-				if($filesize >= $maxsize || $filesize == 0) 
+				if($filesize >= $maxsize) 
 				{
 					echo $file_name." file too large. File must be less than 2 megabytes.";
 				}
@@ -102,26 +177,115 @@ class Initial_model extends CI_Model
 					}
 					else
 					{
-						
-						echo $value." ".$_FILES[$value]['name'][$i]." ".$_FILES[$value]['size'][$i]." ".$_FILES[$value]['type'][$i];
-						echo "<br>";
-						/* if(move_uploaded_file($_FILES["resume"]["tmp_name"][$i], $target_dir."resume/".$resume))
+						if(move_uploaded_file($_FILES[$value]["tmp_name"][$i],$target_folder.''.$filename))
 						{
-							$resume_upload = $this->initial_model->insert_uploaded_info($value,$location,$appcode);
-							$resume_flag = 1;
-						} */
+							$finalreq = $this->initial_model->insert_finalreq_info($value,$location,$fetch_data['appid']);
+						}
 					}
 				}
 			}	
 		}
 		else
 		{
-			$filesize 	= 	$_FILES['birthcertificate']['size'];
-			$filename	=	$_FILES['birthcertificate']['name'];
-			$filetype	=	$_FILES['birthcertificate']['type'];
-			
-			echo $value." ".$_FILES[$value]['name']." ".$_FILES[$value]['size']." ".$_FILES[$value]['type'];
-			echo "<br>";
+			$filesize 	= 	$_FILES[$value]['size'];
+			$filetype	=	$_FILES[$value]['type'];
+			//-------------------------------------------------//
+			if($value == "police_clearance")
+			{
+				$file_name 		= "Police Clearance";
+				$target_folder 	= $target_dir."police_clearance/";
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$location 		= $target_folder.$filename;
+			}
+			else if($value == "fingerprint")
+			{
+				$file_name 		= "Fingerprint";
+				$target_folder 	= $target_dir."fingerprint/";
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$location 		= $target_folder.$filename;
+			}
+			else if($value == "sss")
+			{
+				$file_name 		= "SSS";
+				$target_folder 	= $target_dir."sss/";
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$location 		= $target_folder.$filename;
+			}
+			else if($value == "cedula")
+			{
+				$file_name 		= "Cedula";
+				$target_folder 	= $target_dir."cedula/";
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$location 		= $target_folder.$filename;
+			}
+			else if($value == "parentconsent")
+			{
+				$file_name 		= "Parent Consent";
+				$target_folder 	= $target_dir."parent_consent/";
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$location 		= $target_folder.$filename;
+			}
+			else if($value == "medical")
+			{
+				$file_name 		= "Medical Certificate";
+				$target_folder 	= $target_dir."medical_certificate/";
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$location 		= $target_folder.$filename;
+			}
+			else if($value == "house_skecth")
+			{
+				$file_name 		= "House Sketch";
+				$target_folder 	= $target_dir."sketch/";
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$location 		= $target_folder.$filename;
+			}
+			else if($value == "background_investagation")
+			{
+				$file_name 		= "Background Investagation";
+				$target_folder 	= $target_dir."bi/";
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$location 		= $target_folder.$filename;
+			}
+			else if($value == "drugtest")
+			{
+				$file_name 		= "Drug Test";
+				$target_folder 	= $target_dir."drug_test/";
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$location 		= $target_folder.$filename;
+			}
+			else if($value == "recommend_letter")
+			{
+				$file_name 		= "Recommendation Letter";
+				$target_folder 	= $target_dir."recommendation_letter/";
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$location 		= $target_folder.$filename;
+			}
+			else if($value == "marriage")
+			{
+				$file_name 		= "Marriage Certificate";
+				$target_folder 	= $target_dir."marriage_certificate/";
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$location 		= $target_folder.$filename;
+			}
+			//-------------------------------------------------//
+			if($filesize >= $maxsize) 
+			{
+				echo $file_name." file too large. File must be less than 2 megabytes.";
+			}
+			else
+			{
+				if((!in_array($filetype, $acceptable)) && (!empty($filetype))) 
+				{
+					$value." file is invalid file type. Only PDF, JPG, GIF and PNG types are accepted.";
+				}
+				else
+				{
+					if(move_uploaded_file($_FILES[$value]["tmp_name"],$target_folder.''.$filename))
+					{
+						$finalreq = $this->initial_model->insert_finalreq_info($value,$location,$fetch_data['appid']);
+					}
+				}
+			}
 		}
 	}
 	

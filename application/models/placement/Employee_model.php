@@ -339,7 +339,11 @@ class Employee_model extends CI_Model
             ->where('emp_id', $emp_id)
             ->where('usertype', 'employee')
             ->get();
-        return $query->row()->login;
+        if ($query->num_rows() > 0) {
+            return $query->row()->login;
+        } else {
+            return 'no';
+        }
     }
 
     public function date_hired($app_id)

@@ -91,19 +91,23 @@ class Initial extends CI_Controller
 						'medical',
 						'house_skecth',
 						'background_investagation',
+						'drugtest',
+						'recommend_letter',
+						'marriage',
 						'otherDoc');
 		foreach($files as $file => $value) 
 		{
 			$temp = 'jpg'; 
 			
+			//$fetch_data[$value];
+			
 			if(isset($_FILES[$value])) 
 			{
-				print_r($this->initial_model->check_upload_finalcompletion($value));
-				
+				print_r($this->initial_model->check_upload_finalcompletion($value,$fetch_data));	
 			}
 		}
-			
-		print_r($fetch_data);
+		// update bloodtype
+		//print_r($fetch_data);
 		
 	}
 	public function final_completion()
