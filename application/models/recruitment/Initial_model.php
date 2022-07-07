@@ -34,7 +34,7 @@ class Initial_model extends CI_Model
 		return compact("duplicate","blacklist");
 	}
 	
-	public function insert_finalreq_info($fileV,$fileType,$appcode)
+	public function insert_finalreq_info($fileV,$fileType,$fetch_data)
 	{
 		if($fileV == "police_clearance")
 		{
@@ -86,20 +86,29 @@ class Initial_model extends CI_Model
 		}
 		else if($fileV == 'otherDoc')
 		{
-			$requiName = "Other Docmument";
+			$requiName = $fetch_data['filename'];
 		}
 			
 		$data = array(
 				'filename' 				=> $fileType,
-				'app_id'				=> $appcode,
+				'app_id'				=> $fetch_data['appid'],
 				'requirement_name' 		=> $requiName,
 				'receiving_staff'		=> $_SESSION['emp_id'],
 				'date_time'				=> date("Y-m-d"),
 				'requirement_status'	=> "passed"
 			);
-			
-		$this->db->insert('application_finalreq', $data); 
-		return $this->db->insert_id(); 
+		
+		if($fileV != 'otherDoc')
+		{
+			$this->db->insert('application_finalreq', $data); 
+			return $this->db->insert_id(); 
+		}
+		else
+		{
+			$this->db->insert('application_otherreq', $data); 
+			return $this->db->insert_id();
+		}
+		
 	}
 	
 	public function insert_uploaded_info($fileV,$fileType,$appcode)
@@ -163,6 +172,7 @@ class Initial_model extends CI_Model
 					$target_folder 	= $target_dir."others/";
 					$filename 		= $fetch_data['documentName'][$i]."_".$value."_".$i."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
 					$location 		= $target_folder.$filename;
+					$fetch_data['filename'] = $filename;
 				}
 				
 				if($filesize >= $maxsize) 
@@ -179,7 +189,7 @@ class Initial_model extends CI_Model
 					{
 						if(move_uploaded_file($_FILES[$value]["tmp_name"][$i],$target_folder.''.$filename))
 						{
-							$finalreq = $this->initial_model->insert_finalreq_info($value,$location,$fetch_data['appid']);
+							$finalreq = $this->initial_model->insert_finalreq_info($value,$location,$fetch_data);
 						}
 					}
 				}
@@ -282,7 +292,7 @@ class Initial_model extends CI_Model
 				{
 					if(move_uploaded_file($_FILES[$value]["tmp_name"],$target_folder.''.$filename))
 					{
-						$finalreq = $this->initial_model->insert_finalreq_info($value,$location,$fetch_data['appid']);
+						$finalreq = $this->initial_model->insert_finalreq_info($value,$location,$fetch_data);
 					}
 				}
 			}
@@ -484,6 +494,13 @@ class Initial_model extends CI_Model
 		$this->db->set('interview_code', $int_code);
 		$this->db->where(array('id' => $id));
 		$this->db->update('application_interview_details');
+	}
+	
+	public function updateBloodtype($fetch_data)
+	{
+		$this->db->set('bloodtype', $fetch_data['bloodtype']);
+		$this->db->where(array('app_id' => $fetch_data['appid']));
+		$this->db->update('applicant');
 	}
 	
 	public function history_info_append($fetch_data)
@@ -741,7 +758,18 @@ class Initial_model extends CI_Model
         return $query->result_array();
     }
 	
-	
+	public function update_or_insert_cedula_benifits_numbers($fetch_data)
+	{
+		$query = $this->db->from('applicant_otherdetails')
+							->where('app_id', $fetch_data['appid'])
+							-get();
+        if($query->num_rows())
+		{
+			
+		}
+		
+		
+	}
 	public function applicants_interview($data)
 	{
 		$que = $this->db->select('count(id) as val')

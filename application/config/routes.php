@@ -9,6 +9,7 @@ $route['promo_account_list'] = 'placement/account/promo_account_list';
 $route['hr_account_list'] = 'placement/account/hr_account_list';
 $route['update_hr_account'] = 'placement/account/update_hr_account';
 $route['update_hr_status'] = 'placement/account/update_hr_status';
+$route['update_user_access'] = 'placement/account/update_user_access';
 
 
 // for contract module

@@ -95,20 +95,16 @@ class Initial extends CI_Controller
 						'recommend_letter',
 						'marriage',
 						'otherDoc');
+		
 		foreach($files as $file => $value) 
 		{
-			$temp = 'jpg'; 
-			
-			//$fetch_data[$value];
-			
 			if(isset($_FILES[$value])) 
 			{
-				print_r($this->initial_model->check_upload_finalcompletion($value,$fetch_data));	
+				$this->initial_model->check_upload_finalcompletion($value,$fetch_data);	
 			}
 		}
-		// update bloodtype
-		//print_r($fetch_data);
-		
+		$this->initial_model->updateBloodtype($fetch_data);
+		$this->initial_model->update_or_insert_cedula_benifits_numbers($fetch_data);
 	}
 	public function final_completion()
 	{

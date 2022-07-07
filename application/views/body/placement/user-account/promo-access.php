@@ -78,12 +78,12 @@
                             foreach ($users as $key => $user) {
 
                                 echo "<td>
-                                <select onchange='userAccess(this, promo_placement_submenu, \"$submenu_id\")'>";
+                                <select onchange='userAccess(this.value, \"$user\", \"promo_placement_submenu\", \"$submenu_id\")'>";
                                 foreach ($options as $key => $value) {
                                     if ($key == $submenu[$user]) {
-                                        echo '<option value="' . $value . '" selected>' . $value . '</option>';
+                                        echo '<option value="' . $key . '" selected>' . $value . '</option>';
                                     } else {
-                                        echo '<option value="' . $value . '">' . $value . '</option>';
+                                        echo '<option value="' . $key . '">' . $value . '</option>';
                                     }
                                 }
                                 echo '</select>

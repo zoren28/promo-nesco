@@ -357,8 +357,8 @@
         });
     }
 
-    function userAccess(value, field, table, id) {
-        console.log(value, field, table, id);
+    function userStatus(emp_id, status) {
+
         $.ajax({
             type: "POST",
             url: "<?= site_url('update_hr_status') ?>",
@@ -372,6 +372,31 @@
                 if (response.status == "success") {
 
                     succSaveReload("User Status Successfully Updated");
+                } else {
+
+                    alert(data);
+                }
+            }
+        });
+    }
+
+    function userAccess(value, field, table, id) {
+
+        $.ajax({
+            type: "POST",
+            url: "<?= site_url('update_user_access') ?>",
+            data: {
+                value,
+                field,
+                table,
+                id
+            },
+            success: function(data) {
+
+                response = JSON.parse(data);
+                if (response.status == "success") {
+
+                    succSave("User Access Successfully Updated");
                 } else {
 
                     alert(data);

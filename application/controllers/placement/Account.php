@@ -214,4 +214,14 @@ class Account extends CI_Controller
             echo json_encode(array('status' => 'success'));
         }
     }
+
+    public function update_user_access()
+    {
+        $data = $this->input->post(NULL, TRUE);
+        $access = $this->account_model->update_user_access($data);
+        if ($access) {
+
+            echo json_encode(array('status' => 'success'));
+        }
+    }
 }

@@ -186,4 +186,14 @@ class Account_model extends CI_Model
         $this->db->where('emp_id', $data['emp_id']);
         return $this->db->update('promo_user', $update);
     }
+
+    public function update_user_access($data)
+    {
+        $update = array(
+            $data['field'] => $data['value']
+        );
+
+        $this->db->where('id', $data['id']);
+        return $this->db->update($data['table'], $update);
+    }
 }

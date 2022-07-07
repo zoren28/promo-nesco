@@ -71,35 +71,35 @@
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">POLICE CLEARANCE</label>
-								 <input type="file" name='police_clearance' class="form-control" id="police_clearance" >
+								 <input type="file" name='police_clearance' class="form-control" id="police_clearance" required>
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">FINGERPRINT</label>
-								 <input type="file" name='fingerprint' class="form-control" id="fingerprint" >
+								 <input type="file" name='fingerprint' class="form-control" id="fingerprint" required>
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">SSS</label>
-								 <input type="file" name='sss' class="form-control" id="sss" >
+								 <input type="file" name='sss' class="form-control" id="sss" required>
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">CEDULA</label>
-								 <input type="file" name='cedula' class="form-control" id="cedula" >
+								 <input type="file" name='cedula' class="form-control" id="cedula" required>
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">PARENT CONSENT</label>
-								 <input type="file" name='parentconsent' class="form-control" id="parentconsent" >
+								 <input type="file" name='parentconsent' class="form-control" id="parentconsent" required>
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">MEDICAL CERTIFICATE</label>
-								 <input type="file" name='medical' class="form-control" id="medical" >
+								 <input type="file" name='medical' class="form-control" id="medical" required>
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">HOUSE ADDRESS SKETCH</label>
-								 <input type="file" name='house_skecth' class="form-control" id="house_skecth" >
+								 <input type="file" name='house_skecth' class="form-control" id="house_skecth" required>
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">PAG-IBIG TRACKING</label>
-								 <input type="text" data-inputmask='"mask": "99999999999"' data-mask name='pagibig_track' class="form-control" id="pagibig_track" >
+								 <input type="text" data-inputmask='"mask": "99999999999"' data-mask name='pagibig_track' class="form-control" id="pagibig_track" required>
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">PAG-IBIG MID</label>
@@ -123,23 +123,23 @@
 						<div class="col-sm-6" style='padding-left:5px; padding-right:0px;'>
 							<div class="form-group">
 								<label for="hrmsId">BACKGROUND INVESTIGATION</label>
-								<input type="file" name='background_investagation' class="form-control" id="background_investagation" >
+								<input type="file" name='background_investagation' class="form-control" id="background_investagation" required>
 							</div>
 							<div class="form-group">
 								<label for="hrmsId">DRUG TEST</label>
-								<input type="file" name='drugtest' class="form-control" id="drugtest" >
+								<input type="file" name='drugtest' class="form-control" id="drugtest" required>
 							</div>
 							<div class="form-group">
 								<label for="hrmsId">RECOMMENDATION LETTER</label>
-								<input type="file" name='recommend_letter' class="form-control" id="recommend_letter" >
+								<input type="file" name='recommend_letter' class="form-control" id="recommend_letter" required>
 							</div>
 							<div class="form-group">
 								<label for="hrmsId">MARRIAGE CERTIFICATE</label>
-								<input type="file" name='marriage' class="form-control" id="marriage" >
+								<input type="file" name='marriage' class="form-control" id="marriage" required>
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">SSS ID</label>
-								 <input type="text" data-inputmask='"mask": "99-9999999-9"' data-mask name='sss_id' class="form-control" id="sss_id" >
+								 <input type="text" data-inputmask='"mask": "99-9999999-9"' data-mask name='sss_id' class="form-control" id="sss_id" required>
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">ID CARD No</label>
@@ -147,15 +147,15 @@
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">CTC No</label>
-								 <input type="text" data-inputmask='"mask": "CCI9999 99999999"' data-mask name='ctc_no' class="form-control" id="ctc_no" >
+								 <input type="text" data-inputmask='"mask": "CCI9999 99999999"' data-mask name='ctc_no' class="form-control" id="ctc_no" required>
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">Issued On (CTC)</label>
-								 <input type="text" data-inputmask='"mask": "9999-99-99"' data-mask name='issued_on_ctc' class="form-control" id="issued_on_ctc" placeholder='yyyy-mm-dd' >
+								 <input type="text" data-inputmask='"mask": "9999-99-99"' data-mask name='issued_on_ctc' class="form-control" id="issued_on_ctc" placeholder='yyyy-mm-dd' required>
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">Issued At (CTC)</label>
-									<input list="issued_at_ctc" name="issued_at_ctc" autocomplete="off" class="form-control">
+									<input list="issued_at_ctc" name="issued_at_ctc" autocomplete="off" class="form-control" required>
 									<datalist id="issued_at_ctc">
 									<?php foreach ($check_record['town_brgy'] as $i) { echo "<option value='" . $i['brgy_name'] . ", " . $i['town_name'] . ", " . $i['prov_name'] . "'>" . $i['brgy_name'] . ", " . $i['town_name'] . ", " . $i['prov_name'] . "</option>"; } ?>
 									</datalist>
@@ -163,6 +163,10 @@
 							<div class="form-group">
 								 <label for="hrmsId">Philhealth No</label>
 								 <input type="text" data-inputmask='"mask": "99-999999999-9"' data-mask name='philhealth' class="form-control" id="philhealth">
+							</div>
+							<div class="form-group">
+								<label for="hrmsId">Final Completion Remarks</label>
+								<textarea name='finalremarks' class="form-control" id="finalremarks" style='resize:none; height:110px;'>Remarks here! </textarea>
 							</div>
 						</div>
 						

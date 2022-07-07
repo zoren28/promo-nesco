@@ -17,7 +17,7 @@
 								<?php // $result_applicants->lastname //
 								foreach ($result_applicants as $i) { ?>
 									<tr>
-										<td><?= $i['app_code'] ?></td>
+										<td><?= $i['app_id'] ?></td>
 										<td><?= $i['lastname'].", ".$i['firstname']." ".$i['middlename']." ".$i['suffix'] ?></td>
 										<td><?= $i['position'] ?></td>
 										<td><?= $i['date_time'] ?></td>
