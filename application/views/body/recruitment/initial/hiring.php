@@ -21,7 +21,7 @@
 										<td><?= $i['lastname'].", ".$i['firstname']." ".$i['middlename']." ".$i['suffix'] ?></td>
 										<td><?= $i['position'] ?></td>
 										<td><?= $i['date_time'] ?></td>
-										<td><button id="<?= $i['app_code'] ?>" type="button" class="btn btn-primary btn-sm record">Hire Applicant?</button></td>
+										<td><button id="<?=$i['app_code']."|".$i['app_id'] ?>" type="button" class="btn btn-primary btn-sm hiring">Hire Applicant?</button></td>
 									</tr><?php } ?>
 							</tbody>
 						</table>
@@ -31,19 +31,20 @@
 	</div>
 	
 	
-<div class="modal fade" id="record_applicants">
-		<div class="modal-dialog modal-lg">
+<div class="modal fade" id="hired_applicant">
+		<div class="modal-dialog modal-md">
 			<div class="modal-content">
 				<div class="modal-header bg-light-blue color-palette">
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">×</span></button>
-					<h5 class="modal-title">Uploading Information</h5>
+					<h5 class="modal-title">Hiring Information</h5>
 				</div>
-				<div class="modal-body record_applicants" style='font-size=10px;'>
+				<div class="modal-body hired_display" style='font-size=10px;'>
 						
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn" id='record'>Proceed</button>
+					<button type="button" class="btn" data-dismiss="modal">Close</button>
+					<button type="submit" class="btn btn-primary">Submit</button>
 				</div>
 			</div>
 		</div>

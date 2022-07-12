@@ -2,6 +2,14 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 // for user account module
+$route['company_list'] = 'placement/setup/company_list';
+$route['delete_company'] = 'placement/setup/delete_company';
+$route['update_company_status'] = 'placement/setup/update_company_status';
+$route['show_company'] = 'placement/setup/show_company';
+$route['update_company'] = 'placement/setup/update_company';
+$route['store_company'] = 'placement/setup/store_company';
+
+// for user account module
 $route['create_user_account'] = 'placement/account/create_user_account';
 $route['find_active_hr_staff'] = 'placement/account/find_active_hr_staff';
 $route['create_hr_account'] = 'placement/account/create_hr_account';
@@ -10,7 +18,6 @@ $route['hr_account_list'] = 'placement/account/hr_account_list';
 $route['update_hr_account'] = 'placement/account/update_hr_account';
 $route['update_hr_status'] = 'placement/account/update_hr_status';
 $route['update_user_access'] = 'placement/account/update_user_access';
-
 
 // for contract module
 $route['extend_contract'] = 'placement/contract/extend_contract';
@@ -203,9 +210,11 @@ $route['setup_interview'] = 'recruitment/initial/setup_interview';
 $route['setup_interviewee'] = 'recruitment/initial/setup_interviewee';
 $route['check_interview'] = 'recruitment/initial/check_interview';
 $route['final_interview'] = 'recruitment/initial/final_interview';
-
+$route['hiring_setup'] = 'recruitment/initial/hiring_setup';
 $route['final_completion'] = 'recruitment/initial/final_completion';
 $route['save_final_completion'] = 'recruitment/initial/save_final_completion';
+$route['company_select'] = 'recruitment/initial/company_select';
+
 // for menu module
 $route['logout'] = 'logout';
 $route['placement/page/menu/(:any)/(:any)/(:any)'] = 'placement/page/menu/$1/$2/$3';

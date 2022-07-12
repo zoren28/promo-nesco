@@ -4,11 +4,12 @@ defined('BASEPATH') or exit('No direct script access allowed');
 class Initial_model extends CI_Model
 {
     public $usertype = '';
-
+	public $db2 = '';
     function __construct()
     {
         parent::__construct();
         $this->load->library('nativesession');
+		$this->db2 = $this->load->database('timekeeping', TRUE);
     }
 
 	public function check_applicant_duplicate_or_blacklist($data)
@@ -86,7 +87,7 @@ class Initial_model extends CI_Model
 		}
 		else if($fileV == 'otherDoc')
 		{
-			$requiName = $fetch_data['filename'];
+			$requiName = $fetch_data['doc'];
 		}
 			
 		$data = array(
@@ -170,9 +171,9 @@ class Initial_model extends CI_Model
 				{
 					$file_name 		= "Other Document";
 					$target_folder 	= $target_dir."others/";
-					$filename 		= $fetch_data['documentName'][$i]."_".$value."_".$i."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+					$filename 		= $fetch_data['documentName'][$i]."_".$i."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
 					$location 		= $target_folder.$filename;
-					$fetch_data['filename'] = $filename;
+					$fetch_data['doc'] = $fetch_data['documentName'][$i];
 				}
 				
 				if($filesize >= $maxsize) 
@@ -758,17 +759,61 @@ class Initial_model extends CI_Model
         return $query->result_array();
     }
 	
+	public function insertRemarks($fetch_data)
+	{
+		$data = array(
+						'app_id' 	=> $fetch_data['appid'],
+						'date' 		=> date("Y-m-d"),
+						'remarks' 	=> $fetch_data['finalremarks']
+					);
+		$this->db->insert('application_finalreq_remarks', $data);
+	}
+	public function insertBenifits($fetch_data)
+	{
+		$data = array(
+						'emp_id' 		=> $fetch_data['appid'],
+						'philhealth' 	=> 	$fetch_data['philhealth'],
+						'sssno'			=>	$fetch_data['sss_id'],
+						'pagibig' 		=> 	$fetch_data['pagibig_mid']
+					);
+		$this->db->insert('benefits', $data);
+	}
 	public function update_or_insert_cedula_benifits_numbers($fetch_data)
 	{
+		$dataIn = array(
+						'app_id' 			=> 	$fetch_data['appid'],
+						'sss_no'			=>	$fetch_data['sss_id'],
+						'card_no'			=>	$fetch_data['id_card'],
+						'cedula_no'			=>	$fetch_data['ctc_no'],
+						'cedula_date'		=>	$fetch_data['issued_on_ctc'],
+						'cedula_place'		=>	$fetch_data['issued_at_ctc'],
+						'recordedby'		=> 	$_SESSION['emp_id'],
+						'pagibig_tracking' 	=> 	$fetch_data['pagibig_track'],
+						'pagibig' 			=> 	$fetch_data['pagibig_mid'],
+						'philhealth' 		=> 	$fetch_data['philhealth']
+					);
+		
+		$dataUp = array(
+							'sss_no'			=>	$fetch_data['sss_id'],
+							'cedula_no'			=>	$fetch_data['ctc_no'],
+							'cedula_date'		=>	$fetch_data['issued_on_ctc'],
+							'cedula_place'		=>	$fetch_data['issued_at_ctc'],
+							'recordedby'		=> 	$_SESSION['emp_id'],
+							'pagibig_tracking' 	=> 	$fetch_data['pagibig_track']
+					);			
+					
 		$query = $this->db->from('applicant_otherdetails')
 							->where('app_id', $fetch_data['appid'])
-							-get();
+							->get();
         if($query->num_rows())
 		{
-			
+			$this->db->where('app_id', $fetch_data['appid']);				
+			$this->db->update('applicant_otherdetails', $dataUp);
 		}
-		
-		
+		else
+		{
+			$this->db->insert('applicant_otherdetails', $dataIn);
+		}
 	}
 	public function applicants_interview($data)
 	{
@@ -814,10 +859,47 @@ class Initial_model extends CI_Model
         return $query->result_array();
     }
 	
+	public function company()
+	{
+		$query = $this->db->from('locate_promo_company')
+							->order_by('pc_name', 'ASC')
+							->get();
+			return $query->result_array();	
+	}
+	public function check_agency($data)
+	{
+		if($data == '0')
+		{
+			$query = $this->db->from('locate_promo_company')
+							->where("status = '1'")
+							->order_by('pc_name', 'ASC')
+							->get();
+			return $query->result_array();	
+		}
+		else
+		{
+			$query = $this->db2->from('promo_locate_company')
+							->where("agency_code = $data")
+							->order_by('company_name', 'ASC')
+							->get();
+			return $query->result_array();
+		}
+	}
+	
+	public function agency()
+	{
+		$query = $this->db2->from('promo_locate_agency')
+							->where("status = '1'")
+							->order_by('agency_name', 'ASC')
+							->get();
+        return $query->result_array();
+	}
+	
 	public function applicants_for_hiring()
     {
 		$query = $this->db->from('applicants')
-							->where("status = 'for hiring' AND tagged_to = 'nesco'")
+							->join('applicant', 'applicants.app_code = applicant.appcode')
+							->where("applicants.status = 'for hiring' AND applicants.tagged_to = 'nesco'")
 							->order_by('app_code', 'ASC')
 							->get();
         return $query->result_array();

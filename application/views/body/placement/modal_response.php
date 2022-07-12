@@ -5166,4 +5166,16 @@ if ($request == "update_blacklist_form") {
     <input type="hidden" name="emp_id" id="emp_id" value="<?php echo $emp_id; ?>">
     <input type="hidden" name="record_no" id="record_no" value="<?php echo $emp->record_no; ?>">
 <?php
+} else if ($request == 'show_company') {
+
+?>
+    <div class="form-group">
+        <label>Company</label>
+        <div class="input-group">
+            <input type="hidden" name="company_code" value="<?= $company->pc_code ?>">
+            <input class="form-control" type="text" name="company" value="<?= $company->pc_name ?>" style="text-transform: uppercase; border-color: rgb(204, 204, 204);" onkeyup="inputField(this.name)" required>
+            <span class="input-group-addon"><i class="fa fa-bank"></i></span>
+        </div>
+    </div>
+<?php
 }

@@ -401,8 +401,6 @@
 					data:{id},
 					success: function(response)
 					{
-						//alert(response);
-						//response = JSON.parse(response);
 						
 						$("div#final_modal").modal({
 							backdrop: 'static',
@@ -411,16 +409,36 @@
 						});	
 						
 						$("div.final_display").html(response);
-						
-						
-						/* if(response.status === 1)
-						{
-							$("div.info_exam_msg").html(response.message);
-						} */
 					}
 				});
 		});
 		
+		$('#tableViewEmp').on('click', 'button.hiring', function() 
+		{
+            var id = this.id;
+			
+            if (!$(this).parents('tr').hasClass('selected')) 
+			{
+                tableViewEmp.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+				$.ajax({
+					url: "<?php echo site_url('hiring_setup'); ?>",
+					type: 'POST',
+					data:{id},
+					success: function(response)
+					{
+						
+						$("div#hired_applicant").modal({
+							backdrop: 'static',
+							keyboard: false,
+							show: true
+						});	
+						
+						$("div.hired_display").html(response);
+					}
+				});
+		});
 		
 		$("form#setup_interviewee").submit(function(e) {
 
@@ -474,7 +492,15 @@
 						keyboard: false,
 						show: true
 					});	
-					$("div.final_completion_display").html(response);
+					
+					response = JSON.parse(response);
+					
+					if(response.status === 1)
+					{
+						$("div.final_completion_display").html(response.message);
+					}
+					
+					//$("div.final_completion_display").html(response);
 					
 				},
 				async: false,
@@ -682,4 +708,18 @@
 			$("input#spouse").removeAttr('required');
 		}
 	}
+	
+	// newly added module add agency
+    function select_agency(agency_code) 
+	{
+		$.ajax({
+            type : "POST",
+			url: "<?php echo site_url('company_select'); ?>",
+            data : { agency_code:agency_code },
+            success : function(response){
+                alert(response);
+                $("select[name = 'company']").html(response);
+            }
+        });
+    }
 </script>

@@ -96,6 +96,8 @@ class Initial extends CI_Controller
 						'marriage',
 						'otherDoc');
 		
+		$this->db->trans_start();
+		
 		foreach($files as $file => $value) 
 		{
 			if(isset($_FILES[$value])) 
@@ -103,9 +105,43 @@ class Initial extends CI_Controller
 				$this->initial_model->check_upload_finalcompletion($value,$fetch_data);	
 			}
 		}
+		
 		$this->initial_model->updateBloodtype($fetch_data);
 		$this->initial_model->update_or_insert_cedula_benifits_numbers($fetch_data);
+		$this->initial_model->insertRemarks($fetch_data);
+		$this->initial_model->insertBenifits($fetch_data);
+		$fetch_data['app_status'] = "for hiring";
+		$this->initial_model->applicant_status($fetch_data);
+		
+		$this->db->trans_complete();
+		if ($this->db->trans_status() === TRUE)
+		{ 
+			echo json_encode(array('status'=> 1, 'message' => "Applicant Proceed to For Hiring"));				
+		}
+		else
+		{ 
+			echo json_encode(array('status'=> 0, 'message' => "Error Found!")); 
+		}	
 	}
+	
+	public function company_select()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		$this->initial_model->check_agency($fetch_data['agency_code']);
+		$data['request'] = "company_list";
+		$this->load->view('body/recruitment/function_query', $data);
+	}
+	
+	public function hiring_setup()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		$explode_val = explode("|",$fetch_data['id']);
+		$fetch_data['id'] = $explode_val[1];
+		$data['hired'] = $this->initial_model->applicant_examinee($fetch_data);
+		$data['request'] = "hiring_setup";
+		$this->load->view('body/recruitment/function_query', $data);
+	}
+	
 	public function final_completion()
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
