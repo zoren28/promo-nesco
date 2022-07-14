@@ -31,7 +31,7 @@ class Setup extends CI_Controller
                 $base_url = 'http://' . $_SERVER['SERVER_ADDR'];
             }
 
-            $action =  '<a href="javascript:void(0);" id="update_' . $id . '" title="click to update company" class="update_company"><i class="glyphicon glyphicon-pencil"></i> &nbsp;</a>';
+            $action =  '<a href="javascript:void(0);" id="update_' . $id . '" title="click to update company" class="action"><i class="glyphicon glyphicon-pencil"></i> &nbsp;</a>';
             if ($company->status == '1') {
 
                 $action .= '<a href="javascript:void(0)" id="deactivate_' . $id . '" title="click to deactivate company" class="action"><img src="' . $base_url . '/hrms/images/icons/icon-close-circled-20.png" height="17" width="17"></a>';
@@ -88,7 +88,7 @@ class Setup extends CI_Controller
     {
         $data = $this->input->post(NULL, TRUE);
 
-        $exist = $this->setup_model->check_company($data['company']);
+        $exist = $this->setup_model->check_company($data['company'], $data['id']);
         if ($exist) {
             echo json_encode(array('status' => 'exist'));
         } else {
@@ -105,11 +105,112 @@ class Setup extends CI_Controller
     {
         $company = $this->input->post('company', TRUE);
 
-        $exist = $this->setup_model->check_company($company);
+        $exist = $this->setup_model->check_company($company, '');
         if ($exist) {
             echo json_encode(array('status' => 'exist'));
         } else {
             $store = $this->setup_model->store_company($company);
+            if ($store) {
+                echo json_encode(array('status' => 'success'));
+            } else {
+                echo json_encode(array('status' => 'failure'));
+            }
+        }
+    }
+
+    public function agency_list()
+    {
+        $agencies = $this->setup_model->agency_list();
+        $data = array();
+        foreach ($agencies as $agency) {
+
+            $id = $agency->agency_code;
+            if (isset($_SERVER['SERVER_PORT'])) {
+                $base_url = 'http://' . $_SERVER['SERVER_ADDR'] . ":" . $_SERVER['SERVER_PORT'];
+            } else {
+
+                $base_url = 'http://' . $_SERVER['SERVER_ADDR'];
+            }
+
+            $action =  '<a href="javascript:void(0);" id="update_' . $id . '" title="click to update agency" class="action"><i class="glyphicon glyphicon-pencil"></i> &nbsp;</a>';
+            if ($agency->status == '1') {
+
+                $action .= '<a href="javascript:void(0)" id="deactivate_' . $id . '" title="click to deactivate agency" class="action"><img src="' . $base_url . '/hrms/images/icons/icon-close-circled-20.png" height="17" width="17"></a>';
+            } else {
+
+                $action .= '<a href="javascript:void(0)" id="activate_' . $id . '" title="click to activate agency" class="action"><img src="' . $base_url . '/hrms/images/icons/icn_active.gif" height="17" width="17"></a>';
+            }
+
+            if ($_SESSION['emp_id'] == "06359-2013") {
+                $action .= ' <a href="javascript:void(0);" id="delete_' . $id . '" title="click to delete agency" class="action"><i class="glyphicon glyphicon-trash text-red"></i></a>';
+            }
+
+            $sub_array = array();
+            $sub_array[] = $agency->agency_name;
+            $sub_array[] = $action;
+            $data[] = $sub_array;
+        }
+
+        echo json_encode(array("data" => $data));
+    }
+
+    public function delete_agency()
+    {
+        $id = $this->input->post('agency_code', TRUE);
+        $delete = $this->setup_model->delete_agency($id);
+        if ($delete) {
+            echo json_encode(array('status' => 'success'));
+        } else {
+            echo json_encode(array('status' => 'failure'));
+        }
+    }
+
+    public function agency_status()
+    {
+        $data = $this->input->post(NULL, TRUE);
+        $update = $this->setup_model->update_agency_status($data);
+        if ($update) {
+            echo json_encode(array('status' => 'success'));
+        } else {
+            echo json_encode(array('status' => 'failure'));
+        }
+    }
+
+    public function show_agency()
+    {
+        $agency_code = $this->input->get('agency_code', TRUE);
+
+        $data['agency'] = $this->setup_model->show_agency($agency_code);
+        $data['request'] = 'show_agency';
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function update_agency()
+    {
+        $data = $this->input->post(NULL, TRUE);
+
+        $exist = $this->setup_model->check_agency($data['agency'], $data['agency_code']);
+        if ($exist) {
+            echo json_encode(array('status' => 'exist'));
+        } else {
+            $update = $this->setup_model->update_agency($data);
+            if ($update) {
+                echo json_encode(array('status' => 'success'));
+            } else {
+                echo json_encode(array('status' => 'failure'));
+            }
+        }
+    }
+
+    public function store_agency()
+    {
+        $agency = $this->input->post('agency', TRUE);
+
+        $exist = $this->setup_model->check_agency($agency, '');
+        if ($exist) {
+            echo json_encode(array('status' => 'exist'));
+        } else {
+            $store = $this->setup_model->store_agency($agency);
             if ($store) {
                 echo json_encode(array('status' => 'success'));
             } else {

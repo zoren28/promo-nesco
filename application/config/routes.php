@@ -8,6 +8,12 @@ $route['update_company_status'] = 'placement/setup/update_company_status';
 $route['show_company'] = 'placement/setup/show_company';
 $route['update_company'] = 'placement/setup/update_company';
 $route['store_company'] = 'placement/setup/store_company';
+$route['agency_list'] = 'placement/setup/agency_list';
+$route['delete_agency'] = 'placement/setup/delete_agency';
+$route['agency_status'] = 'placement/setup/agency_status';
+$route['show_agency'] = 'placement/setup/show_agency';
+$route['update_agency'] = 'placement/setup/update_agency';
+$route['store_agency'] = 'placement/setup/store_agency';
 
 // for user account module
 $route['create_user_account'] = 'placement/account/create_user_account';

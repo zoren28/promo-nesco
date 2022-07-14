@@ -5178,4 +5178,15 @@ if ($request == "update_blacklist_form") {
         </div>
     </div>
 <?php
+} else if ($request == 'show_agency') {
+?>
+    <div class="form-group">
+        <label>Agency</label>
+        <div class="input-group">
+            <input type="hidden" name="agency_code" value="<?= $agency->agency_code ?>">
+            <input class="form-control" type="text" name="agency" value="<?= $agency->agency_name ?>" style="text-transform: uppercase; border-color: rgb(204, 204, 204);" onkeyup="inputField(this.name)" required>
+            <span class="input-group-addon"><i class="fa fa-bank"></i></span>
+        </div>
+    </div>
+<?php
 }
