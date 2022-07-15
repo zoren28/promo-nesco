@@ -22,11 +22,13 @@ class Setup_model extends CI_Model
         $this->db->query('SET SESSION sql_mode = ""');
     }
 
-    public function company_list()
+    public function company_list($filter)
     {
-        $query = $this->db->from('locate_promo_company')
-            ->order_by('pc_name', 'ASC')
-            ->get();
+        if (!empty($filter)) {
+            $this->db->where('status', $filter);
+        }
+        $query = $this->db->order_by('pc_name', 'ASC')
+            ->get('locate_promo_company');
         return $query->result();
     }
 
@@ -85,8 +87,11 @@ class Setup_model extends CI_Model
         return $this->db->insert('locate_promo_company', $insert);
     }
 
-    public function agency_list()
+    public function agency_list($filter)
     {
+        if (!empty($filter)) {
+            $this->db2->where('status', $filter);
+        }
         $query = $this->db2->order_by('agency_name', 'ASC')
             ->get('promo_locate_agency');
         return $query->result();
@@ -144,5 +149,39 @@ class Setup_model extends CI_Model
             'created_at' => $this->datetime
         );
         return $this->db2->insert('promo_locate_agency', $insert);
+    }
+
+    public function company_under_agency($agency_code)
+    {
+        $query = $this->db2->select('company_code, company_name')
+            ->get_where('promo_locate_company', array('agency_code' => $agency_code));
+        return $query->result();
+    }
+
+    public function untag_company_agency($company_code)
+    {
+        return $this->db2->delete('promo_locate_company', array('company_code' => $company_code));
+    }
+
+    public function check_company_agency($agency_code, $company_name)
+    {
+        return $this->db2->from('promo_locate_company')
+            ->where(array('agency_code' => $agency_code, 'company_name' => $company_name))
+            ->count_all_results();
+    }
+
+    public function delete_promo_locate_company($agency_code)
+    {
+        $this->db2->delete('promo_locate_company', array('agency_code' => $agency_code));
+    }
+
+    public function store_promo_locate_company($agency_code, $company)
+    {
+        $insert = array(
+            'agency_code' => $agency_code,
+            'company_name' => $company,
+            'created_at' => $this->datetime
+        );
+        $this->db2->insert('promo_locate_company', $insert);
     }
 }

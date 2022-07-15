@@ -19,7 +19,7 @@ class Setup extends CI_Controller
 
     public function company_list()
     {
-        $companies = $this->setup_model->company_list();
+        $companies = $this->setup_model->company_list('');
         $data = array();
         foreach ($companies as $company) {
 
@@ -120,7 +120,7 @@ class Setup extends CI_Controller
 
     public function agency_list()
     {
-        $agencies = $this->setup_model->agency_list();
+        $agencies = $this->setup_model->agency_list('');
         $data = array();
         foreach ($agencies as $agency) {
 
@@ -217,5 +217,63 @@ class Setup extends CI_Controller
                 echo json_encode(array('status' => 'failure'));
             }
         }
+    }
+
+    public function companies_for_agency()
+    {
+        $agencies = $this->setup_model->agency_list(1);
+        $data = array();
+        foreach ($agencies as $agency) {
+
+            $companies = $this->setup_model->company_under_agency($agency->agency_code);
+            foreach ($companies as $company) {
+
+                $sub_array = array();
+                $sub_array[] = $agency->agency_name;
+                $sub_array[] = $company->company_name;
+                $sub_array[] = '<i id="delete_' . $company->company_code . '" title="Untag Company" class="fa fa-lg fa-trash text-danger action"></i>';
+                $data[] = $sub_array;
+            }
+        }
+        echo json_encode(array("data" => $data));
+    }
+
+    public function untag_company_agency()
+    {
+        $company_code = $this->input->post('company_code', TRUE);
+        $delete = $this->setup_model->untag_company_agency($company_code);
+        if ($delete) {
+            echo json_encode(array('status' => 'success'));
+        } else {
+            echo json_encode(array('status' => 'failure'));
+        }
+    }
+
+    public function choose_agency()
+    {
+        $data['agencies'] = $this->setup_model->agency_list(1);
+        $data['request'] = 'choose_agency';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    function tag_company_agency()
+    {
+        $data['agency_code'] = $this->input->get('agency_code');
+        $data['request'] = 'tag_company_agency';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function store_promo_locate_company()
+    {
+        $data = $this->input->post(NULL, TRUE);
+
+        $this->setup_model->delete_promo_locate_company($data['agency']);
+        foreach ($data['companies'] as $company) {
+            $this->setup_model->store_promo_locate_company($data['agency'], $company);
+        }
+
+        echo json_encode(array('status' => 'success'));
     }
 }

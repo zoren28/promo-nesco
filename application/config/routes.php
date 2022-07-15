@@ -14,6 +14,11 @@ $route['agency_status'] = 'placement/setup/agency_status';
 $route['show_agency'] = 'placement/setup/show_agency';
 $route['update_agency'] = 'placement/setup/update_agency';
 $route['store_agency'] = 'placement/setup/store_agency';
+$route['companies_for_agency'] = 'placement/setup/companies_for_agency';
+$route['untag_company_agency'] = 'placement/setup/untag_company_agency';
+$route['choose_agency'] = 'placement/setup/choose_agency';
+$route['tag_company_agency'] = 'placement/setup/tag_company_agency';
+$route['store_promo_locate_company'] = 'placement/setup/store_promo_locate_company';
 
 // for user account module
 $route['create_user_account'] = 'placement/account/create_user_account';

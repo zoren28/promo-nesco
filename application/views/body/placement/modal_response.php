@@ -5189,4 +5189,64 @@ if ($request == "update_blacklist_form") {
         </div>
     </div>
 <?php
+} else if ($request == 'choose_agency') {
+?>
+    <div class="form-group">
+        <label>Agency</label>
+        <select name="agency" class="form-control" onchange="company_list(this.value)">
+            <option value="">Select Agency</option>
+            <?php
+            $agencies = $this->setup_model->agency_list(1);
+            foreach ($agencies as $agency) {
+
+                echo '<option value="' . $agency->agency_code . '">' . $agency->agency_name . '</option>';
+            }
+            ?>
+        </select>
+    </div>
+<?php
+} else if ($request == 'tag_company_agency') {
+?>
+    <div class="table-responsive">
+        <table id="dt_companies" class="table table-bordered table-hover" width="100%">
+            <thead>
+                <tr>
+                    <th>Company Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $companies = $this->setup_model->company_list(1);
+                foreach ($companies as $company) {
+
+                    $exist = $this->setup_model->check_company_agency($agency_code, $company->pc_name);
+                    if ($exist) {
+
+                        $action =  '<input type="checkbox" name="companies[]" value="' . $company->pc_name . '" checked="">';
+                    } else {
+
+                        $action =  '<input type="checkbox" name="companies[]" value="' . $company->pc_name . '">';
+                    }
+
+                    echo '
+                        <tr>
+                            <td>' . $company->pc_name . '</td>
+                            <td>' . $action . '</td>
+                        </tr>
+                    ';
+                }
+                ?>
+            </tbody>
+        </table>
+    </div>
+    <script type="text/javascript">
+        $("table#dt_companies").DataTable({
+            "destroy": true,
+            "scrollY": "200px",
+            "scrollCollapse": true,
+            "paging": false
+        });
+    </script>
+<?php
 }

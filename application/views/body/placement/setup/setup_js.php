@@ -5,7 +5,8 @@
             "destroy": true,
             "stateSave": true,
             "ajax": {
-                url: "<?= site_url('company_list') ?>"
+                url: "<?= site_url('company_list') ?>",
+                type: "POST"
             },
             "order": [],
             "columnDefs": [{
@@ -280,7 +281,8 @@
             "destroy": true,
             "stateSave": true,
             "ajax": {
-                url: "<?= site_url('agency_list') ?>"
+                url: "<?= site_url('agency_list') ?>",
+                type: "POST"
             },
             "order": [],
             "columnDefs": [{
@@ -550,7 +552,157 @@
                 });
             }
         });
+
+        var dt_company_agency = $("table#dt-company-agency").DataTable({
+
+            "destroy": true,
+            "stateSave": true,
+            "ajax": {
+                url: "<?= site_url('companies_for_agency') ?>",
+                type: "POST"
+            },
+            "order": [
+                [0, "asc"],
+                [1, "asc"]
+            ],
+            "columnDefs": [{
+                "targets": [2],
+                "orderable": false,
+                "className": "text-center",
+            }]
+        });
+
+        $('table#dt-company-agency').on('click', 'i.action', function() {
+
+            let [action, company_code] = this.id.split("_");
+
+            if (!$(this).parents('tr').hasClass('selected')) {
+                dt_company_agency.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+
+            $.alert.open({
+                type: 'warning',
+                cancel: false,
+                content: "Are you sure you want to untag this company?",
+                buttons: {
+                    OK: 'Yes',
+                    NO: 'Not now'
+                },
+
+                callback: function(button) {
+                    if (button == 'OK') {
+
+                        $.post("<?= site_url('untag_company_agency') ?>", {
+                            company_code: company_code
+                        }, function(data, status) {
+
+                            var response = JSON.parse(data);
+                            if (response.status == "success") {
+
+                                $.alert.open({
+                                    type: 'warning',
+                                    title: 'Info',
+                                    icon: 'confirm',
+                                    cancel: false,
+                                    content: "Company has been untag in this agency.",
+                                    buttons: {
+                                        OK: 'Yes'
+                                    },
+
+                                    callback: function(button) {
+                                        if (button == 'OK') {
+
+                                            location.reload();
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
+        $("button#setup_under_agency").click(function() {
+
+            $("div#setup_company_under_agency").modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+
+            $("div.companies").html("");
+            $.ajax({
+                type: "POST",
+                url: "<?= site_url('choose_agency') ?>",
+                success: function(data) {
+
+                    $("div.agencies").html(data);
+                }
+            });
+        });
+
+        $("form#company-under-agency").submit(function(e) {
+
+            e.preventDefault();
+            let formData = $(this).serialize();
+
+            $.post("<?= site_url('store_promo_locate_company') ?>", formData, function(data, status) {
+
+                var response = JSON.parse(data);
+                if (response.status == "success") {
+
+                    $.alert.open({
+                        type: 'warning',
+                        title: 'Info',
+                        icon: 'confirm',
+                        cancel: false,
+                        content: "Company under agency has been setup!",
+                        buttons: {
+                            OK: 'Yes'
+                        },
+
+                        callback: function(button) {
+                            if (button == 'OK') {
+
+                                $("div#setup_company_under_agency").modal("hide");
+                                setTimeout(() => {
+
+                                    location.reload();
+                                }, 1000);
+                            }
+                        }
+                    });
+                } else {
+
+                    console.log(data);
+                }
+            });
+        });
     });
+
+    function company_list(agency_code) {
+
+        if (agency_code) {
+
+            $("div.companies").html('<img src="<?= base_url('assets/images/gif/loading.gif') ?>"> <span>Please Wait...</span>');
+            $.ajax({
+                type: "GET",
+                url: "<?= site_url('tag_company_agency') ?>",
+                data: {
+                    agency_code
+                },
+                success: function(result) {
+
+                    $("div.companies").html(result);
+                }
+            });
+        } else {
+
+            $("div.companies").html('');
+        }
+    }
 
     function inputField(name) {
 
