@@ -648,7 +648,7 @@
                         title: 'Info',
                         icon: 'confirm',
                         cancel: false,
-                        content: "Company under agency has been setup!",
+                        content: "Company has been setup under agency !",
                         buttons: {
                             OK: 'Yes'
                         },
@@ -947,6 +947,136 @@
             }
         });
 
+        let dt_company_product = $("table#dt-company-product").DataTable({
+
+            "destroy": true,
+            "stateSave": true,
+            "ajax": {
+                url: "<?= site_url('products_under_company') ?>",
+                type: "POST"
+            },
+            "order": [
+                [0, "asc"],
+                [1, "asc"]
+            ],
+            "columnDefs": [{
+                "targets": [2],
+                "orderable": false,
+                "className": "text-center",
+            }]
+        });
+
+        $('table#dt-company-product').on('click', 'i.action', function() {
+
+            let [action, id] = this.id.split("_");
+
+            if (!$(this).parents('tr').hasClass('selected')) {
+                dt_company_product.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+
+            $.alert.open({
+                type: 'warning',
+                cancel: false,
+                content: `Are you sure you want to ${action} this product?`,
+                buttons: {
+                    OK: 'Yes',
+                    NO: 'Not now'
+                },
+
+                callback: function(button) {
+                    if (button == 'OK') {
+
+                        $.post("<?= site_url('untag_product_company') ?>", {
+                            id
+                        }, function(data, status) {
+
+                            var response = JSON.parse(data);
+                            if (response.status == "success") {
+
+                                $.alert.open({
+                                    type: 'warning',
+                                    title: 'Info',
+                                    icon: 'confirm',
+                                    cancel: false,
+                                    content: "Company has been deleted.",
+                                    buttons: {
+                                        OK: 'Yes'
+                                    },
+
+                                    callback: function(button) {
+                                        if (button == 'OK') {
+
+                                            location.reload();
+                                        }
+                                    }
+                                });
+                            } else {
+                                console.log(data);
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
+        $("button#setup-product-company").click(function() {
+
+            $("div#setup_product_under_company").modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+
+            $("div.products").html("");
+            $.ajax({
+                type: "POST",
+                url: "<?= site_url('choose_company') ?>",
+                success: function(data) {
+
+                    $("div.companies").html(data);
+                }
+            });
+        });
+
+        $("form#product-under-company").submit(function(e) {
+
+            e.preventDefault();
+            let formData = $(this).serialize();
+
+            $.post("<?= site_url('store_promo_company_products') ?>", formData, function(data, status) {
+
+                var response = JSON.parse(data);
+                if (response.status == "success") {
+
+                    $.alert.open({
+                        type: 'warning',
+                        title: 'Info',
+                        icon: 'confirm',
+                        cancel: false,
+                        content: "Product has been setup under company!",
+                        buttons: {
+                            OK: 'Yes'
+                        },
+
+                        callback: function(button) {
+                            if (button == 'OK') {
+
+                                $("div#setup_product_under_company").modal("hide");
+                                setTimeout(() => {
+
+                                    location.reload();
+                                }, 1000);
+                            }
+                        }
+                    });
+                } else {
+
+                    console.log(data);
+                }
+            });
+        });
+
     });
 
     function company_list(agency_code) {
@@ -968,6 +1098,28 @@
         } else {
 
             $("div.companies").html('');
+        }
+    }
+
+    function product_list(company) {
+
+        if (company) {
+
+            $("div.products").html('<img src="<?= base_url('assets/images/gif/loading.gif') ?>"> <span>Please Wait...</span>');
+            $.ajax({
+                type: "GET",
+                url: "<?= site_url('tag_product_company') ?>",
+                data: {
+                    company
+                },
+                success: function(result) {
+
+                    $("div.products").html(result);
+                }
+            });
+        } else {
+
+            $("div.products").html('');
         }
     }
 

@@ -248,4 +248,37 @@ class Setup_model extends CI_Model
         );
         return $this->db->insert('locate_promo_product', $insert);
     }
+
+    public function products_under_company()
+    {
+        $query = $this->db->get('promo_company_products');
+        return $query->result();
+    }
+
+    public function untag_product_company($id)
+    {
+        return $this->db->delete('promo_company_products', array('id' => $id));
+    }
+
+    public function check_product_company($company, $product)
+    {
+        return $this->db->from('promo_company_products')
+            ->where(array('company' => $company, 'product' => $product))
+            ->count_all_results();
+    }
+
+    public function delete_promo_company_products($company)
+    {
+        return $this->db->delete('promo_company_products', array('company' => $company));
+    }
+
+    public function store_promo_company_products($company, $product)
+    {
+        $insert = array(
+            'company' => $company,
+            'product' => $product,
+            'created_at' => $this->datetime
+        );
+        return $this->db->insert('promo_company_products', $insert);
+    }
 }

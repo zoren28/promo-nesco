@@ -25,6 +25,11 @@ $route['update_product_status'] = 'placement/setup/update_product_status';
 $route['show_product'] = 'placement/setup/show_product';
 $route['update_product'] = 'placement/setup/update_product';
 $route['store_product'] = 'placement/setup/store_product';
+$route['products_under_company'] = 'placement/setup/products_under_company';
+$route['untag_product_company'] = 'placement/setup/untag_product_company';
+$route['choose_company'] = 'placement/setup/choose_company';
+$route['tag_product_company'] = 'placement/setup/tag_product_company';
+$route['store_promo_company_products'] = 'placement/setup/store_promo_company_products';
 
 // for user account module
 $route['create_user_account'] = 'placement/account/create_user_account';

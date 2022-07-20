@@ -259,7 +259,7 @@ class Setup extends CI_Controller
 
     function tag_company_agency()
     {
-        $data['agency_code'] = $this->input->get('agency_code');
+        $data['agency_code'] = $this->input->get('agency_code', TRUE);
         $data['request'] = 'tag_company_agency';
 
         $this->load->view('body/placement/modal_response', $data);
@@ -375,5 +375,60 @@ class Setup extends CI_Controller
                 echo json_encode(array('status' => 'failure'));
             }
         }
+    }
+
+    public function products_under_company()
+    {
+        $products = $this->setup_model->products_under_company();
+        $data = array();
+        foreach ($products as $product) {
+
+            $sub_array = array();
+            $sub_array[] = $product->company;
+            $sub_array[] = $product->product;
+            $sub_array[] = '<i id="delete_' . $product->id . '" title="Untag Product Under Company" class="fa fa-lg fa-trash text-danger action"></i>';
+            $data[] = $sub_array;
+        }
+        echo json_encode(array("data" => $data));
+    }
+
+    public function untag_product_company()
+    {
+        $id = $this->input->post('id', TRUE);
+
+        $delete = $this->setup_model->untag_product_company($id);
+        if ($delete) {
+            echo json_encode(array('status' => 'success'));
+        } else {
+            echo json_encode(array('status' => 'failure'));
+        }
+    }
+
+    public function choose_company()
+    {
+        $data['companies'] = $this->setup_model->company_list(1);
+        $data['request'] = 'choose_company';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function tag_product_company()
+    {
+        $data['company'] = $this->input->get('company', TRUE);
+        $data['request'] = 'tag_product_company';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function store_promo_company_products()
+    {
+        $data = $this->input->post(NULL, TRUE);
+
+        $this->setup_model->delete_promo_company_products($data['company']);
+        foreach ($data['products'] as $product) {
+            $this->setup_model->store_promo_company_products($data['company'], $product);
+        }
+
+        echo json_encode(array('status' => 'success'));
     }
 }

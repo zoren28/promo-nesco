@@ -5196,7 +5196,6 @@ if ($request == "update_blacklist_form") {
         <select name="agency" class="form-control" onchange="company_list(this.value)">
             <option value="">Select Agency</option>
             <?php
-            $agencies = $this->setup_model->agency_list(1);
             foreach ($agencies as $agency) {
 
                 echo '<option value="' . $agency->agency_code . '">' . $agency->agency_name . '</option>';
@@ -5211,7 +5210,7 @@ if ($request == "update_blacklist_form") {
         <table id="dt_companies" class="table table-bordered table-hover" width="100%">
             <thead>
                 <tr>
-                    <th>Company Name</th>
+                    <th>Company</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -5259,5 +5258,65 @@ if ($request == "update_blacklist_form") {
             <span class="input-group-addon"><i class="fa fa-bank"></i></span>
         </div>
     </div>
+<?php
+} else if ($request == 'choose_company') {
+?>
+    <div class="form-group">
+        <label>Company</label>
+        <select name="company" class="form-control" onchange="product_list(this.value)">
+            <option value="">Select Company</option>
+            <?php
+            foreach ($companies as $company) {
+
+                echo '<option value="' . $company->pc_name . '">' . $company->pc_name . '</option>';
+            }
+            ?>
+        </select>
+    </div>
+<?php
+} else if ($request == 'tag_product_company') {
+
+?>
+    <div class="table-responsive">
+        <table id="dt_products" class="table table-bordered table-hover" width="100%">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $products = $this->setup_model->product_list(1);
+                foreach ($products as $product) {
+
+                    $exist = $this->setup_model->check_product_company($company, $product->product);
+                    if ($exist) {
+
+                        $action =  '<input type="checkbox" name="products[]" value="' . $product->product . '" checked="">';
+                    } else {
+
+                        $action =  '<input type="checkbox" name="products[]" value="' . $product->product . '">';
+                    }
+
+                    echo '
+                        <tr>
+                            <td>' . $product->product . '</td>
+                            <td>' . $action . '</td>
+                        </tr>
+                    ';
+                }
+                ?>
+            </tbody>
+        </table>
+    </div>
+    <script type="text/javascript">
+        $("table#dt_products").DataTable({
+            "destroy": true,
+            "scrollY": "200px",
+            "scrollCollapse": true,
+            "paging": false
+        });
+    </script>
 <?php
 }

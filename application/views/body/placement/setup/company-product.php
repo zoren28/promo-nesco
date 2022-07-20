@@ -5,7 +5,7 @@
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
         <li><a href="#">Setup</a></li>
-        <li class="active">Company under Agency</li>
+        <li class="active">Product under Company</li>
     </ol>
 </section>
 <section class="content">
@@ -14,18 +14,18 @@
     <div class="box box-primary">
         <div class="box-header with-border">
             <div class="pull-right">
-                <button type="button" id="setup_under_agency" class="btn btn-primary btn-sm">
-                    Setup Company under Agency
+                <button type="button" id="setup-product-company" class="btn btn-primary btn-sm">
+                    Setup Product Under Company
                 </button>
             </div>
         </div>
 
         <div class="box-body">
-            <table id="dt-company-agency" class="table table-striped table-hover">
+            <table id="dt-company-product" class="table table-striped table-hover">
                 <thead>
                     <tr>
-                        <th>Agency</th>
-                        <th>Company Name</th>
+                        <th>Company</th>
+                        <th>Product</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -34,24 +34,25 @@
         <!-- /.box-body -->
     </div>
     <!-- /.box -->
+
 </section>
 
-<div class="modal fade" id="setup_company_under_agency">
+<div class="modal fade" id="setup_product_under_company">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-light-blue color-palette">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span></button>
-                <h4 class="modal-title">Setup Company Under Agency</h4>
+                <h4 class="modal-title">Setup Product Under Company</h4>
             </div>
-            <form id="company-under-agency">
+            <form id="product-under-company">
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-6 agencies"></div>
+                        <div class="col-md-6 companies"></div>
                     </div>
                     <br>
                     <div class="row">
-                        <div class="col-md-12 companies"></div>
+                        <div class="col-md-12 products"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
