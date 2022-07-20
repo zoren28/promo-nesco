@@ -276,4 +276,104 @@ class Setup extends CI_Controller
 
         echo json_encode(array('status' => 'success'));
     }
+
+    public function product_list()
+    {
+        $products = $this->setup_model->product_list('');
+        $data = array();
+        foreach ($products as $product) {
+
+            if (isset($_SERVER['SERVER_PORT'])) {
+                $base_url = 'http://' . $_SERVER['SERVER_ADDR'] . ":" . $_SERVER['SERVER_PORT'];
+            } else {
+
+                $base_url = 'http://' . $_SERVER['SERVER_ADDR'];
+            }
+
+            $action =  '<a href="javascript:void(0);" id="update_' . $product->id . '" title="click to update product" class="action"><i class="glyphicon glyphicon-pencil"></i> &nbsp;</a>';
+            if ($product->status == '1') {
+
+                $action .= '<a href="javascript:void(0)" id="deactivate_' . $product->id . '" title="click to deactivate product" class="action"><img src="' . $base_url . '/hrms/images/icons/icon-close-circled-20.png" height="17" width="17"></a>';
+            } else {
+
+                $action .= '<a href="javascript:void(0)" id="activate_' . $product->id . '" title="click to activate product" class="action"><img src="' . $base_url . '/hrms/images/icons/icn_active.gif" height="17" width="17"></a>';
+            }
+
+            if ($_SESSION['emp_id'] == "06359-2013") {
+                $action .= ' <a href="javascript:void(0);" id="delete_' . $product->id . '" title="click to delete product" class="action"><i class="glyphicon glyphicon-trash text-red"></i></a>';
+            }
+
+            $sub_array = array();
+            $sub_array[] = $product->product;
+            $sub_array[] = $action;
+            $data[] = $sub_array;
+        }
+        echo json_encode(array("data" => $data));
+    }
+
+    public function delete_product()
+    {
+        $id = $this->input->post('id', TRUE);
+        $delete = $this->setup_model->delete_product($id);
+        if ($delete) {
+            echo json_encode(array('status' => 'success'));
+        } else {
+            echo json_encode(array('status' => 'failure'));
+        }
+    }
+
+    public function product_status()
+    {
+        $data = $this->input->post(NULL, TRUE);
+
+        $update = $this->setup_model->update_product_status($data);
+        if ($update) {
+            echo json_encode(array('status' => 'success'));
+        } else {
+            echo json_encode(array('status' => 'failure'));
+        }
+    }
+
+    public function show_product()
+    {
+        $id = $this->input->get('id', TRUE);
+        $data['product'] = $this->setup_model->show_product($id);
+        $data['request'] = 'show_product';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function update_product()
+    {
+        $data = $this->input->post(NULL, TRUE);
+
+        $exist = $this->setup_model->check_product($data['company'], $data['id']);
+        if ($exist) {
+            echo json_encode(array('status' => 'exist'));
+        } else {
+            $update = $this->setup_model->update_product($data);
+            if ($update) {
+                echo json_encode(array('status' => 'success'));
+            } else {
+                echo json_encode(array('status' => 'failure'));
+            }
+        }
+    }
+
+    public function store_product()
+    {
+        $product = $this->input->post('product', TRUE);
+
+        $exist = $this->setup_model->check_product($product, '');
+        if ($exist) {
+            echo json_encode(array('status' => 'exist'));
+        } else {
+            $store = $this->setup_model->store_product($product);
+            if ($store) {
+                echo json_encode(array('status' => 'success'));
+            } else {
+                echo json_encode(array('status' => 'failure'));
+            }
+        }
+    }
 }

@@ -25,12 +25,7 @@
                 $(this).parents('tr').addClass('selected');
             }
 
-            var messej = "";
-            if (action == 'delete') {
-                messej = "Are you sure you want to delete this company?";
-            } else {
-                messej = `Are you sure you want to ${action} this company`;
-            }
+            let messej = `Are you sure you want to ${action} this company`;
 
             $.alert.open({
                 type: 'warning',
@@ -132,7 +127,7 @@
             e.preventDefault();
 
             let formData = $(this).serialize();
-            let company = $("input[name = 'company']").val();
+            let company = $("input#edit-company").val();
             if (company.trim() == '') {
 
                 $.alert.open({
@@ -301,12 +296,7 @@
                 $(this).parents('tr').addClass('selected');
             }
 
-            var messej = "";
-            if (action == 'delete') {
-                messej = "Are you sure you want to delete this agency?";
-            } else {
-                messej = `Are you sure you want to ${action} this agency`;
-            }
+            let messej = `Are you sure you want to ${action} this agency`;
 
             $.alert.open({
                 type: 'warning',
@@ -406,7 +396,7 @@
 
             e.preventDefault();
             let formData = $(this).serialize();
-            let agency = $("input[name = 'agency']").val();
+            let agency = $("input#edit-agency").val();
 
             if (agency.trim() == '') {
 
@@ -680,6 +670,283 @@
                 }
             });
         });
+
+        let dt_products = $("table#dt-products").DataTable({
+
+            "destroy": true,
+            "stateSave": true,
+            "ajax": {
+                url: "<?= site_url('product_list') ?>",
+                type: "POST"
+            },
+            "order": [],
+            "columnDefs": [{
+                "targets": [1],
+                "orderable": false,
+                "className": "text-center",
+            }]
+        });
+
+        $('table#dt-products').on('click', 'a.action', function() {
+
+            let [action, id] = this.id.split("_");
+
+            if (!$(this).parents('tr').hasClass('selected')) {
+                dt_products.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+
+            let messej = `Are you sure you want to ${action} this product`;
+
+            $.alert.open({
+                type: 'warning',
+                cancel: false,
+                content: messej,
+                buttons: {
+                    OK: 'Yes',
+                    NO: 'Not now'
+                },
+
+                callback: function(button) {
+                    if (button == 'OK') {
+
+                        if (action == 'delete') {
+
+                            $.post("<?= site_url('delete_product') ?>", {
+                                id
+                            }, function(data, status) {
+
+                                var response = JSON.parse(data);
+                                if (response.status == "success") {
+
+                                    $.alert.open({
+                                        type: 'warning',
+                                        title: 'Info',
+                                        icon: 'confirm',
+                                        cancel: false,
+                                        content: "Product has been deleted.",
+                                        buttons: {
+                                            OK: 'Yes'
+                                        },
+
+                                        callback: function(button) {
+                                            if (button == 'OK') {
+
+                                                location.reload();
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        } else if (action == 'activate' || action == 'deactivate') {
+
+                            $.post("<?= site_url('update_product_status') ?>", {
+                                action,
+                                id
+                            }, function(data, status) {
+
+                                var response = JSON.parse(data);
+                                if (response.status == "success") {
+
+                                    $.alert.open({
+                                        type: 'warning',
+                                        title: 'Info',
+                                        icon: 'confirm',
+                                        cancel: false,
+                                        content: `Product has been ${action}.`,
+                                        buttons: {
+                                            OK: 'Yes'
+                                        },
+
+                                        callback: function(button) {
+                                            if (button == 'OK') {
+
+                                                location.reload();
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        } else {
+
+                            if (!$(this).parents('tr').hasClass('selected')) {
+                                dt_products.$('tr.selected').removeClass('selected');
+                                $(this).parents('tr').addClass('selected');
+                            }
+
+                            $("div#update-product").modal({
+                                backdrop: 'static',
+                                keyboard: false,
+                                show: true
+                            });
+
+                            $("div.update-product").html("");
+                            $.ajax({
+                                type: "GET",
+                                url: "<?= site_url('show_product') ?>",
+                                data: {
+                                    id
+                                },
+                                success: function(data) {
+
+                                    $("div.update-product").html(data);
+                                }
+                            });
+
+                        }
+                    }
+                }
+            });
+        });
+
+        $("form#update-product").submit(function(e) {
+
+            e.preventDefault();
+            let formData = $(this).serialize();
+            let product = $("input#edit-product").val();
+
+            if (product.trim() == '') {
+
+                $.alert.open({
+                    type: 'warning',
+                    cancel: false,
+                    content: "Please Fill-up Product Name!",
+                    buttons: {
+                        OK: 'Ok'
+                    },
+
+                    callback: function(button) {
+                        if (button == 'OK') {
+
+                            if (product.trim() == "") {
+
+                                $("input[name = 'product']").css("border-color", "#dd4b39");
+                            }
+                        }
+                    }
+                });
+            } else {
+
+                $.ajax({
+                    type: "POST",
+                    url: "<?= site_url('update_product') ?>",
+                    data: formData,
+                    success: function(data) {
+
+                        var response = JSON.parse(data);
+                        if (response.status == "success") {
+
+                            $.alert.open({
+                                type: 'warning',
+                                title: 'Info',
+                                icon: 'confirm',
+                                cancel: false,
+                                content: "Product has been updated!",
+                                buttons: {
+                                    OK: 'Yes'
+                                },
+
+                                callback: function(button) {
+                                    if (button == 'OK') {
+
+                                        location.reload();
+                                    }
+                                }
+                            });
+                        } else if (response, status == 'exist') {
+
+                            $.alert.open({
+                                type: 'warning',
+                                content: "Product is already exist"
+                            });
+                        } else {
+
+                            console.log(data);
+                        }
+                    }
+                });
+            }
+        });
+
+        $("button#add-product").click(function() {
+
+            $("div#add-product").modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+
+            $("input[name ='product']").val("");
+        });
+
+        $("form#add-product").submit(function(e) {
+
+            e.preventDefault();
+            let product = $("input[name ='product']").val();
+            if (product.trim() == '') {
+
+                $.alert.open({
+                    type: 'warning',
+                    cancel: false,
+                    content: "Please Fill-up product Name!",
+                    buttons: {
+                        OK: 'Ok'
+                    },
+
+                    callback: function(button) {
+                        if (button == 'OK') {
+
+                            if (product.trim() == "") {
+
+                                $("input[name = 'product']").css("border-color", "#dd4b39");
+                            }
+                        }
+                    }
+                });
+            } else {
+
+                $.ajax({
+                    type: "POST",
+                    url: "<?= site_url('store_product') ?>",
+                    data: {
+                        product
+                    },
+                    success: function(data) {
+
+                        var response = JSON.parse(data);
+                        if (response.status == "success") {
+
+                            $.alert.open({
+                                type: 'warning',
+                                title: 'Info',
+                                icon: 'confirm',
+                                cancel: false,
+                                content: "Product has been added!",
+                                buttons: {
+                                    OK: 'Yes'
+                                },
+                                callback: function(button) {
+                                    if (button == 'OK') {
+
+                                        location.reload();
+                                    }
+                                }
+                            });
+                        } else if (response.status == 'exist') {
+
+                            $.alert.open({
+                                type: 'warning',
+                                content: "Product is already exist"
+                            });
+                        } else {
+
+                            console.log(data);
+                        }
+                    }
+                });
+            }
+        });
+
     });
 
     function company_list(agency_code) {

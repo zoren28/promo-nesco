@@ -868,22 +868,11 @@ class Initial_model extends CI_Model
 	}
 	public function check_agency($data)
 	{
-		if($data == '0')
-		{
-			$query = $this->db->from('locate_promo_company')
-							->where("status = '1'")
-							->order_by('pc_name', 'ASC')
-							->get();
-			return $query->result_array();	
-		}
-		else
-		{
-			$query = $this->db2->from('promo_locate_company')
+		$query = $this->db2->from('promo_locate_company')
 							->where("agency_code = $data")
 							->order_by('company_name', 'ASC')
 							->get();
 			return $query->result_array();
-		}
 	}
 	
 	public function agency()
@@ -895,6 +884,13 @@ class Initial_model extends CI_Model
         return $query->result_array();
 	}
 	
+	public function business_unit()
+	{
+		$query = $this->db->from('locate_promo_business_unit')
+							->where("status = 'active'")
+							->get();
+        return $query->result_array();
+	}
 	public function applicants_for_hiring()
     {
 		$query = $this->db->from('applicants')

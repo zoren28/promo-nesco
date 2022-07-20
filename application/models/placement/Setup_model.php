@@ -184,4 +184,68 @@ class Setup_model extends CI_Model
         );
         $this->db2->insert('promo_locate_company', $insert);
     }
+
+    public function product_list($filter)
+    {
+        if (!empty($filter)) {
+            $this->db->where('status', $filter);
+        }
+        $query = $this->db->order_by('product', 'ASC')
+            ->get('locate_promo_product');
+        return $query->result();
+    }
+
+    public function delete_product($id)
+    {
+        return $this->db->delete('locate_promo_product', array('id' => $id));
+    }
+
+    public function update_product_status($data)
+    {
+        if ($data['action'] == 'activate') {
+            $this->db->set('status', 1);
+        } else {
+            $this->db->set('status', 0);
+        }
+
+        $this->db->where('id', $data['id']);
+        return $this->db->update('locate_promo_product');
+    }
+
+    public function show_product($id)
+    {
+        $query = $this->db->get_where('locate_promo_product', array('id' => $id));
+        return $query->row();
+    }
+
+    public function update_product($data)
+    {
+        $update = array(
+            'product' => strtoupper($data['product']),
+            'updated_at' => $this->datetime
+        );
+        $this->db->where('id', $data['id']);
+        return $this->db->update('locate_promo_product', $update);
+    }
+
+    public function check_product($product, $id)
+    {
+        $this->db->from('locate_promo_product');
+
+        if (!empty($id)) {
+            $this->db->where('id !=', $id);
+        }
+
+        $this->db->where('product', $product);
+        return $this->db->count_all_results();
+    }
+
+    public function store_product($product)
+    {
+        $insert = array(
+            'product' => strtoupper($product),
+            'created_at' => $this->datetime
+        );
+        return $this->db->insert('locate_promo_product', $insert);
+    }
 }

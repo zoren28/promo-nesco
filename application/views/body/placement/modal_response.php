@@ -5173,7 +5173,7 @@ if ($request == "update_blacklist_form") {
         <label>Company</label>
         <div class="input-group">
             <input type="hidden" name="company_code" value="<?= $company->pc_code ?>">
-            <input class="form-control" type="text" name="company" value="<?= $company->pc_name ?>" style="text-transform: uppercase; border-color: rgb(204, 204, 204);" onkeyup="inputField(this.name)" required>
+            <input class="form-control" type="text" id="edit-company" name="company" value="<?= $company->pc_name ?>" style="text-transform: uppercase; border-color: rgb(204, 204, 204);" onkeyup="inputField(this.name)" required>
             <span class="input-group-addon"><i class="fa fa-bank"></i></span>
         </div>
     </div>
@@ -5184,7 +5184,7 @@ if ($request == "update_blacklist_form") {
         <label>Agency</label>
         <div class="input-group">
             <input type="hidden" name="agency_code" value="<?= $agency->agency_code ?>">
-            <input class="form-control" type="text" name="agency" value="<?= $agency->agency_name ?>" style="text-transform: uppercase; border-color: rgb(204, 204, 204);" onkeyup="inputField(this.name)" required>
+            <input class="form-control" type="text" id="edit-agency" name="agency" value="<?= $agency->agency_name ?>" style="text-transform: uppercase; border-color: rgb(204, 204, 204);" onkeyup="inputField(this.name)" required>
             <span class="input-group-addon"><i class="fa fa-bank"></i></span>
         </div>
     </div>
@@ -5248,5 +5248,16 @@ if ($request == "update_blacklist_form") {
             "paging": false
         });
     </script>
+<?php
+} else if ($request == 'show_product') {
+?>
+    <div class="form-group">
+        <label>Product</label>
+        <div class="input-group">
+            <input type="hidden" name="id" value="<?= $product->id ?>">
+            <input class="form-control" type="text" id="edit-product" name="product" value="<?= $product->product ?>" style="text-transform: uppercase; border-color: rgb(204, 204, 204);" onkeyup="inputField(this.name)" required>
+            <span class="input-group-addon"><i class="fa fa-bank"></i></span>
+        </div>
+    </div>
 <?php
 }

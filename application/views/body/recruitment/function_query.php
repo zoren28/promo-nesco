@@ -315,6 +315,34 @@
 				  </select>
 				 
 			</div>
+			
+			<div class="form-group">
+				 <label for="company">PROMO TYPE</label>
+				 <select class="form-control" name="promotype" required>
+					<option value=''>Select</option>
+					<option value='Roving'>ROVING</option>
+					<option value='Station'>STATION</option>
+				  </select>
+				 
+			</div>
+			
+			<div class="form-group">
+				 <label for="company">BUSINESS UNIT</label>
+				 <?php $result = $this->initial_model->business_unit(); ?>
+				 <table class="table table-bordered">
+					<tr>
+						<td colspan="2"><b>SELECT STORE</b></td>
+					</tr>
+					<?php
+					
+					foreach ($result as $i) { ?>
+					<tr>
+						<td><input type="checkbox"></td>
+						<td><?= $i['bunit_name'] ?></td>
+					</tr>
+					<?php }?>
+				</table>
+			</div>
 		</div>
 		<?php
 	}
@@ -1002,9 +1030,13 @@
 	}
 	else if ($request == 'company_list') 
 	{
-		?>
-			<option value=""> --Select-- </option>
-        <?php
+		 
+		?><option value=""> --Select-- </option><?php
+		foreach ($agency_result as $i)  
+		{ ?>
+			<option value='<?=$i['agency_code']?>'><?=$i['company_name']?></option><?php 
+		} ?>
+		<?php	
 	}
 	else if ($request == 'append_character_ref')
 	{

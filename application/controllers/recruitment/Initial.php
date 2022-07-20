@@ -127,7 +127,7 @@ class Initial extends CI_Controller
 	public function company_select()
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
-		$this->initial_model->check_agency($fetch_data['agency_code']);
+		$data['agency_result'] = $this->initial_model->check_agency($fetch_data['agency_code']);
 		$data['request'] = "company_list";
 		$this->load->view('body/recruitment/function_query', $data);
 	}
