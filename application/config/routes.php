@@ -30,6 +30,12 @@ $route['untag_product_company'] = 'placement/setup/untag_product_company';
 $route['choose_company'] = 'placement/setup/choose_company';
 $route['tag_product_company'] = 'placement/setup/tag_product_company';
 $route['store_promo_company_products'] = 'placement/setup/store_promo_company_products';
+$route['find_active_supervisor'] = 'placement/setup/find_active_supervisor';
+$route['supervisor_details'] = 'placement/setup/supervisor_details';
+$route['list_of_subordinates'] = 'placement/setup/list_of_subordinates';
+$route['remove_subordinates'] = 'placement/setup/remove_subordinates';
+$route['employee_list'] = 'placement/setup/employee_list';
+$route['store_subordinates'] = 'placement/setup/store_subordinates';
 
 // for user account module
 $route['create_user_account'] = 'placement/account/create_user_account';

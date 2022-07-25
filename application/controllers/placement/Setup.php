@@ -15,6 +15,7 @@ class Setup extends CI_Controller
         }
 
         $this->load->model('placement/setup_model');
+        $this->load->model('placement/employee_model');
     }
 
     public function company_list()
@@ -430,5 +431,83 @@ class Setup extends CI_Controller
         }
 
         echo json_encode(array('status' => 'success'));
+    }
+
+    public function find_active_supervisor()
+    {
+        $val = "";
+        $str = $this->input->post('str', TRUE);
+
+        $query = $this->setup_model->find_active_supervisor($str);
+        if ($query->num_rows() > 0) {
+
+            $info = $query->result_array();
+            foreach ($info as $emp) {
+
+                $empId = $emp['emp_id'];
+                $name  = ucwords(strtolower($emp['name']));
+
+                if ($val != $empId) {
+?>
+                    <a href="javascript:void(0);" onclick="getEmpId('<?= $emp['emp_id'] . ' * ' . $emp['name']  ?>')"><?= $emp['emp_id'] . ' * ' . $emp['name']  ?></a></br>
+<?php
+                } else {
+                    echo 'No Result Found';
+                }
+            }
+        } else {
+
+            echo 'No Result Found';
+        }
+    }
+
+    public function supervisor_details()
+    {
+        $emp_id = $this->input->get('emp_id', TRUE);
+        $data['supervisor'] = $this->setup_model->show_supervisor($emp_id);
+        $data['request'] = 'supervisor_details';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function list_of_subordinates()
+    {
+        $emp_id = $this->input->get('emp_id', TRUE);
+        $data['subordinates'] = $this->setup_model->list_of_subordinates($emp_id);
+        $data['request'] = 'list_of_subordinates';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function remove_subordinates()
+    {
+        $subordinates = $this->input->post('subordinates', TRUE);
+        $delete = $this->setup_model->remove_subordinates($subordinates);
+        if ($delete) {
+            echo json_encode(array('status' => 'success'));
+        } else {
+            echo json_encode(array('status' => 'failure'));
+        }
+    }
+
+    public function employee_list()
+    {
+        $request = $this->input->post(NULL, TRUE);
+        $data['employees'] = $this->setup_model->employee_list($request);
+        $data['rater'] = $request['rater'];
+        $data['request'] = 'employee_list';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function store_subordinates()
+    {
+        $data = $this->input->post(NULL, TRUE);
+        $store = $this->setup_model->store_leveling_subordinates($data);
+        if ($store) {
+            echo json_encode(array('status' => 'success'));
+        } else {
+            echo json_encode(array('status' => 'failure'));
+        }
     }
 }

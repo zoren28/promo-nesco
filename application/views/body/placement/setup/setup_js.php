@@ -1077,6 +1077,126 @@
             });
         });
 
+        $("input[name = 'supervisor']").keyup(function(e) {
+
+            let str = $(this).val().trim();
+            $(".search-results").hide();
+
+            if (str == '') {
+
+                $(".search-results").hide();
+            } else {
+
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo site_url('find_active_supervisor'); ?>",
+                    data: {
+                        str
+                    },
+                    success: function(data) {
+
+                        if (data.trim() != "No Result Found") {
+
+                            $(".search-results").show().html(data);
+                        } else {
+
+                            $(".search-results").hide();
+                        }
+                    }
+                });
+            }
+        });
+
+        $("select[name = 'store']").change(function() {
+
+            let [id, field] = $(this).val().split('/');
+            $.ajax({
+                type: "POST",
+                url: "<?= site_url('fetch_assigned_department') ?>/" + id,
+                success: function(data) {
+
+                    $("select[name = 'department']").prop('disabled', false);
+                    $("select[name = 'department']").html(data);
+                }
+            });
+        });
+
+        $("select[name = 'department']").change(function() {
+
+            let [id, field] = $("select[name = 'store']").val().split('/');
+            let department = $(this).val();
+            let rater = $("input[name = 'rater']").val();
+
+            $("div#load-gif").show();
+            $.ajax({
+                type: "POST",
+                url: "<?= site_url('employee_list') ?>",
+                data: {
+                    field,
+                    department,
+                    rater
+                },
+                success: function(data) {
+
+                    $("div#load-gif").hide();
+                    $("div.employee-list").html(data);
+                }
+            });
+        });
+
+        $("form#add-subordinates").submit(function(e) {
+
+            e.preventDefault();
+            let formData = $(this).serialize();
+            let rater = $("input[name = 'rater']").val();
+            let employees = [];
+
+            $("input[name = 'employees[]']:checked").each(function() {
+                employees.push($(this).val());
+            });
+
+            if (employees.length === 0) {
+
+                errDup("You need to check a subordinate to be added!");
+            } else {
+
+                $.ajax({
+                    type: "POST",
+                    url: "<?= site_url('store_subordinates') ?>",
+                    data: formData,
+                    success: function(data) {
+
+                        response = JSON.parse(data);
+                        if (response.status == "success") {
+
+                            $.alert.open({
+                                type: 'warning',
+                                title: 'Info',
+                                icon: 'confirm',
+                                cancel: false,
+                                content: "Subordinate(s) Successfully Added",
+                                buttons: {
+                                    OK: 'Yes'
+                                },
+
+                                callback: function(button) {
+                                    if (button == 'OK') {
+
+                                        $("div#add-subordinates").modal("hide");
+                                        list_of_subordinates(rater);
+                                    }
+
+                                }
+                            });
+                        } else {
+
+                            console.log(data);
+                        }
+                    }
+                });
+            }
+        });
+
     });
 
     function company_list(agency_code) {
@@ -1123,8 +1243,106 @@
         }
     }
 
+    function getEmpId(supervisor) {
+
+        let [emp_id, name] = supervisor.split('*');
+
+        $("input[name='supervisor']").val(supervisor);
+        $("input[name = 'rater']").val(emp_id.trim());
+        $(".search-results").hide();
+
+        $.ajax({
+            url: "<?php echo site_url('supervisor_details'); ?>",
+            data: {
+                emp_id: emp_id.trim()
+            },
+            success: function(data) {
+
+                $("div.supervisor-details").html(data);
+                list_of_subordinates(emp_id.trim());
+            }
+        });
+    }
+
+    function list_of_subordinates(emp_id) {
+
+        $("div#loading-gif").show();
+        $.ajax({
+            type: "GET",
+            url: "<?= site_url('list_of_subordinates') ?>",
+            data: {
+                emp_id
+            },
+            success: function(data) {
+
+                $("div#loading-gif").hide();
+                $("div.subordinates").html(data);
+            }
+        });
+    }
+
     function inputField(name) {
 
         $("[name = '" + name + "']").css("border-color", "#d2d6de");
+    }
+
+    function remove_sub() {
+
+        let subordinates = [];
+        let [emp_id, name] = $("input[name = 'supervisor']").val().split('*');
+        $("input[name= 'subordinates[]']:checked").each(function() {
+
+            subordinates.push($(this).val());
+        })
+
+        if (subordinates.length === 0) {
+
+            errDup("You need to check atleast one subordinate to remove!");
+        } else {
+
+            $.ajax({
+                type: "POST",
+                url: "<?= site_url('remove_subordinates') ?>",
+                data: {
+                    subordinates
+                },
+                success: function(data) {
+
+                    let response = JSON.parse(data);
+                    if (response.status == "success") {
+
+                        $.alert.open({
+                            type: 'warning',
+                            title: 'Info',
+                            icon: 'confirm',
+                            cancel: false,
+                            content: "Subordinate(s) Successfully Removed",
+                            buttons: {
+                                OK: 'Yes'
+                            },
+                            callback: function(button) {
+                                if (button == 'OK') {
+
+                                    list_of_subordinates(emp_id.trim());
+                                }
+
+                            }
+                        });
+                    } else {
+
+                        console.log(data);
+                    }
+                }
+            });
+        }
+    }
+
+    function addSubordinates() {
+
+        $("div#add-subordinates").modal({
+            backdrop: 'static',
+            keyboard: false,
+            show: true
+        });
     }
 </script>

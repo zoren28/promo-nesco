@@ -281,4 +281,100 @@ class Setup_model extends CI_Model
         );
         return $this->db->insert('promo_company_products', $insert);
     }
+
+    public function find_active_supervisor($str)
+    {
+        $this->db->query('SET SESSION sql_mode = ""');
+
+        // ONLY_FULL_GROUP_BY
+        $this->db->query('SET SESSION sql_mode =
+                              REPLACE(REPLACE(REPLACE(
+                              @@sql_mode,
+                              "ONLY_FULL_GROUP_BY,", ""),
+                              ",ONLY_FULL_GROUP_BY", ""),
+                              "ONLY_FULL_GROUP_BY", "")');
+
+        return $this->db->select('employee3.emp_id, name')
+            ->from('employee3')
+            ->join('users', 'employee3.emp_id = users.emp_id')
+            ->where('usertype', 'supervisor')
+            ->group_start()
+            ->like('name', $str)
+            ->or_where('employee3.emp_id', $str)
+            ->group_end()
+            ->group_by('users.emp_id')
+            ->order_by('name', 'ASC')
+            ->limit(10)
+            ->get();
+    }
+
+    public function show_supervisor($emp_id)
+    {
+        $query = $this->db->get_where('employee3', array('emp_id' => $emp_id));
+        return $query->row();
+    }
+
+    public function list_of_subordinates($rater)
+    {
+        $this->db->select('leveling_subordinates.record_no, emp_id, name, current_status, position')
+            ->from('leveling_subordinates')
+            ->join('employee3', 'employee3.emp_id = leveling_subordinates.subordinates_rater')
+            ->where('ratee', $rater);
+
+        if ($this->hr == 'nesco') {
+            $this->db->where('emp_type', 'Promo-NESCO');
+        } else {
+            $this->db->like('emp_type', 'Promo', 'after');
+        }
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function remove_subordinates($subordinates)
+    {
+        $this->db->where_in('record_no', $subordinates);
+        return $this->db->delete('leveling_subordinates');
+    }
+
+    public function employee_list($data)
+    {
+        $this->db->select('employee3.emp_id, name, current_status, position')
+            ->from('employee3')
+            ->join('promo_record', 'promo_record.record_no = employee3.record_no AND promo_record.emp_id = employee3.emp_id')
+            ->where($data['field'], 'T')
+            ->where('promo_department', $data['department'])
+            ->where('current_status !=', 'blacklisted');
+
+        if ($this->hr == 'nesco') {
+            $this->db->where('emp_type', 'Promo-NESCO');
+        } else {
+            $this->db->like('emp_type', 'Promo', 'after');
+        }
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function check_subordinates($rater, $ratee)
+    {
+        return $this->db->from('leveling_subordinates')
+            ->where(array('ratee' => $rater, 'subordinates_rater' => $ratee))
+            ->count_all_results();
+    }
+
+    public function store_leveling_subordinates($data)
+    {
+        $insert = array();
+        foreach ($data['employees'] as $employee) {
+
+            $subordinates = array(
+                'ratee' => $data['rater'],
+                'subordinates_rater' => $employee
+            );
+
+            $insert[] = $subordinates;
+        }
+
+        return $this->db->insert_batch('leveling_subordinates', $insert);
+    }
 }

@@ -117,7 +117,7 @@ class Employee extends CI_Controller
 
     public function fetch_assigned_department($id)
     {
-        echo "<option value=''> Select Department </option>";
+        echo "<option value=''> --Select-- </option>";
         $departments = $this->employee_model->assigned_departments($id);
         foreach ($departments as $dept) {
 

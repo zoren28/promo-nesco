@@ -5319,4 +5319,167 @@ if ($request == "update_blacklist_form") {
         });
     </script>
 <?php
+} else if ($request == 'supervisor_details') {
+?>
+    <table class="table">
+        <tr>
+            <td>Company</td>
+            <td>:</td>
+            <td><?= ucwords(strtolower($this->employee_model->asc_company_name($supervisor->company_code)['company'])); ?></td>
+        </tr>
+        <tr>
+            <td>Business Unit</td>
+            <td>:</td>
+            <td><?= ucwords(strtolower($this->employee_model->get_businessunit_name($supervisor->company_code, $supervisor->bunit_code)['business_unit'])); ?></td>
+        </tr>
+        <tr>
+            <td>Department</td>
+            <td>:</td>
+            <td><?= ucwords(strtolower($this->employee_model->get_department_name($supervisor->company_code, $supervisor->bunit_code, $supervisor->dept_code)['dept_name'])); ?></td>
+        </tr>
+        <tr>
+            <td>Section</td>
+            <td>:</td>
+            <td><?= ucwords(strtolower($this->employee_model->get_section_name($supervisor->company_code, $supervisor->bunit_code, $supervisor->dept_code, $supervisor->section_code)['section_name'])); ?></td>
+        </tr>
+        <tr>
+            <td>Position</td>
+            <td>:</td>
+            <td><?= ucwords(strtolower($supervisor->position)); ?></td>
+        </tr>
+        <tr>
+            <td>Position Level</td>
+            <td>:</td>
+            <td><?= ucwords(strtolower($supervisor->poslevel)); ?></td>
+        </tr>
+        <tr>
+            <td>Employee Type</td>
+            <td>:</td>
+            <td><?= ucwords(strtolower($supervisor->emp_type)); ?></td>
+        </tr>
+    </table>
+<?php
+} else if ($request == 'list_of_subordinates') {
+?>
+    <div class="panel panel-default">
+        <div class="panel-heading">S U B O R D I N A T E S
+            <span style="float:right"><a href="javascript:void(0)" class="btn btn-primary btn-sm" onclick="addSubordinates()"><span class="fa fa-street-view"></span> Add Subordinates </a> | <a href="javascript:void(0)" class="btn btn-warning btn-sm" onclick="remove_sub()"><span class="fa fa-remove"></span> Remove</a></span>
+        </div>
+        <div class="panel-body">
+            <table id="dt-subordinates" class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Emp.ID</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+
+                    foreach ($subordinates as $subordinate) {
+
+                        $ratee = $subordinate->emp_id;
+                        $id = $subordinate->record_no;
+
+                        if ($subordinate->current_status == "Active") {
+
+                            $class = "btn btn-success btn-xs btn-flat";
+                        } else if ($subordinate->current_status == 'blacklisted') {
+
+                            $class = "btn btn-danger btn-xs btn-flat";
+                        } else {
+
+                            $class = "btn btn-warning btn-xs btn-flat";
+                        }
+
+                        echo '
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="subordinates[]" value="' . $id . '">
+                                </td>
+                                <td><a href="' . base_url('placement/page/menu/employee/profile') . '/' . $ratee . '" target="_blank">' . $ratee . '</a></td>
+                                <td>' . ucwords(strtolower($subordinate->name)) . '</td>
+                                <td>' . $subordinate->position . '</td>
+                                <td><span class="' . $class . ' btn-block">' . ucfirst(strtolower($subordinate->current_status)) . '</span></td>
+                            </tr>
+                        ';
+                    }
+
+                    ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(function() {
+            $("table#dt-subordinates").DataTable({
+                "destroy": true,
+                "order": [
+                    [2, 'asc']
+                ],
+                scrollY: '320px',
+                scrollCollapse: true,
+                paging: false
+            });
+        });
+    </script>
+<?php
+} else if ($request == 'employee_list') {
+?>
+    <table id="dt-employees" class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Emp.ID</th>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+
+            foreach ($employees as $employee) {
+
+                if ($employee->current_status == 'Active') {
+                    $class = "btn btn-success btn-xs";
+                } else {
+                    $class = "btn btn-warning btn-xs";
+                }
+
+                $exist = $this->setup_model->check_subordinates($rater, $employee->emp_id);
+                if ($exist == 0) {
+                    echo '
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="employees[]" value="' . $employee->emp_id . '">
+                            </td>
+                            <td>' . $employee->emp_id . '</td>
+                            <td><a href="' . base_url('placement/page/menu/employee/profile') . '/' . $employee->emp_id . '" target="_blank">' . $employee->name . '</a></td>
+                            <td>' . $employee->position . '</td>
+                            <td><span class="' . $class . ' btn-block">' . $employee->current_status . '</span></td>
+                        </tr>
+                    ';
+                }
+            }
+            ?>
+        </tbody>
+    </table>
+    <script type="text/javascript">
+        $(function() {
+            $("table#dt-employees").DataTable({
+                "destroy": true,
+                "order": [
+                    [2, 'asc']
+                ],
+                scrollY: '300px',
+                scrollCollapse: true,
+                paging: false
+            });
+        });
+    </script>
+<?php
 }
