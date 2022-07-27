@@ -125,6 +125,40 @@ class Initial extends CI_Controller
 		}	
 	}
 	
+	public function get_duration()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		
+		$dF =  new DateTime($fetch_data['strtDate']);
+		$dT =  new DateTime($fetch_data['endDate']);
+
+		$newDF = date('Y-m-d', strtotime($fetch_data['strtDate']));
+		$newDT = date('Y-m-d', strtotime($fetch_data['endDate']));
+
+		$interval = $dT->diff($dF);
+		$duration = $interval->format('%a') + 1;
+
+		if ($duration >= 32) 
+		{
+			$duration = $interval->format('%m');
+		} 
+		else 
+		{
+			$duration = "$duration day(s)";
+		}
+
+		if($newDF > $newDT)
+		{
+			echo json_encode(array('status'=> 1, 'message' => "EOCdate must be greater than or equal to startdate!"));	
+		}
+		else
+		{
+			echo json_encode(array('status'=> 0, 'duration' => $duration));	
+		}	
+		//$data['duration'] = $this->initial_model->durationFormula($fetch_data);
+		//print_r($data);	
+	}
+	
 	public function company_select()
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);

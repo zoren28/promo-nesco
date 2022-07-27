@@ -112,4 +112,45 @@ class Resignation_model extends CI_Model
         $this->db->where('termination_no', $data['termination_no']);
         return $this->db->update('termination', $update);
     }
+
+    public function upload_clearance($emp_id, $clearances)
+    {
+        foreach ($clearances as $clearance) {
+            $this->db->set($clearance['clearance'], $clearance['path']);
+        }
+        $this->db->where('emp_id', $emp_id);
+        return $this->db->update('promo_record');
+    }
+
+    public function store_termination($data)
+    {
+        $insert = array(
+            'emp_id' => $data['emp_id'],
+            'date' => date('Y-m-d', strtotime($data['dateEffective'])),
+            'remarks' => $data['remarks'],
+            'resignation_letter' => $data['resignation_path'],
+            'added_by' => $this->loginId,
+            'date_updated' => $this->date
+        );
+        return $this->db->insert('termination', $insert);
+    }
+
+    public function update_employee3($data)
+    {
+        $update = array(
+            'current_status' => $data['rt_status'],
+            'remarks' => $data['remarks']
+        );
+        $this->db->where('emp_id', $data['emp_id']);
+        return $this->db->update('employee3', $update);
+    }
+
+    public function inactive_user($emp_id)
+    {
+        $update = array(
+            'user_status' => 'inactive'
+        );
+        $this->db->where('emp_id', $emp_id);
+        return $this->db->update('users', $update);
+    }
 }

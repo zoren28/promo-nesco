@@ -369,7 +369,7 @@
 			<div class="form-group">
 				<label for="company">PRODUCT</label>
 				<select name="product[]" class="form-control" multiple="">
-					<option value=""> --Select-- </option>
+					<option value="">Select</option>
 				</select>	 
 			</div>
 			
@@ -395,8 +395,8 @@
 				<label for="company">INCLUSIVE DATES</label>
 				<table class="table table-bordered">
 					<tr>
-						<td><input type="text" name="startDate" class="form-control datepicker" placeholder="Startdate"></td>
-						<td><input type="text" name="startDate" class="form-control datepicker" placeholder="Startdate"></td>
+						<td><input type="text" name="startDate" id="startDate" class="form-control datepicker" placeholder="Start Date" autocomplete='off'></td>
+						<td><input type="text" name="endDate" id='endDate' class="form-control datepicker" placeholder="End Date" onchange="duration()" autocomplete='off'></td>
 					</tr>
 					
 				</table>	 
@@ -413,6 +413,7 @@
 			</div>
 			
 		</div>
+		
 		<script>
 		$('.datepicker').datepicker({
 				inline: true,
@@ -422,7 +423,6 @@
 		</script>
 		<?php
 	}
-	
 	else if($request == "applicant_record")
 	{
 		?>

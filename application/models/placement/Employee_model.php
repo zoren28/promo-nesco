@@ -195,8 +195,13 @@ class Employee_model extends CI_Model
             ->like('name', $fetch['str'])
             ->or_where('employee3.emp_id', $fetch['str'])
             ->group_end()
-            ->where('emp_type', 'Promo-NESCO')
             ->where('current_status', 'Active');
+
+        if ($this->hr == 'nesco') {
+            $this->db->where('emp_type', 'Promo-NESCO');
+        } else {
+            $this->db->like('emp_type', 'Promo', 'after');
+        }
 
         if ($fetch['promo_type'] == 'ROVING') {
 
@@ -211,17 +216,53 @@ class Employee_model extends CI_Model
         return $this->db->get();
     }
 
+    public function find_all_promo($str)
+    {
+        $this->db->query('SET SESSION sql_mode = ""');
+
+        // ONLY_FULL_GROUP_BY
+        $this->db->query('SET SESSION sql_mode =
+                              REPLACE(REPLACE(REPLACE(
+                              @@sql_mode,
+                              "ONLY_FULL_GROUP_BY,", ""),
+                              ",ONLY_FULL_GROUP_BY", ""),
+                              "ONLY_FULL_GROUP_BY", "")');
+
+        $this->db->select('employee3.emp_id, name')
+            ->from('employee3')
+            ->join('promo_record', 'promo_record.record_no = employee3.record_no AND promo_record.emp_id = employee3.emp_id')
+            ->group_start()
+            ->like('name', $str)
+            ->or_where('employee3.emp_id', $str)
+            ->group_end();
+
+        if ($this->hr == 'nesco') {
+            $this->db->where('emp_type', 'Promo-NESCO');
+        } else {
+            $this->db->like('emp_type', 'Promo', 'after');
+        }
+
+        $this->db->order_by('name', 'ASC')
+            ->limit(10);
+        return $this->db->get();
+    }
+
     public function employee_list($data)
     {
         if (!empty($data['company'])) {
             $company = $this->get_company_name($data['company'])->pc_name;
         }
 
-        $where = array('emp_type' => 'Promo-NESCO', 'current_status' => 'Active');
         $this->db->select('employee3.record_no, employee3.emp_id, name, agency_code, promo_company, promo_department, al_tag, al_tal, icm, pm, abenson_tag, abenson_icm, cdc, berama, al_tub, colc, colm, alta_citta, bq, shoppers, promo_type, position, current_status')
             ->from('employee3')
             ->join('promo_record', 'promo_record.record_no = employee3.record_no')
-            ->where($where);
+            ->where('current_status', 'Active');
+
+        if ($this->hr == 'nesco') {
+            $this->db->where('emp_type', 'Promo-NESCO');
+        } else {
+            $this->db->like('emp_type', 'Promo', 'after');
+        }
 
         if (!empty($data['promo_type'])) {
             $this->db->where('promo_type', $data['promo_type']);
@@ -262,11 +303,17 @@ class Employee_model extends CI_Model
 
     public function search_employee($search)
     {
-        $query = $this->db->select('employee3.record_no, employee3.emp_id, name, agency_code, promo_company, promo_department, al_tag, al_tal, icm, pm, abenson_tag, abenson_icm, cdc, berama, al_tub, colc, colm, alta_citta, bq, shoppers, promo_type, type, current_status, position, startdate, eocdate')
+        $this->db->select('employee3.record_no, employee3.emp_id, name, agency_code, promo_company, promo_department, al_tag, al_tal, icm, pm, abenson_tag, abenson_icm, cdc, berama, al_tub, colc, colm, alta_citta, bq, shoppers, promo_type, type, current_status, position, startdate, eocdate')
             ->from('employee3')
-            ->join('promo_record', 'promo_record.record_no = employee3.record_no')
-            ->where('emp_type', 'Promo-NESCO')
-            ->group_start()
+            ->join('promo_record', 'promo_record.record_no = employee3.record_no');
+
+        if ($this->hr == 'nesco') {
+            $this->db->where('emp_type', 'Promo-NESCO');
+        } else {
+            $this->db->like('emp_type', 'Promo', 'after');
+        }
+
+        $query = $this->db->group_start()
             ->like('name', $search)
             ->or_like('employee3.emp_id', $search)
             ->group_end()
@@ -306,16 +353,11 @@ class Employee_model extends CI_Model
 
     public function employee_info($emp_id)
     {
-        $this->db->select('employee3.record_no, employee3.emp_id, name, emp_no, emp_type, agency_code, promo_company, promo_department, vendor_code, promo_type, type, current_status, position, startdate, eocdate')
+        $query = $this->db->select('employee3.record_no, employee3.emp_id, name, emp_no, emp_type, agency_code, promo_company, promo_department, vendor_code, promo_type, type, current_status, position, startdate, eocdate')
             ->from('employee3')
             ->join('promo_record', 'promo_record.record_no = employee3.record_no', 'left')
-            ->where('employee3.emp_id', $emp_id);
-        if ($this->hr == 'nesco') {
-            $this->db->where('emp_type', 'Promo-NESCO');
-        } else {
-            $this->db->like('emp_type', 'Promo', 'after');
-        }
-        $query = $this->db->get();
+            ->where('employee3.emp_id', $emp_id)
+            ->get();
         return $query->row();
     }
 

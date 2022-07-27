@@ -6,6 +6,10 @@ $route['resignation_list'] = 'placement/resignation/resignation_list';
 $route['show_resignation_letter'] = 'placement/resignation/show_resignation_letter';
 $route['upload_resignation_letter'] = 'placement/resignation/upload_resignation_letter';
 $route['submit_resignation_letter'] = 'placement/resignation/submit_resignation_letter';
+$route['check_rt_status'] = 'placement/resignation/check_rt_status';
+$route['store_rt'] = 'placement/resignation/store_rt';
+$route['find_all_promo'] = 'placement/resignation/find_all_promo';
+$route['show_employee/(:any)'] = 'placement/resignation/show_employee/$1';
 
 // for setup module
 $route['company_list'] = 'placement/setup/company_list';
@@ -250,6 +254,7 @@ $route['save_final_completion'] = 'recruitment/initial/save_final_completion';
 $route['company_select'] = 'recruitment/initial/company_select';
 $route['locate_vendor'] = 'recruitment/initial/locate_vendor';
 $route['selproduct'] = 'recruitment/initial/selproduct';
+$route['get_duration'] = 'recruitment/initial/get_duration';
 
 // for menu module
 $route['logout'] = 'logout';

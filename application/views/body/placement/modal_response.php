@@ -5497,5 +5497,30 @@ if ($request == "update_blacklist_form") {
             <input type='button' name='clearresignation' id='clearresignation' style='display:none' class='btn btn-default' value='Clear' onclick="clears('resignation','photoresignation','clearresignation')">
         </div>
     </div><br>
+    <?php
+} else if ($request == 'check_rt_status') {
+
+    $bUs = $this->dashboard_model->businessUnit_list();
+    foreach ($bUs as $bu) {
+
+        $hasBU = $this->dashboard_model->promo_has_bu($data['emp_id'], $bu->bunit_field);
+        if ($hasBU > 0) {
+    ?>
+            <div class="form-group">
+                <label>Clearance (<?= $bu->bunit_name ?>)</label> <i class="text-red">*</i>
+                <input type="hidden" name="clearances[]" value="<?= $bu->bunit_clearance ?>">
+                <input type="file" name="<?= $bu->bunit_clearance ?>" class="btn btn-default btn-flat clearances" required>
+            </div>
+        <?php
+        }
+    }
+
+    if ($data['rt_status'] == 'Resigned') {
+        ?>
+        <div class="form-group">
+            <label>Resignation Letter</label> <i class="text-red">*</i>
+            <input type="file" name="resignation" class="btn btn-default btn-flat" required>
+        </div>
 <?php
+    }
 }

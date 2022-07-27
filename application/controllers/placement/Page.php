@@ -35,7 +35,7 @@ class Page extends CI_Controller
 
         $data['activeBUs'] = $this->dashboard_model->businessUnit_list();
 
-        if (($menu == "employee" && $page == "profile") || ($menu == "contract" && $page == "process-renewal") || ($menu == "blacklisted" && $page == "add-blacklisted") || ($menu == "termination" && $page == "resignation_termination")) {
+        if (($menu == "employee" && $page == "profile") || ($menu == "contract" && $page == "process-renewal") || ($menu == "blacklisted" && $page == "add-blacklisted") || ($menu == "resignation-termination" && $page == "add-resignation-termination")) {
 
             $data['empId']  = $empId;
             $data['emp_details'] = $this->employee_model->get_promo_details($empId);

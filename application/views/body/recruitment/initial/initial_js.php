@@ -733,6 +733,31 @@
 		}
 	}
 	
+	function duration()
+	{	
+      var strtDate = $("input[name = 'startDate']").val(); 
+	  var endDate = $("input[name = 'endDate']").val(); 
+	  
+	  $.ajax({
+			type : "POST",
+			url: "<?php echo site_url('get_duration'); ?>",
+            data : 
+				{ strtDate:strtDate, endDate:endDate },
+			success : function(response){
+               
+				response = JSON.parse(response);
+					
+					if(response.status === 0)
+					{
+						$("input[name = 'duration']").val(response.duration);
+					}
+					else
+					{
+						alert(response.message);
+					}
+            }
+        });
+	}
 	// newly added module add agency
     function select_agency(agency_code) 
 	{

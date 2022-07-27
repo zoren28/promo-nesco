@@ -1015,6 +1015,35 @@ class Initial_model extends CI_Model
 		$que = $this->db->get_where('applicants', array('app_code' => $data));
 		return $que->row_array();	
 	}
+	public function durationFormula($fetch_data)
+	{
+		$dF =  new DateTime($fetch_data['strtDate']);
+		$dT =  new DateTime($fetch_data['endDate']);
+
+		$newDF = date('Y-m-d', strtotime($fetch_data['strtDate']));
+		$newDT = date('Y-m-d', strtotime($fetch_data['endDate']));
+
+		$interval = $dT->diff($dF);
+		$duration = $interval->format('%a') + 1;
+
+		if ($duration >= 32) 
+		{
+			$duration = $interval->format('%m');
+		} 
+		else 
+		{
+			$duration = "$duration day(s)";
+		}
+
+		if($newDF > $newDT)
+		{
+			return "EOCdate must be greater than or equal to startdate!";
+		}
+		else
+		{
+			return $duration;
+		}	
+	}
 	// process for recording applicants
 	public function record_applicant_info($fetch_data)
 	{

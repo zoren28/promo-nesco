@@ -23,6 +23,7 @@ class Resignation extends CI_Controller
         }
 
         $this->load->model('placement/resignation_model');
+        $this->load->model('placement/dashboard_model');
         $this->load->model('placement/employee_model');
     }
 
@@ -101,6 +102,106 @@ class Resignation extends CI_Controller
             } else {
                 echo json_encode(array('status' => 'failure'));
             }
+        }
+    }
+
+    public function check_rt_status()
+    {
+        $data['data'] = $this->input->post(NULL, TRUE);
+        $data['request'] = 'check_rt_status';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function store_rt()
+    {
+        $data = $this->input->post(NULL, TRUE);
+        $id = explode('*', $data['employee']);
+        $emp_id = trim(current($id));
+        $data['emp_id'] = $emp_id;
+
+        $clearances = array();
+        foreach ($data['clearances'] as $value) {
+
+            $destination_path = "";
+            if (isset($_FILES[$value]['name'])) {
+
+                $image_name   = addslashes($_FILES[$value]['name']);
+                $array     = explode(".", $image_name);
+
+                $filename     = $emp_id . "=" . date('Y-m-d') . "=" . $value . "=" . date('H-i-s-A') . "." . end($array);
+                $destination_path    = "../document/clearance/" . $filename;
+                if (move_uploaded_file($_FILES[$value]['tmp_name'], $destination_path)) {
+
+                    $clearances[] = array(
+                        'clearance' => $value,
+                        'path' => $destination_path
+                    );
+                }
+            }
+        }
+
+        $update = $this->resignation_model->upload_clearance($emp_id, $clearances);
+        if ($update) {
+
+            $resignation_path = '';
+            if ($data['rt_status'] == 'Resigned') {
+
+                $image_name    = addslashes($_FILES['resignation']['name']);
+                $array     = explode(".", $image_name);
+
+                $filename     = $emp_id . "=" . date('Y-m-d') . "=" . 'Resignation-Letter' . "=" . date('H-i-s-A') . "." . end($array);
+                $resignation_path    = "../document/resignation/" . $filename;
+
+                move_uploaded_file($_FILES['resignation']['tmp_name'], $resignation_path);
+            }
+
+            $data['resignation_path'] = $resignation_path;
+
+            $store = $this->resignation_model->store_termination($data);
+            if ($store) {
+                $record = $this->resignation_model->update_employee3($data);
+                $user = $this->resignation_model->inactive_user($emp_id);
+                if ($record && $user) {
+                    echo json_encode(array('status' => 'success', 'url' => $this->base_url . '/hrms/promo-nesco/placement/page/menu/resignation-termination/resignation-termination-list'));
+                }
+            }
+        }
+    }
+
+    public function find_all_promo()
+    {
+        $str = $this->input->post('str', TRUE);
+        $val = "";
+
+        $query = $this->employee_model->find_all_promo($str);
+        if ($query->num_rows() > 0) {
+
+            $info = $query->result_array();
+            foreach ($info as $emp) {
+
+                $empId = $emp['emp_id'];
+                $name  = ucwords(strtolower($emp['name']));
+
+                if ($val != $empId) {
+?>
+                    <a href="javascript:void(0);" onclick="empDetails('<?= $emp['emp_id'] . ' * ' . $emp['name']  ?>')"><?= $emp['emp_id'] . ' * ' . $emp['name']  ?></a></br>
+<?php
+                } else {
+                    echo 'No Result Found';
+                }
+            }
+        } else {
+
+            echo 'No Result Found';
+        }
+    }
+
+    public function show_employee($emp_id)
+    {
+        $emp = $this->employee_model->employee_info($emp_id);
+        if ($emp) {
+            echo json_encode(array('status' => $emp->current_status));
         }
     }
 }
