@@ -14,6 +14,7 @@ class Initial extends CI_Controller
             redirect('http://' . $_SERVER['SERVER_ADDR'] . ":" . $_SERVER['SERVER_PORT'] . '/hrms/nesco');
         }
 		$this->load->model('recruitment/initial_model');
+		$this->load->model('placement/employee_model');
 	}
 	
 	public function check_applicant_duplicate_or_blacklist() {
@@ -129,6 +130,22 @@ class Initial extends CI_Controller
 		$fetch_data = $this->input->post(NULL, TRUE);
 		$data['agency_result'] = $this->initial_model->check_agency($fetch_data['agency_code']);
 		$data['request'] = "company_list";
+		$this->load->view('body/recruitment/function_query', $data);
+	}
+	
+	public function selproduct()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		$data['product'] = $this->initial_model->check_product($fetch_data['product']);
+		$data['request'] = "product";
+		$this->load->view('body/recruitment/function_query', $data);
+	}
+	
+	public function locate_vendor()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		$data['vendor'] = $this->initial_model->check_vendor($fetch_data['deptval']);
+		$data['request'] = "vendor";
 		$this->load->view('body/recruitment/function_query', $data);
 	}
 	

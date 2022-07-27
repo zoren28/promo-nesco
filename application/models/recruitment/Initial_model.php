@@ -866,6 +866,52 @@ class Initial_model extends CI_Model
 							->get();
 			return $query->result_array();	
 	}
+	
+	public function department()
+	{
+		$this->db->query('SET SESSION sql_mode = ""');
+
+        // ONLY_FULL_GROUP_BY
+        $this->db->query('SET SESSION sql_mode =
+                              REPLACE(REPLACE(REPLACE(
+                              @@sql_mode,
+                              "ONLY_FULL_GROUP_BY,", ""),
+                              ",ONLY_FULL_GROUP_BY", ""),
+                              "ONLY_FULL_GROUP_BY", "")');
+		
+		$query = $this->db->from('locate_promo_department')
+							->order_by('dept_name', 'ASC')
+							->group_by('dept_name')
+							->get();
+			return $query->result_array();	
+	}
+	
+	public function check_product($data)
+	{
+		$query = $this->db->from('promo_company_products')
+							->where('company', $data)
+							->order_by('product', 'ASC')
+							->get();
+		return $query->result_array();
+	}
+	
+	public function check_vendor($data)
+	{
+		if($data == "EASY FIX") 
+		{
+			$dept = 'FIXRITE';
+		}
+		else
+		{
+			$dept = $data;
+		}
+		
+		$query = $this->db->from('promo_vendor_lists')
+							->where('department', $dept)
+							->order_by('vendor_name', 'ASC')
+							->get();
+		return $query->result_array();
+	}
 	public function check_agency($data)
 	{
 		$query = $this->db2->from('promo_locate_company')

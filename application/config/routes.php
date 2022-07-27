@@ -1,7 +1,13 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-// for user account module
+// for resignation/termination module
+$route['resignation_list'] = 'placement/resignation/resignation_list';
+$route['show_resignation_letter'] = 'placement/resignation/show_resignation_letter';
+$route['upload_resignation_letter'] = 'placement/resignation/upload_resignation_letter';
+$route['submit_resignation_letter'] = 'placement/resignation/submit_resignation_letter';
+
+// for setup module
 $route['company_list'] = 'placement/setup/company_list';
 $route['delete_company'] = 'placement/setup/delete_company';
 $route['update_company_status'] = 'placement/setup/update_company_status';
@@ -242,6 +248,8 @@ $route['hiring_setup'] = 'recruitment/initial/hiring_setup';
 $route['final_completion'] = 'recruitment/initial/final_completion';
 $route['save_final_completion'] = 'recruitment/initial/save_final_completion';
 $route['company_select'] = 'recruitment/initial/company_select';
+$route['locate_vendor'] = 'recruitment/initial/locate_vendor';
+$route['selproduct'] = 'recruitment/initial/selproduct';
 
 // for menu module
 $route['logout'] = 'logout';

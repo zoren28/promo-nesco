@@ -304,7 +304,7 @@
 			
 			<div class="form-group">
 				 <label for="company">COMPANY</label>
-				 <select class="form-control" name="company" required>
+				 <select class="form-control" name="company" required onchange="selectProduct(this.value)">
 					<option value='0'>Select</option>
 					<?php 
 						$r = $this->initial_model->company(); 
@@ -343,7 +343,83 @@
 					<?php }?>
 				</table>
 			</div>
+			
+			<div class="form-group">
+				 <label for="company">DEPARTMENT</label>
+				 <select class="form-control" name="department" required onchange="locate_vendor(this.value)">
+					<option value=''>Select</option>
+					<?php 
+						$r = $this->initial_model->department(); 
+						foreach ($r as $i)  
+						{ ?>
+							<option value='<?=$i['dept_name']?>'><?=$i['dept_name']?></option><?php 
+						} ?>
+				  </select>
+				 
+			</div>
+			
+			<div class="form-group">
+				<label for="company">VENDOR NAME</label>
+				<select class="form-control" name="vendor" required>
+					<option value=''>Select</option>	
+				</select>
+				 
+			</div>
+			
+			<div class="form-group">
+				<label for="company">PRODUCT</label>
+				<select name="product[]" class="form-control" multiple="">
+					<option value=""> --Select-- </option>
+				</select>	 
+			</div>
+			
+			<div class="form-group">
+				<label for="company">EMPLOYEE TYPE</label>
+				<select name="emptype" class="form-control">
+					<option value="">Select</option>
+					<option value="Promo">Promo</option>
+					<option value="Promo-Nesco">Promo-Nesco</option>
+				</select>	 
+			</div>
+			
+			<div class="form-group">
+				<label for="company">CONTRACT TYPE</label>
+				<select name="contract" class="form-control">
+					<option value="">Select</option>
+					<option value="contractual">Contractual</option>
+					<option value="seassonal">Seasonnal</option>
+				</select>	 
+			</div>
+			
+			<div class="form-group">
+				<label for="company">INCLUSIVE DATES</label>
+				<table class="table table-bordered">
+					<tr>
+						<td><input type="text" name="startDate" class="form-control datepicker" placeholder="Startdate"></td>
+						<td><input type="text" name="startDate" class="form-control datepicker" placeholder="Startdate"></td>
+					</tr>
+					
+				</table>	 
+			</div>
+			
+			<div class="form-group">
+				<label for="company">DURATION</label>
+				<input type="text" name="duration" class="form-control">	 
+			</div>
+			
+			<div class="form-group">
+				<label for="hrmsId">REMARKS/COMMENTS</label>
+				<textarea name='remark_comment' class="form-control" style='resize:none; height:110px;'></textarea>
+			</div>
+			
 		</div>
+		<script>
+		$('.datepicker').datepicker({
+				inline: true,
+				changeYear: true,
+				changeMonth: true
+			});
+		</script>
 		<?php
 	}
 	
@@ -1027,6 +1103,24 @@
 			</div>
 		</div>
 	<?php
+	}
+	else if ($request == 'vendor') 
+	{
+		?><option value=""> --Select Vendor-- </option><?php
+		foreach ($vendor as $i)  
+		{ ?>
+			<option value='<?=$i['vendor_code']?>'><?=$i['vendor_name']?></option><?php 
+		} ?>
+		<?php
+	}
+	else if ($request == 'product') 
+	{
+		?><option value="">Select Product</option><?php
+		foreach ($product as $i)  
+		{ ?>
+			<option value='<?=$i['product']?>'><?=$i['product']?></option><?php 
+		} ?>
+		<?php
 	}
 	else if ($request == 'company_list') 
 	{

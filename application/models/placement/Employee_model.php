@@ -306,12 +306,16 @@ class Employee_model extends CI_Model
 
     public function employee_info($emp_id)
     {
-        $query = $this->db->select('employee3.record_no, employee3.emp_id, name, emp_no, emp_type, agency_code, promo_company, promo_department, vendor_code, promo_type, type, current_status, position, startdate, eocdate')
+        $this->db->select('employee3.record_no, employee3.emp_id, name, emp_no, emp_type, agency_code, promo_company, promo_department, vendor_code, promo_type, type, current_status, position, startdate, eocdate')
             ->from('employee3')
             ->join('promo_record', 'promo_record.record_no = employee3.record_no', 'left')
-            ->where('emp_type', 'Promo-NESCO')
-            ->where('employee3.emp_id', $emp_id)
-            ->get();
+            ->where('employee3.emp_id', $emp_id);
+        if ($this->hr == 'nesco') {
+            $this->db->where('emp_type', 'Promo-NESCO');
+        } else {
+            $this->db->like('emp_type', 'Promo', 'after');
+        }
+        $query = $this->db->get();
         return $query->row();
     }
 

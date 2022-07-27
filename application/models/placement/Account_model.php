@@ -124,7 +124,11 @@ class Account_model extends CI_Model
     {
         $this->db->from('employee3');
         $this->db->join('users', 'users.emp_id = employee3.emp_id');
-        $this->db->where('emp_type', 'Promo-NESCO');
+        if ($this->hr ==  'nesco') {
+            $this->db->where('emp_type', 'Promo-NESCO');
+        } else {
+            $this->db->like('emp_type', 'Promo', 'after');
+        }
         $this->db->where('users.usertype', 'employee');
         return $this->db->count_all_results();
     }
@@ -133,7 +137,11 @@ class Account_model extends CI_Model
     {
         $this->db->from('employee3');
         $this->db->join('users', 'users.emp_id = employee3.emp_id');
-        $this->db->where('emp_type', 'Promo-NESCO');
+        if ($this->hr ==  'nesco') {
+            $this->db->where('emp_type', 'Promo-NESCO');
+        } else {
+            $this->db->like('emp_type', 'Promo', 'after');
+        }
         $this->db->where('users.usertype', 'employee');
 
         $i = 0;

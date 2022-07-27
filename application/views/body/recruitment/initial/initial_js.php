@@ -691,6 +691,30 @@
 		
 	})
 	
+	function locate_vendor(deptval)
+	{
+		$.ajax({
+            type : "POST",
+			url: "<?php echo site_url('locate_vendor'); ?>",
+            data : { deptval:deptval },
+            success : function(response){
+                //alert(response);
+                $("select[name = 'vendor']").html(response);
+            }
+        });
+	} 
+	
+	function selectProduct(product)
+	{
+		$.ajax({
+			url: "<?php echo site_url('select_product'); ?>?company_code="+product,
+            success : function(response){
+                alert(response);
+                $("select[name = 'product[]']").html(response);
+            }
+        });
+	} 
+	
 	function check_status(val)
 	{
 		let status = ['Widowed','Married'];

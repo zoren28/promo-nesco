@@ -5482,4 +5482,20 @@ if ($request == "update_blacklist_form") {
         });
     </script>
 <?php
+} else if ($request == 'upload_resignation_letter') {
+
+    echo '
+        <input type="hidden" name="emp_id" value="' . $data['emp_id'] . '">
+        <input type="hidden" name="termination_no" value="' . $data['termination_no'] . '">
+    ';
+?>
+    <div class="row">
+        <div class="col-md-12">
+            <b>Resignation Letter</b><br>
+            <img id="photoresignation" class='preview img-responsive' /><br>
+            <input type='file' name='resignation' id='resignation' class='btn btn-default' required onchange='readURL(this,"resignation")'>
+            <input type='button' name='clearresignation' id='clearresignation' style='display:none' class='btn btn-default' value='Clear' onclick="clears('resignation','photoresignation','clearresignation')">
+        </div>
+    </div><br>
+<?php
 }
