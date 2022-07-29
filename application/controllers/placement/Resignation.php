@@ -23,6 +23,7 @@ class Resignation extends CI_Controller
         }
 
         $this->load->model('placement/resignation_model');
+        $this->load->model('placement/setup_model');
         $this->load->model('placement/dashboard_model');
         $this->load->model('placement/employee_model');
     }
@@ -202,6 +203,34 @@ class Resignation extends CI_Controller
         $emp = $this->employee_model->employee_info($emp_id);
         if ($emp) {
             echo json_encode(array('status' => $emp->current_status));
+        }
+    }
+
+    public function list_of_subordinates()
+    {
+        $emp_id = $this->input->get('emp_id', TRUE);
+        $data['rater'] = $emp_id;
+        $data['subordinates'] = $this->setup_model->list_of_subordinates($emp_id);
+        $data['request'] = 'resignation/list_of_subordinates';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function update_resignation_status()
+    {
+        $data = $this->input->post(NULL, TRUE);
+        if ($data['action'] == 'tag') {
+
+            $action = $this->resignation_model->store_tag_for_resignation($data);
+        } else {
+
+            $action = $this->resignation_model->delete_tag_for_resignation($data);
+        }
+
+        if ($action) {
+            echo json_encode(array('status' => 'success'));
+        } else {
+            echo json_encode(array('status' => 'failure'));
         }
     }
 }

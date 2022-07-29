@@ -153,4 +153,43 @@ class Resignation_model extends CI_Model
         $this->db->where('emp_id', $emp_id);
         return $this->db->update('users', $update);
     }
+
+    public function show_resignation_status($ratee, $status, $rater)
+    {
+        return $this->db->from('tag_for_resignation')
+            ->where(array('ratee_id' => $ratee, 'tag_stat' => $status, 'rater_id' => $rater))
+            ->count_all_results();
+    }
+
+    public function check_promo_epas($emp_id, $record_no, $epas)
+    {
+        $this->db->from('promo_record');
+        $this->db->where('record_no', $record_no);
+        $this->db->where('emp_id', $emp_id);
+        foreach ($epas as $key => $field) {
+            if ($key == 0) {
+                $this->db->where($field, '');
+            } else {
+                $this->db->or_where($field, '');
+            }
+        }
+        return $this->db->count_all_results();
+    }
+
+    public function store_tag_for_resignation($data)
+    {
+        $insert = array(
+            'ratee_id' => $data['emp_id'],
+            'rater_id' => $data['rater'],
+            'added_by' => $this->loginId,
+            'date_added' => $this->date,
+            'tag_stat' => 'Pending'
+        );
+        return $this->db->insert('tag_for_resignation', $insert);
+    }
+
+    public function delete_tag_for_resignation($data)
+    {
+        return $this->db->delete('tag_for_resignation', array('ratee_id' => $data['emp_id'], 'rater_id' => $data['rater']));
+    }
 }

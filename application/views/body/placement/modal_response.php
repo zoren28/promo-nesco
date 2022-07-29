@@ -5458,7 +5458,7 @@ if ($request == "update_blacklist_form") {
                                 <input type="checkbox" name="employees[]" value="' . $employee->emp_id . '">
                             </td>
                             <td>' . $employee->emp_id . '</td>
-                            <td><a href="' . base_url('placement/page/menu/employee/profile') . '/' . $employee->emp_id . '" target="_blank">' . $employee->name . '</a></td>
+                            <td><a href="' . base_url('placement/page/menu/employee/profile') . '/' . $employee->emp_id . '" target="_blank">' . ucwords(strtolower($employee->name)) . '</a></td>
                             <td>' . $employee->position . '</td>
                             <td><span class="' . $class . ' btn-block">' . $employee->current_status . '</span></td>
                         </tr>
@@ -5521,6 +5521,147 @@ if ($request == "update_blacklist_form") {
             <label>Resignation Letter</label> <i class="text-red">*</i>
             <input type="file" name="resignation" class="btn btn-default btn-flat" required>
         </div>
-<?php
+    <?php
     }
+} else if ($request == 'resignation/list_of_subordinates') {
+    ?>
+    <div class="panel panel-default">
+        <div class="panel-heading">S U B O R D I N A T E S</div>
+        <div class="panel-body">
+            <table id="dt-employees" class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Emp.ID</th>
+                        <th>Name</th>
+                        <th>EmpType</th>
+                        <th>Position</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    foreach ($subordinates as $subordinate) {
+
+                        $epas = array();
+                        $bUs = $this->dashboard_model->businessUnit_list();
+                        foreach ($bUs as $bu) {
+
+                            $hasBU = $this->dashboard_model->promo_has_bu($subordinate->emp_id, $bu->bunit_field);
+                            if ($hasBU > 0) {
+                                $epas[] = $bu->bunit_epascode;
+                            }
+                        }
+
+                        $no_epas = $this->resignation_model->check_promo_epas($subordinate->emp_id, $subordinate->record_no, $epas);
+                        if ($no_epas > 0) {
+
+                    ?>
+                            <tr class="<?php if ($this->resignation_model->show_resignation_status($subordinate->emp_id, 'Pending', $rater)) echo 'info';
+                                        else if ($this->resignation_model->show_resignation_status($subordinate->emp_id, 'Done', $rater)) echo 'success';  ?>">
+                        <?php
+                            echo '  <td>' . $subordinate->emp_id . '</td>
+                                    <td><a href="' . base_url('placement/page/menu/employee/profile') . '/' . $subordinate->emp_id . '" target="_blank">' . ucwords(strtolower($subordinate->name)) . '</a></td>
+                                    <td>' . $subordinate->emp_type . '</td>
+                                    <td>' . $subordinate->position . '</td>
+                                    <td>';
+
+                            if ($this->resignation_model->show_resignation_status($subordinate->emp_id, 'Pending', $rater) > 0) {
+                                echo '
+                                    <a href="javascript:void(0);" id="untag_' . $subordinate->emp_id . '_' . $rater . '" class="text-danger action" data-toggle="tooltip" data-placement="top" title="Untag for Resignation">
+                                        <i class="fa fa-remove"></i>
+                                    </a>
+                                ';
+                            } else if ($this->resignation_model->show_resignation_status($subordinate->emp_id, 'Done', $rater) > 0) {
+                                echo '<i data-toggle="tooltip" data-placement="top" title="EPAS done" class="fa  fa-thumbs-o-up"></i>';
+                            } else {
+                                echo '
+                                    <a href="javascript:void(0);" id="tag_' . $subordinate->emp_id . '_' . $rater . '" class="action" data-toggle="tooltip" data-placement="top" title="Click to Tag for Resignation">
+                                        <i class="fa fa-tag"></i>
+                                    </a>
+                                ';
+                            }
+
+                            echo '   </td>
+                                </tr>
+                            ';
+                        }
+                    }
+                        ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(function() {
+            let dt_employees = $("table#dt-employees").DataTable({
+                "destroy": true,
+                "order": [
+                    [1, 'asc']
+                ]
+            });
+
+            $('table#dt-employees').on('click', 'a.action', function() {
+
+                let [action, emp_id, rater] = this.id.split("_");
+
+                if (!$(this).parents('tr').hasClass('selected')) {
+                    dt_employees.$('tr.selected').removeClass('selected');
+                    $(this).parents('tr').addClass('selected');
+                }
+
+                $.alert.open({
+                    type: 'warning',
+                    cancel: false,
+                    content: "Are you sure you want to " + action + " for resignation?",
+                    buttons: {
+                        OK: 'Ok'
+                    },
+
+                    callback: function(button) {
+                        if (button == 'OK') {
+
+                            $.ajax({
+                                type: "POST",
+                                url: "<?= site_url('update_resignation_status') ?>",
+                                data: {
+                                    action,
+                                    emp_id,
+                                    rater
+                                },
+                                success: function(data) {
+
+                                    let response = JSON.parse(data);
+                                    if (response.status == "success") {
+
+                                        $.alert.open({
+                                            type: 'warning',
+                                            title: 'Info',
+                                            icon: 'confirm',
+                                            cancel: false,
+                                            content: "Successfully " + action + " for resignation.",
+                                            buttons: {
+                                                OK: 'Yes'
+                                            },
+
+                                            callback: function(button) {
+                                                if (button == 'OK') {
+
+                                                    list_of_subordinates(rater);
+                                                }
+
+                                            }
+                                        });
+                                    } else {
+
+                                        console.log(data);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+<?php
 }

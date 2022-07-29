@@ -136,27 +136,26 @@ class Initial extends CI_Controller
 		$newDT = date('Y-m-d', strtotime($fetch_data['endDate']));
 
 		$interval = $dT->diff($dF);
-		$duration = $interval->format('%a') + 1;
+		$days_duration = $interval->format('%a') + 1;
 
-		if ($duration >= 32) 
+		if ($days_duration >= 32) 
 		{
-			$duration = $interval->format('%m');
+			$days_duration = $interval->format('%m');
 		} 
 		else 
 		{
-			$duration = "$duration day(s)";
+			$days_duration = "$days_duration day(s)";
 		}
-
+		
 		if($newDF > $newDT)
 		{
 			echo json_encode(array('status'=> 1, 'message' => "EOCdate must be greater than or equal to startdate!"));	
 		}
 		else
 		{
-			echo json_encode(array('status'=> 0, 'duration' => $duration));	
-		}	
-		//$data['duration'] = $this->initial_model->durationFormula($fetch_data);
-		//print_r($data);	
+			echo json_encode(array('status'=> 0, 'duration' => $days_duration));	
+		}
+			
 	}
 	
 	public function company_select()
@@ -202,6 +201,13 @@ class Initial extends CI_Controller
 		$data['check_record'] 	= $this->initial_model->record_applicant_info($fetch_data);
 		$data['request'] = "final_completion";
 		$this->load->view('body/recruitment/function_query', $data);
+	}
+	
+	public function hire_applicant()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		print_r($fetch_data);
+		//$fetch_data['app_status'] = $this->initial_model->get_interview_result($fetch_data);
 	}
 	
 	public function final_interview()

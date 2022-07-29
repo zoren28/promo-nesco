@@ -316,7 +316,7 @@ class Setup_model extends CI_Model
 
     public function list_of_subordinates($rater)
     {
-        $this->db->select('leveling_subordinates.record_no, emp_id, name, current_status, position')
+        $this->db->select('leveling_subordinates.record_no, emp_id, name, emp_type, current_status, position')
             ->from('leveling_subordinates')
             ->join('employee3', 'employee3.emp_id = leveling_subordinates.subordinates_rater')
             ->where('ratee', $rater);

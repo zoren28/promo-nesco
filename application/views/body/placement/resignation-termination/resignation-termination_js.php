@@ -58,7 +58,6 @@
         $('table#dt-resignation-list').on('click', 'button.action', function() {
 
             let [action, emp_id, termination_no] = this.id.split("_");
-            console.log(action, emp_id, termination_no);
 
             if (!$(this).parents('tr').hasClass('selected')) {
                 dt_resignation_list.$('tr.selected').removeClass('selected');
@@ -343,7 +342,66 @@
                 }
             }
         });
+
+        $("input[name = 'supervisor']").keyup(function(e) {
+
+            let str = $(this).val().trim();
+            $(".search-results").hide();
+
+            if (str == '') {
+
+                $(".search-results").hide();
+            } else {
+
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo site_url('find_active_supervisor'); ?>",
+                    data: {
+                        str
+                    },
+                    success: function(data) {
+
+                        if (data.trim() != "No Result Found") {
+
+                            $(".search-results").show().html(data);
+                        } else {
+
+                            $(".search-results").hide();
+                        }
+                    }
+                });
+            }
+        });
     });
+
+    function getEmpId(supervisor) {
+
+        let [emp_id, name] = supervisor.split('*');
+
+        $("input[name='supervisor']").val(supervisor);
+        $("input[name = 'rater']").val(emp_id.trim());
+        $(".search-results").hide();
+
+        list_of_subordinates(emp_id.trim());
+    }
+
+    function list_of_subordinates(emp_id) {
+
+        $("div.subordinates").html('');
+        $("div#loading-gif").show();
+        $.ajax({
+            type: "GET",
+            url: "<?= site_url('resignation/list_of_subordinates') ?>",
+            data: {
+                emp_id
+            },
+            success: function(data) {
+
+                $("div#loading-gif").hide();
+                $("div.subordinates").html(data);
+            }
+        });
+    }
 
     function readURL(input, upload) {
 

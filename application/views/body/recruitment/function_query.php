@@ -290,7 +290,7 @@
 			
 			<div class="form-group">
 				 <label for="agency">AGENCY</label>
-				 <select class="form-control" name="agency" onchange="select_agency(this.value)" required>
+				 <select class="form-control" name="agency" onchange="select_agency(this.value)">
 					<option value='0'>Select Agency</option>
 					<?php 
 						$resultype = $this->initial_model->agency(); 
@@ -304,8 +304,8 @@
 			
 			<div class="form-group">
 				 <label for="company">COMPANY</label>
-				 <select class="form-control" name="company" required onchange="selectProduct(this.value)">
-					<option value='0'>Select</option>
+				 <select class="form-control" name="company" onchange="selectProduct(this.value)" required>
+					<option value=''>Select</option>
 					<?php 
 						$r = $this->initial_model->company(); 
 						foreach ($r as $i)  
@@ -337,10 +337,11 @@
 					
 					foreach ($result as $i) { ?>
 					<tr>
-						<td><input type="checkbox"></td>
+						<td><input type="checkbox" name='check[]'></td>
 						<td><?= $i['bunit_name'] ?></td>
 					</tr>
 					<?php }?>
+					
 				</table>
 			</div>
 			
@@ -360,7 +361,7 @@
 			
 			<div class="form-group">
 				<label for="company">VENDOR NAME</label>
-				<select class="form-control" name="vendor" required>
+				<select class="form-control" name="vendor">
 					<option value=''>Select</option>	
 				</select>
 				 
@@ -396,7 +397,7 @@
 				<table class="table table-bordered">
 					<tr>
 						<td><input type="text" name="startDate" id="startDate" class="form-control datepicker" placeholder="Start Date" autocomplete='off'></td>
-						<td><input type="text" name="endDate" id='endDate' class="form-control datepicker" placeholder="End Date" onchange="duration()" autocomplete='off'></td>
+						<td><input type="text" name="endDate" id='endDate' class="form-control datepicker" placeholder="End Date" onchange="getDuration()" autocomplete='off'></td>
 					</tr>
 					
 				</table>	 
@@ -404,7 +405,7 @@
 			
 			<div class="form-group">
 				<label for="company">DURATION</label>
-				<input type="text" name="duration" class="form-control">	 
+				<input type="text" name="duration_display" class="form-control" autocomplete='off'>	 
 			</div>
 			
 			<div class="form-group">

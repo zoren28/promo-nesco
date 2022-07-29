@@ -39,13 +39,15 @@
 						<span aria-hidden="true">×</span></button>
 					<h5 class="modal-title">Hiring Information</h5>
 				</div>
-				<div class="modal-body hired_display" style='font-size=10px;'>
-						
-				</div>
+				
+				<form id='hire_applicant' method='post' enctype="multipart/form-data">
+				<div class="modal-body hired_display" style='font-size=10px;'></div>
 				<div class="modal-footer">
 					<button type="button" class="btn" data-dismiss="modal">Close</button>
 					<button type="submit" class="btn btn-primary">Submit</button>
 				</div>
+				</form>
+				
 			</div>
 		</div>
 	</div>

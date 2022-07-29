@@ -655,6 +655,32 @@
 			});
         });
 		
+		
+		// for hiring // hired applicants
+		$("form#hire_applicant").submit(function(e) {
+
+            e.preventDefault();
+			
+            var formData = new FormData(this);
+
+			console.log(formData);
+			$.ajax({
+				url: "<?php echo site_url('hire_applicant'); ?>",
+				type: 'POST',
+				data:formData,
+				success: function(response) {
+					
+				alert(response);	
+					
+				},
+				async: false,
+				cache: false,
+				contentType: false,
+				processData: false
+			});
+        });
+		
+		
 		$("form#applicant_information").submit(function(e) {
 
             e.preventDefault();
@@ -709,7 +735,7 @@
 		$.ajax({
 			url: "<?php echo site_url('select_product'); ?>?company_code="+product,
             success : function(response){
-                alert(response);
+                //alert(response);
                 $("select[name = 'product[]']").html(response);
             }
         });
@@ -733,10 +759,12 @@
 		}
 	}
 	
-	function duration()
+	function getDuration()
 	{	
       var strtDate = $("input[name = 'startDate']").val(); 
 	  var endDate = $("input[name = 'endDate']").val(); 
+	  
+	  alert(strtDate+""+endDate)
 	  
 	  $.ajax({
 			type : "POST",
@@ -744,16 +772,17 @@
             data : 
 				{ strtDate:strtDate, endDate:endDate },
 			success : function(response){
-               
+             
+				
 				response = JSON.parse(response);
-					
-					if(response.status === 0)
+				
+					if(response.status == 0)
 					{
-						$("input[name = 'duration']").val(response.duration);
-					}
+						$("input[name = 'duration_display']").val(response.duration);
+					} 
 					else
 					{
-						alert(response.message);
+						alert(response.message)
 					}
             }
         });
