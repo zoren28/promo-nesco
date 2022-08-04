@@ -1290,16 +1290,16 @@ if ($request == 'basic_info') {
                             ";
                 } else {
 
-                    if (trim($this->employee_model->asc_company_name($row2['company_code'])['acroname']) != "") : $companyName = $this->employee_model->asc_company_name($row2['company_code'])['acroname'];
-                    else : $companyName = $this->employee_model->asc_company_name($row2['company_code'])['company'];
+                    if (trim($this->employee_model->asc_company_name($row['company_code'])['acroname']) != "") : $companyName = $this->employee_model->asc_company_name($row['company_code'])['acroname'];
+                    else : $companyName = $this->employee_model->asc_company_name($row['company_code'])['company'];
                     endif;
 
-                    if (trim($this->employee_model->get_businessunit_name($row2['company_code'], $row2['bunit_code'])['acroname']) != "") : $bunitName = $this->employee_model->get_businessunit_name($row2['company_code'], $row2['bunit_code'])['acroname'];
-                    else : $bunitName = $this->employee_model->get_businessunit_name($row2['company_code'], $row2['bunit_code'])['business_unit'];
+                    if (trim($this->employee_model->get_businessunit_name($row['company_code'], $row['bunit_code'])['acroname']) != "") : $bunitName = $this->employee_model->get_businessunit_name($row['company_code'], $row['bunit_code'])['acroname'];
+                    else : $bunitName = $this->employee_model->get_businessunit_name($row['company_code'], $row['bunit_code'])['business_unit'];
                     endif;
 
-                    if (trim($this->employee_model->get_department_name($row2['company_code'], $row2['bunit_code'], $row2['dept_code'])['acroname']) != "") : $deptName = $this->employee_model->get_department_name($row2['company_code'], $row2['bunit_code'], $row2['dept_code'])['acroname'];
-                    else : $deptName = $this->employee_model->get_department_name($row2['company_code'], $row2['bunit_code'], $row2['dept_code'])['dept_name'];
+                    if (trim($this->employee_model->get_department_name($row['company_code'], $row['bunit_code'], $row['dept_code'])['acroname']) != "") : $deptName = $this->employee_model->get_department_name($row['company_code'], $row['bunit_code'], $row['dept_code'])['acroname'];
+                    else : $deptName = $this->employee_model->get_department_name($row['company_code'], $row['bunit_code'], $row['dept_code'])['dept_name'];
                     endif;
 
                     echo "

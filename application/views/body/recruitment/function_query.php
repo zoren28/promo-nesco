@@ -337,7 +337,7 @@
 					
 					foreach ($result as $i) { ?>
 					<tr>
-						<td><input type="checkbox" name='check[]'></td>
+						<td><input type="checkbox" name='check[]' value="<?php echo $i['bunit_id'].'/'.$i['bunit_field']; ?>"></td>
 						<td><?= $i['bunit_name'] ?></td>
 					</tr>
 					<?php }?>
@@ -369,14 +369,16 @@
 			
 			<div class="form-group">
 				<label for="company">PRODUCT</label>
-				<select name="product[]" class="form-control" multiple="">
+				<select name="product[]" class="form-control select2" id="productSel" onchange="showSelected();">
 					<option value="">Select</option>
-				</select>	 
-			</div>
+				</select>
+
+				<input type="text" id="productSelect" class="form-control" name='pro' autocomplete='off'>
+			</div>			
 			
 			<div class="form-group">
 				<label for="company">EMPLOYEE TYPE</label>
-				<select name="emptype" class="form-control">
+				<select name="emptype" class="form-control" required>
 					<option value="">Select</option>
 					<option value="Promo">Promo</option>
 					<option value="Promo-Nesco">Promo-Nesco</option>
@@ -385,7 +387,7 @@
 			
 			<div class="form-group">
 				<label for="company">CONTRACT TYPE</label>
-				<select name="contract" class="form-control">
+				<select name="contract" class="form-control" required>
 					<option value="">Select</option>
 					<option value="contractual">Contractual</option>
 					<option value="seassonal">Seasonnal</option>
@@ -405,7 +407,7 @@
 			
 			<div class="form-group">
 				<label for="company">DURATION</label>
-				<input type="text" name="duration_display" class="form-control" autocomplete='off'>	 
+				<input type="text" name="duration_display" class="form-control" autocomplete='off' required >	 
 			</div>
 			
 			<div class="form-group">
@@ -413,14 +415,31 @@
 				<textarea name='remark_comment' class="form-control" style='resize:none; height:110px;'></textarea>
 			</div>
 			
-		</div>
+		</div>		
+		
+	
+		<style>
+		
+		</style>
+		
 		
 		<script>
+		function showSelected()
+		{
+		  var selObj = document.getElementById('productSel');
+		  var txtTextObj = document.getElementById('productSelect');
+
+		  var selIndex = selObj.selectedIndex;
+		  txtTextObj.value += selObj.options[selIndex].text +', ';
+		}
+		
 		$('.datepicker').datepicker({
 				inline: true,
 				changeYear: true,
 				changeMonth: true
 			});
+		
+		$("span.select2").css("width", "100%");
 		</script>
 		<?php
 	}

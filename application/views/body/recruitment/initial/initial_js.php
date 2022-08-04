@@ -794,8 +794,8 @@
             type : "POST",
 			url: "<?php echo site_url('company_select'); ?>",
             data : { agency_code:agency_code },
-            success : function(response){
-                alert(response);
+            success : function(response)
+			{
                 $("select[name = 'company']").html(response);
             }
         });
