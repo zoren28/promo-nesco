@@ -660,10 +660,28 @@
 		$("form#hire_applicant").submit(function(e) {
 
             e.preventDefault();
-			
             var formData = new FormData(this);
-
 			console.log(formData);
+			
+			promo_type = $("select[name = 'promotype']").val();
+			let stores = $("input[name='check[]']:checked").map(function() { return this.value; }).get();
+			
+			if(promo_type == "Roving")
+			{
+				if (stores.length == 1 || stores.length == 0) 
+				{
+					alert("Please select two or more Store..");
+					$("input[name='check[]']")[0].focus();
+				}
+			}
+			else
+			{
+				if (stores.length > 1) 
+				{
+					alert("Please select one Store only..");
+				}
+			}
+			
 			$.ajax({
 				url: "<?php echo site_url('hire_applicant'); ?>",
 				type: 'POST',
@@ -764,7 +782,7 @@
       var strtDate = $("input[name = 'startDate']").val(); 
 	  var endDate = $("input[name = 'endDate']").val(); 
 	  
-	  alert(strtDate+""+endDate)
+	  //alert(strtDate+""+endDate)
 	  
 	  $.ajax({
 			type : "POST",

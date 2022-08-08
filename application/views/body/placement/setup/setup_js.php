@@ -1197,6 +1197,328 @@
             }
         });
 
+        let dt_business_unit = $("table#dt-business-unit").DataTable({
+
+            "destroy": true,
+            "stateSave": true,
+            "ajax": {
+                url: "<?= site_url('business_unit_list') ?>",
+                type: "POST"
+            },
+            "order": [],
+            "columnDefs": [{
+                "targets": [7],
+                "orderable": false,
+                "className": "text-center",
+            }]
+        });
+
+        $('table#dt-business-unit').on('change', 'select.status', function() {
+
+            let id = this.id;
+            let [column, bunit_id] = this.id.split("-");
+            let status = $(this).val();
+
+            if (!$(this).parents('tr').hasClass('selected')) {
+                dt_business_unit.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+
+            let messej = `Are you sure you want to update ${column} to ${status}?`;
+
+            $.alert.open({
+                type: 'warning',
+                cancel: false,
+                content: messej,
+                buttons: {
+                    OK: 'Yes',
+                    NO: 'Not now'
+                },
+
+                callback: function(button) {
+                    if (button == 'OK') {
+
+
+                        $.ajax({
+                            type: "POST",
+                            url: "<?= site_url('update_business_unit_status') ?>",
+                            data: {
+                                column,
+                                bunit_id,
+                                status
+                            },
+                            success: function(data) {
+
+                                let response = JSON.parse(data);
+                                if (response.status == 'success') {
+
+                                    $.alert.open({
+                                        type: 'warning',
+                                        title: 'Info',
+                                        icon: 'confirm',
+                                        cancel: false,
+                                        content: `Business Unit ${column} has been updated.`,
+                                        buttons: {
+                                            OK: 'Yes'
+                                        },
+                                        callback: function(button) {
+                                            if (button == 'OK') {
+
+                                                location.reload();
+                                            }
+
+                                        }
+                                    });
+                                } else {
+                                    console.log(data);
+                                }
+                            }
+                        });
+                    } else {
+
+                        if (status == 'active') {
+                            $(`select#${id}`).val('inactive');
+                        } else {
+                            $(`select#${id}`).val('active');
+                        }
+                    }
+                }
+            });
+        });
+
+        $('table#dt-business-unit').on('click', 'a.action', function() {
+
+            let [action, bunit_id] = this.id.split("_");
+
+            if (!$(this).parents('tr').hasClass('selected')) {
+                dt_business_unit.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+
+            let messej = `Are you sure you want to ${action} this business unit?`;
+
+            $.alert.open({
+                type: 'warning',
+                cancel: false,
+                content: messej,
+                buttons: {
+                    OK: 'Yes',
+                    NO: 'Not now'
+                },
+
+                callback: function(button) {
+                    if (button == 'OK') {
+
+                        $("div#show-business-unit").modal({
+                            backdrop: 'static',
+                            keyboard: false,
+                            show: true
+                        });
+
+                        $("div.show-business-unit").html("");
+                        $.ajax({
+                            url: "<?= site_url('show_business_unit') ?>/" + bunit_id,
+                            success: function(data) {
+
+                                $("div.show-business-unit").html(data);
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
+        $("form#update-business-unit").submit(function(e) {
+
+            e.preventDefault();
+            let formData = $(this).serialize();
+            let bunit_name = $("input[name = 'bunit_name']").val();
+            let bunit_field = $("input[name = 'bunit_field']").val();
+            let bunit_acronym = $("input[name = 'bunit_acronym']").val();
+            let hrd_location = $("select[name = 'hrd_location']").val();
+            if (bunit_name.trim() == '' || bunit_field.trim() == '' || bunit_acronym.trim() == '' || hrd_location.trim() == '') {
+
+                $.alert.open({
+                    type: 'warning',
+                    cancel: false,
+                    content: "Please Fill-up Required Fields!",
+                    buttons: {
+                        OK: 'Ok'
+                    },
+
+                    callback: function(button) {
+                        if (button == 'OK') {
+
+                            if (bunit_name.trim() == '') {
+
+                                $("input[name = 'bunit_name']").css("border-color", "#dd4b39");
+                            }
+
+                            if (bunit_field.trim() == '') {
+
+                                $("input[name = 'bunit_field']").css("border-color", "#dd4b39");
+                            }
+
+                            if (bunit_acronym.trim() == '') {
+
+                                $("input[name = 'bunit_acronym']").css("border-color", "#dd4b39");
+                            }
+
+                            if (hrd_location.trim() == '') {
+
+                                $("select[name = 'hrd_location']").css("border-color", "#dd4b39");
+                            }
+                        }
+                    }
+                });
+            } else {
+
+                $("button#update-btn").prop('disabled', true);
+                $("button#update-btn").html('Please Wait...');
+
+                $.ajax({
+                    type: "POST",
+                    url: "<?= site_url('update_promo_business_unit') ?>",
+                    data: formData,
+                    success: function(data) {
+
+                        var response = JSON.parse(data);
+                        if (response.status == "success") {
+
+                            $("button#update-btn").prop('disabled', false);
+                            $("button#update-btn").html('Update');
+
+                            $.alert.open({
+                                type: 'warning',
+                                title: 'Info',
+                                icon: 'confirm',
+                                cancel: false,
+                                content: "Business Unit has been successfully updated!",
+                                buttons: {
+                                    OK: 'Yes'
+                                },
+
+                                callback: function(button) {
+                                    if (button == 'OK') {
+
+                                        location.reload();
+                                    }
+                                }
+                            });
+
+                        } else {
+
+                            console.log(data);
+                        }
+                    }
+                });
+            }
+        });
+
+        $("button#add-business-unit").click(function() {
+
+            $("div#add-business-unit").modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+
+            $.ajax({
+                url: "<?= site_url('add_businessUnit_form') ?>",
+                success: function(data) {
+
+                    $("div.add-business-unit").html(data);
+                }
+            });
+        });
+
+        $("form#add-business-unit").submit(function(e) {
+
+            e.preventDefault();
+            let formData = $(this).serialize();
+            let bunit_name = $("input[name = 'bunit_name']").val();
+            let bunit_field = $("input[name = 'bunit_field']").val();
+            let bunit_acronym = $("input[name = 'bunit_acronym']").val();
+            let hrd_location = $("select[name = 'hrd_location']").val();
+            if (bunit_name.trim() == '' || bunit_field.trim() == '' || bunit_acronym.trim() == '' || hrd_location.trim() == '') {
+
+                $.alert.open({
+                    type: 'warning',
+                    cancel: false,
+                    content: "Please Fill-up Required Fields!",
+                    buttons: {
+                        OK: 'Ok'
+                    },
+
+                    callback: function(button) {
+                        if (button == 'OK') {
+
+                            if (bunit_name.trim() == '') {
+
+                                $("input[name = 'bunit_name']").css("border-color", "#dd4b39");
+                            }
+
+                            if (bunit_field.trim() == '') {
+
+                                $("input[name = 'bunit_field']").css("border-color", "#dd4b39");
+                            }
+
+                            if (bunit_acronym.trim() == '') {
+
+                                $("input[name = 'bunit_acronym']").css("border-color", "#dd4b39");
+                            }
+
+                            if (hrd_location.trim() == '') {
+
+                                $("select[name = 'hrd_location']").css("border-color", "#dd4b39");
+                            }
+                        }
+                    }
+                });
+            } else {
+
+                $("button#add-btn").prop('disabled', true);
+                $("button#add-btn").html('Please Wait...');
+
+                $.ajax({
+                    type: "POST",
+                    url: "<?= site_url('store_promo_business_unit') ?>",
+                    data: formData,
+                    success: function(data) {
+
+                        var response = JSON.parse(data);
+                        if (response.status == "success") {
+
+                            $("button#add-btn").prop('disabled', false);
+                            $("button#add-btn").html('Submit');
+
+                            $.alert.open({
+                                type: 'warning',
+                                title: 'Info',
+                                icon: 'confirm',
+                                cancel: false,
+                                content: "Business Unit has been successfully added!",
+                                buttons: {
+                                    OK: 'Yes'
+                                },
+
+                                callback: function(button) {
+                                    if (button == 'OK') {
+
+                                        location.reload();
+                                    }
+                                }
+                            });
+
+                        } else {
+
+                            console.log(data);
+                        }
+                    }
+                });
+            }
+        });
+
     });
 
     function company_list(agency_code) {

@@ -369,11 +369,11 @@
 			
 			<div class="form-group">
 				<label for="company">PRODUCT</label>
-				<select name="product[]" class="form-control select2" id="productSel" onchange="showSelected();">
-					<option value="">Select</option>
+				<select id="states" name="product[]" class="form-control select2" multiple="multiple" onchange="showSelected();">
+					<option value="">Sefsdfsdflect</option>
 				</select>
 
-				<input type="text" id="productSelect" class="form-control" name='pro' autocomplete='off'>
+				<!--input type="text" id="productSelect" class="form-control" name='pro' autocomplete='off'-->
 			</div>			
 			
 			<div class="form-group">
@@ -415,30 +415,25 @@
 				<textarea name='remark_comment' class="form-control" style='resize:none; height:110px;'></textarea>
 			</div>
 			
-		</div>		
-		
-	
-		<style>
-		
-		</style>
-		
+		</div>
 		
 		<script>
-		function showSelected()
-		{
-		  var selObj = document.getElementById('productSel');
-		  var txtTextObj = document.getElementById('productSelect');
-
-		  var selIndex = selObj.selectedIndex;
-		  txtTextObj.value += selObj.options[selIndex].text +', ';
-		}
-		
+		  $('#states').select2({
+			 dropdownParent: $('#parent')
+		  });
+		  $('#states').on('select2:open', function (e) {
+			const evt = "scroll.select2";
+			$(e.target).parents().off(evt);
+			$(window).off(evt);
+		  });  
+				  
 		$('.datepicker').datepicker({
 				inline: true,
 				changeYear: true,
 				changeMonth: true
 			});
 		
+		$('.select2').select2();
 		$("span.select2").css("width", "100%");
 		</script>
 		<?php

@@ -510,4 +510,146 @@ class Setup extends CI_Controller
             echo json_encode(array('status' => 'failure'));
         }
     }
+
+    public function business_unit_list()
+    {
+        $business_units = $this->setup_model->businessUnit_list();
+        $data = array();
+        foreach ($business_units as $bU) {
+
+            if (isset($_SERVER['SERVER_PORT'])) {
+                $base_url = 'http://' . $_SERVER['SERVER_ADDR'] . ":" . $_SERVER['SERVER_PORT'];
+            } else {
+
+                $base_url = 'http://' . $_SERVER['SERVER_ADDR'];
+            }
+
+            $action =  '<a href="javascript:void(0);" id="edit_' . $bU->bunit_id . '" title="click to update business unit" class="action"><i class="glyphicon glyphicon-pencil"></i></a>';
+            $options = ['active', 'inactive'];
+
+            $status = '
+                <select id="status-' . $bU->bunit_id . '" class="status">';
+            foreach ($options as $option) {
+                if ($option == $bU->status) {
+                    $status .= '<option value="' . $option . '" selected>' . $option . '</option>';
+                } else {
+                    $status .= '<option value="' . $option . '">' . $option . '</option>';
+                }
+            }
+            $status .= '
+                </select>
+            ';
+
+            $tk_status = '
+                <select id="tk_status-' . $bU->bunit_id . '" class="status">';
+            foreach ($options as $option) {
+                if ($option == $bU->tk_status) {
+                    $tk_status .= '<option value="' . $option . '" selected>' . $option . '</option>';
+                } else {
+                    $tk_status .= '<option value="' . $option . '">' . $option . '</option>';
+                }
+            }
+            $tk_status .= '
+                </select>
+            ';
+
+            $appraisal_status = '
+                <select id="appraisal_status-' . $bU->bunit_id . '" class="status">';
+            foreach ($options as $option) {
+                if ($option == $bU->appraisal_status) {
+                    $appraisal_status .= '<option value="' . $option . '" selected>' . $option . '</option>';
+                } else {
+                    $appraisal_status .= '<option value="' . $option . '">' . $option . '</option>';
+                }
+            }
+            $appraisal_status .= '
+                </select>
+            ';
+
+            $sub_array = array();
+            $sub_array[] = $bU->bunit_name;
+            $sub_array[] = $bU->bunit_acronym;
+            $sub_array[] = $bU->bunit_field;
+            $sub_array[] = $status;
+            $sub_array[] = $tk_status;
+            $sub_array[] = $appraisal_status;
+            $sub_array[] = $bU->hrd_location;
+            $sub_array[] = $action;
+            $data[] = $sub_array;
+        }
+        echo json_encode(array("data" => $data));
+    }
+
+    public function update_business_unit_status()
+    {
+        $data = $this->input->post(NULL, TRUE);
+        $update = $this->setup_model->update_business_unit_status($data);
+        if ($update) {
+            echo json_encode(array('status' => 'success'));
+        } else {
+            echo json_encode(array('status' => 'failure'));
+        }
+    }
+
+    public function show_business_unit($bunit_id)
+    {
+        $bU = $this->setup_model->show_business_unit($bunit_id);
+        $data['bU'] = $bU;
+        $data['request'] = 'show_business_unit';
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function add_businessUnit_form()
+    {
+        $data['request'] = 'add_business_unit';
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function store_promo_business_unit()
+    {
+        $data = $this->input->post(NULL, TRUE);
+        $fields_values = array(
+            'bunit_epascode' => 'epascode',
+            'bunit_contract' => 'contract',
+            'bunit_permit' => 'permit',
+            'bunit_clearance' => 'clearance',
+            'bunit_intro' => 'intro',
+            'bunit_dutySched' => 'sched',
+            'bunit_dutyDays' => 'days',
+            'bunit_specialSched' => 'special_sched',
+            'bunit_specialDays' => 'special_days'
+        );
+
+        // add business unit details in locate_promo_business_unit
+        $store_bu = $this->setup_model->store_promo_business_unit($data, $fields_values);
+        if ($store_bu) {
+
+            // add fields in promo_record table
+            $store_promo = $this->setup_model->add_fields_promo($data['bunit_field']);
+
+            // add fields in promo_history_record table
+            $store_promo_hist = $this->setup_model->add_fields_promo_hist($data['bunit_field']);
+
+            if ($store_promo && $store_promo_hist) {
+                echo json_encode(array('status' => 'success'));
+            } else {
+                echo json_encode(array('status' => 'failure'));
+            }
+        } else {
+            echo json_encode(array('status' => 'failure'));
+        }
+    }
+
+    public function update_promo_business_unit()
+    {
+        $data = $this->input->post(NULL, TRUE);
+
+        $update = $this->setup_model->update_promo_business_unit($data);
+        if ($update) {
+            echo json_encode(array('status' => 'success'));
+        } else {
+            echo json_encode(array('status' => 'failure'));
+        }
+    }
 }

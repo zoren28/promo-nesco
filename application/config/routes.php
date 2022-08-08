@@ -48,6 +48,12 @@ $route['list_of_subordinates'] = 'placement/setup/list_of_subordinates';
 $route['remove_subordinates'] = 'placement/setup/remove_subordinates';
 $route['employee_list'] = 'placement/setup/employee_list';
 $route['store_subordinates'] = 'placement/setup/store_subordinates';
+$route['business_unit_list'] = 'placement/setup/business_unit_list';
+$route['update_business_unit_status'] = 'placement/setup/update_business_unit_status';
+$route['show_business_unit/(:any)'] = 'placement/setup/show_business_unit/$1';
+$route['add_businessUnit_form'] = 'placement/setup/add_businessUnit_form';
+$route['store_promo_business_unit'] = 'placement/setup/store_promo_business_unit';
+$route['update_promo_business_unit'] = 'placement/setup/update_promo_business_unit';
 
 // for user account module
 $route['create_user_account'] = 'placement/account/create_user_account';

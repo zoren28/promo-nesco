@@ -377,4 +377,96 @@ class Setup_model extends CI_Model
 
         return $this->db->insert_batch('leveling_subordinates', $insert);
     }
+
+    public function businessUnit_list()
+    {
+        $query = $this->db->get_where('locate_promo_business_unit');
+        return $query->result();
+    }
+
+    public function update_business_unit_status($data)
+    {
+        $update = array(
+            $data['column'] => $data['status']
+        );
+        $this->db->where('bunit_id', $data['bunit_id']);
+        return $this->db->update('locate_promo_business_unit', $update);
+    }
+
+    public function show_business_unit($bunit_id)
+    {
+        $query = $this->db->get_where('locate_promo_business_unit', array('bunit_id' => $bunit_id));
+        return $query->row();
+    }
+
+    public function check_field_value($field)
+    {
+        $count_table = $this->db->from('promo_record')
+            ->where($field, 'T')
+            ->count_all_results();
+
+        if ($count_table == 0) {
+
+            $count_table = $this->db->from('promo_history_record')
+                ->where($field, 'T')
+                ->count_all_results();
+        }
+
+        return $count_table;
+    }
+
+    public function store_promo_business_unit($data, $fields)
+    {
+        foreach ($fields as $key => $value) {
+
+            $this->db->set($key, $data['bunit_field'] . '_' . $value);
+        }
+        $this->db->set('bunit_name', strtoupper($data['bunit_name']));
+        $this->db->set('business_unit', strtoupper($data['bunit_name']));
+        $this->db->set('bunit_field', $data['bunit_field']);
+        $this->db->set('bunit_acronym', strtoupper($data['bunit_acronym']));
+        $this->db->set('hrd_location', $data['hrd_location']);
+        return $this->db->insert('locate_promo_business_unit');
+    }
+
+    public function add_fields_promo($field)
+    {
+        return $this->db->query("ALTER TABLE `promo_record`
+        ADD COLUMN `" . $field . "` VARCHAR(1) NULL DEFAULT NULL AFTER `alta_citta`,
+        ADD COLUMN `" . $field . "_epascode` VARCHAR(255) NULL DEFAULT NULL AFTER `alta_special_days`,
+        ADD COLUMN `" . $field . "_contract` TEXT NULL DEFAULT NULL AFTER `" . $field . "_epascode`,
+        ADD COLUMN `" . $field . "_permit` VARCHAR(255) NULL DEFAULT NULL AFTER `" . $field . "_contract`,
+        ADD COLUMN `" . $field . "_clearance` TEXT NULL DEFAULT NULL AFTER `" . $field . "_permit`,
+        ADD COLUMN `" . $field . "_intro` VARCHAR(255) NULL DEFAULT NULL AFTER `" . $field . "_clearance`,
+        ADD COLUMN `" . $field . "_sched` VARCHAR(50) NULL DEFAULT NULL AFTER `" . $field . "_intro`,
+        ADD COLUMN `" . $field . "_days` VARCHAR(50) NULL DEFAULT NULL AFTER `" . $field . "_sched`,
+        ADD COLUMN `" . $field . "_special_sched` VARCHAR(50) NULL DEFAULT NULL AFTER `" . $field . "_days`,
+        ADD COLUMN `" . $field . "_special_days` VARCHAR(50) NULL DEFAULT NULL AFTER `" . $field . "_special_sched`");
+    }
+
+    public function add_fields_promo_hist($field)
+    {
+        return $this->db->query("ALTER TABLE `promo_history_record`
+        ADD COLUMN `" . $field . "` VARCHAR(1) NULL DEFAULT NULL AFTER `alta_citta`,
+        ADD COLUMN `" . $field . "_epascode` VARCHAR(255) NULL DEFAULT NULL AFTER `alta_special_days`,
+        ADD COLUMN `" . $field . "_contract` TEXT NULL DEFAULT NULL AFTER `" . $field . "_epascode`,
+        ADD COLUMN `" . $field . "_permit` VARCHAR(255) NULL DEFAULT NULL AFTER `" . $field . "_contract`,
+        ADD COLUMN `" . $field . "_clearance` TEXT NULL DEFAULT NULL AFTER `" . $field . "_permit`,
+        ADD COLUMN `" . $field . "_intro` VARCHAR(255) NULL DEFAULT NULL AFTER `" . $field . "_clearance`,
+        ADD COLUMN `" . $field . "_sched` VARCHAR(50) NULL DEFAULT NULL AFTER `" . $field . "_intro`,
+        ADD COLUMN `" . $field . "_days` VARCHAR(50) NULL DEFAULT NULL AFTER `" . $field . "_sched`,
+        ADD COLUMN `" . $field . "_special_sched` VARCHAR(50) NULL DEFAULT NULL AFTER `" . $field . "_days`,
+        ADD COLUMN `" . $field . "_special_days` VARCHAR(50) NULL DEFAULT NULL AFTER `" . $field . "_special_sched`");
+    }
+
+    public function update_promo_business_unit($data)
+    {
+        $update = array(
+            'bunit_name' => $data['bunit_name'],
+            'bunit_acronym' => $data['bunit_acronym'],
+            'hrd_location' => $data['hrd_location']
+        );
+        $this->db->where('bunit_id', $data['bunit_id']);
+        return $this->db->update('locate_promo_business_unit', $update);
+    }
 }

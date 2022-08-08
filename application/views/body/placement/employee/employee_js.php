@@ -2563,7 +2563,7 @@
                 },
                 success: function(data) {
 
-                    $("select[name = 'product']").html(data);
+                    $("select[name = 'product[]']").html(data);
                 }
             });
         } else {

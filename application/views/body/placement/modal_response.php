@@ -2615,6 +2615,11 @@ if ($request == "update_blacklist_form") {
         });
 
         $('.select2').select2();
+        $('.select2').on('select2:open', function(e) {
+            const evt = "scroll.select2";
+            $(e.target).parents().off(evt);
+            $(window).off(evt);
+        });
         $("span.select2").css("width", "100%");
     </script>
 <?php
@@ -5663,5 +5668,75 @@ if ($request == "update_blacklist_form") {
             });
         });
     </script>
+<?php
+} else if ($request == 'show_business_unit') {
+?>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="">Business Unit</label> <span class="text-red">*</span>
+                <input type="hidden" name="bunit_id" value="<?= $bU->bunit_id ?>">
+                <input type="text" name="bunit_name" class="form-control" style="text-transform: uppercase;" required value="<?= $bU->bunit_name ?>">
+            </div>
+            <div class="form-group">
+                <label for="">Column Field</label> <span class="text-red">*</span>
+                <input type="text" name="bunit_field" class="form-control" value="<?= $bU->bunit_field ?>" readonly>
+            </div>
+        </div>
+        <div class=" col-md-6">
+            <div class="form-group">
+                <label for="">Acronym</label> <span class="text-red">*</span>
+                <input type="text" name="bunit_acronym" class="form-control" style="text-transform: uppercase;" required value="<?= $bU->bunit_acronym ?>">
+            </div>
+            <div class="form-group">
+                <label for="">Location</label> <span class="text-red">*</span>
+                <select name="hrd_location" id="" class="form-control" required>
+                    <?php
+                    $locations = array('asc', 'cebo');
+                    foreach ($locations as $location) {
+                        if ($location == $bU->hrd_location) {
+                            echo '<option value="' . $location . '" selected>' . $location . '</option>';
+                        } else {
+                            echo '<option value="' . $location . '">' . $location . '</option>';
+                        }
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
+    </div>
+<?php
+} else if ($request == 'add_business_unit') {
+
+?>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="">Business Unit</label> <span class="text-red">*</span>
+                <input type="text" name="bunit_name" class="form-control" style="text-transform: uppercase;" required>
+            </div>
+            <div class="form-group">
+                <label for="">Column Field</label> <span class="text-red">*</span>
+                <input type="text" name="bunit_field" class="form-control" required>
+            </div>
+        </div>
+        <div class=" col-md-6">
+            <div class="form-group">
+                <label for="">Acronym</label> <span class="text-red">*</span>
+                <input type="text" name="bunit_acronym" class="form-control" style="text-transform: uppercase;" required>
+            </div>
+            <div class="form-group">
+                <label for="">Location</label> <span class="text-red">*</span>
+                <select name="hrd_location" id="" class="form-control" required>
+                    <?php
+                    $locations = array('asc', 'cebo');
+                    foreach ($locations as $location) {
+                        echo '<option value="' . $location . '">' . $location . '</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
+    </div>
 <?php
 }
