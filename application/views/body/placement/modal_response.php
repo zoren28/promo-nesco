@@ -5739,4 +5739,256 @@ if ($request == "update_blacklist_form") {
         </div>
     </div>
 <?php
+} else if ($request == 'secure_clearance') {
+
+?>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            SECURE CLEARANCE
+        </div>
+        <div class="panel-body">
+            <form id="secure-clearance" autocomplete="off">
+                <input type="hidden" name="process" value="secure-clearance">
+                <div class="form-group">
+                    <label><span class="text-red">*</span> Search Promo</label>
+                    <div class="input-group">
+                        <input class="form-control" type="text" name="employee" onkeyup="nameSearch(this.value)">
+                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                    </div>
+                    <div class="search-results" style="display: none;"></div>
+                </div>
+                <div class="promo-details"></div>
+                <div class="clearance-form" style="display: none;">
+                    <div class="form-group">
+                        <label for="">Reason for asking clearance</label>
+                        <select class="form-control" name='reason' required onchange='getRL(this.value)'>
+                            <option value=''> - Please Choose - </option>
+                            <option value="V-Resigned"> VOLUNTARY RESIGNATION FROM EMPLOYMENT WITH THE COMPANY </option>
+                            <option value="Ad-Resigned"> ADVISED TO RESIGNED FROM EMPLOYMENT WITH THE COMPANY </option>
+                            <option value="Termination"> TERMINATION OF CONTRACT FROM THE COMPANY </option>
+                            <option value="Deceased"> DECEASED </option>
+                        </select>
+                    </div>
+                    <div class="reason-based"></div>
+                    <button type="submit" id="secure-clearance-btn" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        $(function() {
+
+            $("form#secure-clearance").submit(function(e) {
+
+                e.preventDefault();
+                let formData = new FormData(this);
+                $("button#secure-clearance-btn").prop('disabled', true);
+                $("button#secure-clearance-btn").text('Please Wait...');
+
+                let reason = $("select[name = 'reason']").val();
+                let is_date_required = '';
+                if (reason == 'Deceased') {
+                    is_date_required = $("input[name = 'date_of_death']").val();
+                } else {
+                    is_date_required = $("input[name = 'date_of_resignation']").val();
+                }
+
+                if (!is_date_required) {
+
+
+                    $("button#secure-clearance-btn").prop('disabled', false);
+                    $("button#secure-clearance-btn").text('Submit');
+                    $.alert.open({
+                        type: 'warning',
+                        cancel: false,
+                        content: "Please Fill-up Required Fields!",
+                        buttons: {
+                            OK: 'Ok'
+                        },
+                        callback: function(button) {
+                            if (button == 'OK') {
+
+                                if (reason == 'Deceased') {
+                                    $("input[name = 'date_of_death']").css("border-color", "#dd4b39");
+                                } else {
+                                    $("input[name = 'date_of_resignation']").css("border-color", "#dd4b39");
+                                }
+                            }
+                        }
+                    });
+                } else {
+
+                    $.ajax({
+                        type: "POST",
+                        url: "<?= site_url('store_secure_clearance'); ?>",
+                        data: formData,
+                        success: function(data) {
+
+                            let response = JSON.parse(data);
+                            if (response.status == 'success') {
+
+                                $.alert.open({
+                                    type: 'warning',
+                                    title: 'Info',
+                                    icon: 'confirm',
+                                    cancel: false,
+                                    content: "Clearance Processing is successfull! <br> Do you want to print clearance now or later?",
+                                    buttons: {
+                                        OK: 'Yes',
+                                        NO: 'Not now'
+                                    },
+                                    callback: function(button) {
+                                        if (button == 'OK') {
+
+                                            if (reason == 'Deceased') {
+                                                $.alert.open({
+                                                    type: 'warning',
+                                                    cancel: false,
+                                                    content: 'Generating Clearance...',
+                                                    buttons: {
+                                                        OK: 'Yes',
+                                                    },
+                                                    callback: function(button) {
+                                                        if (button == 'OK') {
+
+                                                            clearanceProcess('secure_clearance');
+                                                            window.open(response.base_url + '/hrms/report/deceased_clearance.php?empid=' + response.emp_id);
+                                                        }
+                                                    }
+                                                });
+                                            } else {
+                                                $.alert.open({
+                                                    type: 'warning',
+                                                    cancel: false,
+                                                    content: 'Generating Clearance...',
+                                                    buttons: {
+                                                        OK: 'Yes',
+                                                    },
+                                                    callback: function(button) {
+                                                        if (button == 'OK') {
+
+                                                            clearanceProcess('secure_clearance');
+                                                            window.open(response.base_url + '/hrms/report/promo_clearance.php?empid=' + response.emp_id + '&scprdetailsid=' + response.scdetails_id);
+                                                        }
+                                                    }
+                                                });
+                                            }
+
+                                        } else {
+                                            clearanceProcess('secure_clearance');
+                                        }
+                                    }
+                                });
+                            } else {
+                                console.log(data);
+                            }
+                        },
+                        async: false,
+                        cache: false,
+                        contentType: false,
+                        processData: false
+                    });
+                }
+            });
+        });
+    </script>
+<?php
+} else if ($request == 'promo_details_clearance') {
+
+?>
+    <div class="form-group">
+        <label for=""><span class="text-red">*</span> Promo Type</label>
+        <input type="text" name="promo_type" class="form-control" value="<?= $emp_details->promo_type ?>" readonly>
+    </div>
+    <div class="form-group">
+        <label for=""><span class="text-red">*</span> Store</label>
+        <select name="store" class="form-control" required>
+            <option value=""></option>
+            <?php
+            $bUs = $this->dashboard_model->businessUnit_list();
+            foreach ($bUs as $bu) {
+
+                $hasBU = $this->dashboard_model->promo_has_bu($emp_id, $bu->bunit_field);
+                if ($hasBU > 0) {
+
+                    $exist = $this->resignation_model->check_secure_clearance_details($emp_id, $bu->bunit_name);
+                    if ($exist) {
+                        echo '<option value="' . $bu->bunit_name . '" disabled>' . $bu->bunit_name . ' - DONE </option>';
+                    } else {
+                        echo '<option value="' . $bu->bunit_name . '">' . $bu->bunit_name . '</option>';
+                    }
+                }
+            }
+            ?>
+        </select>
+    </div>
+    <?php
+} else if ($request == 'get_rb_form') {
+
+    if ($reason == 'Deceased') {
+    ?>
+        <div class="form-group">
+            <label for=""><span class="text-red">*</span> Date of Death</label>
+            <input type="text" name="date_of_death" class="form-control datepicker" placeholder="mm/dd/yyyy" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask="" required onchange="inputField(this.name)">
+        </div>
+        <div class="form-group">
+            <label for=""><span class="text-red">*</span> Name of Claimant</label>
+            <input type="text" name="claimant" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for=""><span class="text-red">*</span> Relation to the deceased employee</label>
+            <select name="relation" class="form-control" required>
+                <option value=""> --Choose Relationship-- </option>
+                <?php
+                $relationships = array('Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Sister/Brother');
+                foreach ($relationships as $relationship) {
+
+                    echo '<option value="' . $relationship . '">' . $relationship . '</option>';
+                }
+                ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for=""><span class="text-red">*</span> Cause of Death</label>
+            <input type="text" name="cause_of_death" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for=""><span class="text-red">*</span> Required Document (Scanned Death Certificate)</label>
+            <input type="file" name="resignation_letter" class="form-control" required accept="image/*">
+        </div>
+        <div class="form-group">
+            <label for=""><span class="text-red">*</span> Required Document (Scanned Authorization Letter)</label>
+            <input type="file" name="authorization_letter" class="form-control" required accept="image/*">
+        </div>
+    <?php
+    } else if ($reason == 'Termination' || $reason == 'Remove-BU') {
+    ?>
+        <div class="form-group">
+            <label for=""><span class="text-red">*</span> EOC Date</label>
+            <input type="text" name="date_of_resignation" class="form-control datepicker" placeholder="mm/dd/yyyy" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask="" required onchange="inputField(this.name)">
+        </div>
+    <?php
+    } else {
+    ?>
+        <div class="form-group">
+            <label for=""><span class="text-red">*</span> Date of Resignation</label>
+            <input type="text" name="date_of_resignation" class="form-control datepicker" placeholder="mm/dd/yyyy" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask="" required onchange="inputField(this.name)">
+        </div>
+        <div class="form-group">
+            <label for=""><span class="text-red">*</span> Required Document (Scanned Resignation Letter)</label>
+            <input type="file" name="resignation_letter" class="form-control" required accept="image/*">
+        </div>
+    <?php
+    }
+    ?>
+    <script type="text/javascript">
+        $('.datepicker').datepicker({
+            inline: true,
+            changeYear: true,
+            changeMonth: true
+        });
+
+        $("[data-mask]").inputmask();
+    </script>
+<?php
 }

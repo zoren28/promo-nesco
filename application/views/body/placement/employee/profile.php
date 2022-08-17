@@ -80,6 +80,18 @@ switch ($current_status) {
         $statClass = "btn-warning";
         break;
 
+    case 'V-Resigned':
+        $statClass = "btn-warning";
+        break;
+
+    case 'Ad-Resigned':
+        $statClass = "btn-warning";
+        break;
+
+    case 'Deceased':
+        $statClass = "btn-warning";
+        break;
+
     case 'End of Contract':
         $statClass = "btn-warning";
         break;
@@ -232,7 +244,14 @@ if ($hired != "" && $hired != "0000-00-00"  && $hired != "1970-01-01"  && $hired
                                 ?>
                             </strong></p>
                     </div>
-                    <a href="#" class="btn btn-sm btn-block <?php echo $statClass; ?>"><b><?php echo $current_status; ?></b></a>
+                    <a href="#" class="btn btn-sm btn-block <?php echo $statClass; ?>"><b>
+                            <?php
+                            echo $current_status;
+                            if ($emp_info->sub_status) {
+                                echo " &nbsp; ($emp_info->sub_status)";
+                            }
+                            ?>
+                        </b></a>
                 </div>
             </div>
         </div>

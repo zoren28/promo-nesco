@@ -1128,7 +1128,7 @@ if ($request == 'basic_info') {
                     </select>
                 </td>
                 <td width="20%" align="right">Date Applied</td>
-                <td><input name="dateApplied" value="<?php echo $dateApplied; ?>" placeholder="mm/dd/yyyy" class="form-control datepicker inputForm" type="text"></td>
+                <td><input name="dateApplied" value="<?php echo $dateApplied; ?>" placeholder="mm/dd/yyyy" class="form-control datepicker inputForm" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask="" type="text"></td>
             </tr>
             <tr>
                 <td align="right">Date of Exam</td>

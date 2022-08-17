@@ -676,9 +676,15 @@
 			}
 			else
 			{
-				if (stores.length > 1) 
+				if (stores.length > 1 ) 
 				{
 					alert("Please select one Store only..");
+					$("input[name='check[]']")[0].focus();
+				}
+				else if(stores.length == 0)
+				{
+					alert("Please select one Store..");
+					$("input[name='check[]']")[0].focus();
 				}
 			}
 			
@@ -777,6 +783,26 @@
 		}
 	}
 	
+	function intro_letter()
+	{
+		let check = [];
+        $("input[name = 'check[]']:checked").each(function() {
+			
+            check.push($(this).val())
+        })
+		
+		$.ajax({
+            type: "GET",
+            url: "<?= site_url('show_intro_check') ?>",
+            data: {
+                check
+            },
+            success: function(data) {
+                $("#intro_letter").html('').append(data);
+            }
+        });
+	}
+	
 	function getDuration()
 	{	
       var strtDate = $("input[name = 'startDate']").val(); 
@@ -817,5 +843,32 @@
                 $("select[name = 'company']").html(response);
             }
         });
+    }
+	
+	function validateForm(imgid) 
+	{
+        var img = $("#" + imgid).val();
+        var res = '';
+        var i = img.length - 1;
+        while (img[i] != ".") {
+            res = img[i] + res;
+            i--;
+        }
+
+        //checks the file format
+        if (res != "PNG" && res != "jpg" && res != "JPG" && res != "png") {
+            $("#" + imgid).val("");
+            errDup('Invalid File Format. Take note on the allowed file!');
+            return 1;
+        }
+
+        //checks the filesize- should not be greater than 2MB
+        var uploadedFile = document.getElementById(imgid);
+        var fileSize = uploadedFile.files[0].size < 1024 * 1024 * 2;
+        if (fileSize == false) {
+            $("#" + imgid).val("");
+            errDup('The size of the file exceeds 2MB!')
+            return 1;
+        }
     }
 </script>

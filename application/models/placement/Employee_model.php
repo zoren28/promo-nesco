@@ -247,6 +247,38 @@ class Employee_model extends CI_Model
         return $this->db->get();
     }
 
+    public function find_promo_for_clearance($str)
+    {
+        $this->db->query('SET SESSION sql_mode = ""');
+
+        // ONLY_FULL_GROUP_BY
+        $this->db->query('SET SESSION sql_mode =
+                              REPLACE(REPLACE(REPLACE(
+                              @@sql_mode,
+                              "ONLY_FULL_GROUP_BY,", ""),
+                              ",ONLY_FULL_GROUP_BY", ""),
+                              "ONLY_FULL_GROUP_BY", "")');
+
+        $this->db->select('employee3.emp_id, name, promo_type')
+            ->from('employee3')
+            ->join('promo_record', 'promo_record.record_no = employee3.record_no AND promo_record.emp_id = employee3.emp_id')
+            ->where('current_status !=', 'blacklisted')
+            ->group_start()
+            ->like('name', $str)
+            ->or_where('employee3.emp_id', $str)
+            ->group_end();
+
+        if ($this->hr == 'nesco') {
+            $this->db->where('emp_type', 'Promo-NESCO');
+        } else {
+            $this->db->like('emp_type', 'Promo', 'after');
+        }
+
+        $this->db->order_by('name', 'ASC')
+            ->limit(10);
+        return $this->db->get();
+    }
+
     public function employee_list($data)
     {
         if (!empty($data['company'])) {
@@ -353,7 +385,7 @@ class Employee_model extends CI_Model
 
     public function employee_info($emp_id)
     {
-        $query = $this->db->select('employee3.record_no, employee3.emp_id, name, emp_no, emp_type, agency_code, promo_company, promo_department, vendor_code, promo_type, type, current_status, position, startdate, eocdate')
+        $query = $this->db->select('employee3.record_no, employee3.emp_id, name, emp_no, emp_type, agency_code, promo_company, promo_department, vendor_code, promo_type, type, current_status, position, startdate, eocdate, sub_status')
             ->from('employee3')
             ->join('promo_record', 'promo_record.record_no = employee3.record_no', 'left')
             ->where('employee3.emp_id', $emp_id)

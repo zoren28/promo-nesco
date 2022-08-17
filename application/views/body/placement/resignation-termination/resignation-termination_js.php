@@ -1,6 +1,19 @@
 <script>
     $(document).ready(function() {
 
+        let page = $("input[name = 'page']").val();
+        if (page == 'clearance-processing') {
+            clearanceProcess('secure_clearance');
+        }
+
+        $("button.clearance-action").click(function() {
+
+            $("button.clearance-action").removeClass('active');
+            $(this).addClass('active');
+
+            clearanceProcess(this.id);
+        });
+
         let employee = $("input[name = 'employee']").val();
         if (employee) {
             $(".rt-form").prop('disabled', false);
@@ -511,5 +524,116 @@
         $("select[name = 'rt_status']").prop('disabled', true);
 
         $("div.uploadResignation").html('');
+    }
+
+    function clearanceProcess(process) {
+
+        $("div.clearance-body").html('');
+        $("div#loading-gif").show();
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('clearance_process'); ?>",
+            data: {
+                process
+            },
+            success: function(data) {
+
+                $("div#loading-gif").hide();
+                $("div.clearance-body").html(data);
+            }
+        });
+    }
+
+    function nameSearch(str) {
+
+        str = str.trim();
+        $(".search-results").hide();
+
+        if (str == '') {
+
+            $(".search-results").hide();
+        } else {
+
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('find_promo_for_clearance'); ?>",
+                data: {
+                    str
+                },
+                success: function(data) {
+
+                    if (data.trim() != "No Result Found") {
+
+                        $("div.promo-details").html('');
+                        $("div.clearance-form").hide();
+                        $(".search-results").show().html(data);
+                    } else {
+
+                        $(".search-results").hide();
+                    }
+                }
+            });
+        }
+    }
+
+    function promoClearance(employee) {
+
+        let [emp_id, name, promo_type] = employee.trim().split("*");
+        $("input[name='employee']").val(`${emp_id} * ${name}`);
+        $("div.search-results").hide();
+        $("input[name = 'employee']").css("border-color", "#ccc");
+
+        $("div.clearance-form").show();
+
+        if (promo_type == 'ROVING') {
+            $("select[name = 'reason']").append('<option value="Remove-BU">REMOVE BUSINESS UNIT</option>');
+        }
+
+        let process = $("input[name = 'process']").val();
+        if (process) {
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('check_secure_clearance'); ?>",
+                data: {
+                    emp_id: emp_id.trim(),
+                    promo_type: promo_type
+                },
+                success: function(data) {
+
+                    let response = JSON.parse(data);
+                    $("select[name = 'reason']").val(response.reason);
+                },
+                async: false
+            });
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "<?php echo site_url('promo_details_clearance'); ?>",
+            data: {
+                emp_id: emp_id.trim()
+            },
+            success: function(data) {
+
+                $("div.promo-details").html(data);
+            }
+        });
+    }
+
+    function getRL(reason) {
+
+        if (reason) {
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('get_rb_form'); ?>",
+                data: {
+                    reason
+                },
+                success: function(data) {
+
+                    $("div.reason-based").html(data);
+                }
+            });
+        }
     }
 </script>

@@ -192,4 +192,103 @@ class Resignation_model extends CI_Model
     {
         return $this->db->delete('tag_for_resignation', array('ratee_id' => $data['emp_id'], 'rater_id' => $data['rater']));
     }
+
+    public function get_scpr_id($data)
+    {
+        $scpr_id = '';
+        $query = $this->db->select('scpr_id')
+            ->get_where('secure_clearance_promo', array('emp_id' => $data['emp_id'], 'promo_type' => $data['promo_type'], 'status' => 'Pending'));
+
+        if ($query->num_rows() > 0) {
+            $scpr_id = $query->row_array()['scpr_id'];
+        }
+
+        return $scpr_id;
+    }
+
+    public function show_secure_clearance_promo($scpr_id)
+    {
+        $query = $this->db->get_where('secure_clearance_promo', array('scpr_id' => $scpr_id));
+        return $query->row();
+    }
+
+    public function check_secure_clearance_details($emp_id, $store)
+    {
+        return $this->db->from('secure_clearance_promo_details')
+            ->where(array('emp_id' => $emp_id, 'store' => $store, 'clearance_status' => 'Pending'))
+            ->count_all_results();
+    }
+
+    public function store_secure_clearance_promo($data)
+    {
+        $insert = array(
+            'emp_id' => $data['emp_id'],
+            'promo_type' => $data['promo_type'],
+            'reason' => $data['reason'],
+            'date_added' => $this->datetime,
+            'added_by' => $this->loginId,
+            'status' => 'Pending',
+        );
+
+        $this->db->insert('secure_clearance_promo', $insert);
+        return $this->db->insert_id();
+    }
+
+    public function update_employee_status($data)
+    {
+        $update = array(
+            'current_status' => $data['status'],
+            'sub_status' => $data['sub_status']
+        );
+
+        $this->db->where('emp_id', $data['emp_id']);
+        $this->db->update('employee3', $update);
+    }
+
+    function store_secure_clearance_promo_details($data)
+    {
+        if (!isset($data['date_of_resignation'])) {
+            $date_effectivity = $this->date;
+        } else {
+            $date_effectivity = date('Y-m-d', strtotime($data['date_of_resignation']));
+        }
+
+        $insert = array(
+            'scpr_id' => $data['scpr_id'],
+            'emp_id' => $data['emp_id'],
+            'store' => $data['store'],
+            'date_activefor_resign' => $data['dateforactiveresign'],
+            'date_secure' => $this->date,
+            'date_effectivity' => $date_effectivity,
+            'date_uncleared' => $data['dateuncleared'],
+            'resignation_letter' => $data['resignation_path'],
+            'added_by' => $this->loginId,
+            'clearance_status' => 'Pending'
+        );
+
+        $this->db->insert('secure_clearance_promo_details', $insert);
+        return $this->db->insert_id();
+    }
+
+    public function store_secure_clearance_deceased($data, $scpr_id)
+    {
+        $insert = array(
+            'sc_id' => $scpr_id,
+            'emp_id' => $data['emp_id'],
+            'claimant' => $data['claimant'],
+            'relation' => $data['relation'],
+            'dateofdeath' => date('Y-m-d', strtotime($data['date_of_death'])),
+            'causeofdeath' => $data['cause_of_death'],
+            'authorization_letter' => $data['authorization_path']
+        );
+
+        $this->db->insert('secure_clearance_deceased', $insert);
+    }
+
+    public function employees_ratee($emp_id)
+    {
+        $query = $this->db->select('ratee')
+            ->get_where('leveling_subordinates', array('subordinates_rater' => $emp_id));
+        return $query->result();
+    }
 }

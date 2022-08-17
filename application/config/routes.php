@@ -12,6 +12,12 @@ $route['find_all_promo'] = 'placement/resignation/find_all_promo';
 $route['show_employee/(:any)'] = 'placement/resignation/show_employee/$1';
 $route['resignation/list_of_subordinates'] = 'placement/resignation/list_of_subordinates';
 $route['update_resignation_status'] = 'placement/resignation/update_resignation_status';
+$route['clearance_process'] = 'placement/resignation/clearance_process';
+$route['find_promo_for_clearance'] = 'placement/resignation/find_promo_for_clearance';
+$route['check_secure_clearance'] = 'placement/resignation/check_secure_clearance';
+$route['promo_details_clearance'] = 'placement/resignation/promo_details_clearance';
+$route['get_rb_form'] = 'placement/resignation/get_rb_form';
+$route['store_secure_clearance'] = 'placement/resignation/store_secure_clearance';
 
 // for setup module
 $route['company_list'] = 'placement/setup/company_list';
@@ -264,7 +270,7 @@ $route['locate_vendor'] = 'recruitment/initial/locate_vendor';
 $route['selproduct'] = 'recruitment/initial/selproduct';
 $route['get_duration'] = 'recruitment/initial/get_duration';
 $route['hire_applicant'] = 'recruitment/initial/hire_applicant';
-
+$route['show_intro_check'] = 'recruitment/initial/show_intro_check';
 // for menu module
 $route['logout'] = 'logout';
 $route['placement/page/menu/(:any)/(:any)/(:any)'] = 'placement/page/menu/$1/$2/$3';

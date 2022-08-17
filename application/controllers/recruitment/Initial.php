@@ -15,6 +15,7 @@ class Initial extends CI_Controller
         }
 		$this->load->model('recruitment/initial_model');
 		$this->load->model('placement/employee_model');
+		$this->load->model('placement/contract_model');
 	}
 	
 	public function check_applicant_duplicate_or_blacklist() {
@@ -24,6 +25,14 @@ class Initial extends CI_Controller
         $data['fetch'] = $this->initial_model->check_applicant_duplicate_or_blacklist($fetch_data);
 		$this->load->view('body/recruitment/function_query',$data);
 	}
+	
+	public function show_intro_check()
+    {
+		$data['stores'] = $this->input->get('check', TRUE);
+        $data['request'] = 'show_intro';
+        $this->load->view('body/recruitment/function_query',$data);
+		
+    }
 	
 	public function proceed_record_applicants() 
 	{

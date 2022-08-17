@@ -337,7 +337,7 @@
 					
 					foreach ($result as $i) { ?>
 					<tr>
-						<td><input type="checkbox" name='check[]' value="<?php echo $i['bunit_id'].'/'.$i['bunit_field']; ?>"></td>
+						<td><input type="checkbox" name='check[]' value="<?php echo $i['bunit_id'].'/'.$i['bunit_field']; ?>" onchange="intro_letter()"></td>
 						<td><?= $i['bunit_name'] ?></td>
 					</tr>
 					<?php }?>
@@ -410,6 +410,13 @@
 				<input type="text" name="duration_display" class="form-control" autocomplete='off' required >	 
 			</div>
 			
+			
+			<div class="form-group">
+				<div id='intro_letter'>
+			</div>
+			
+			
+			
 			<div class="form-group">
 				<label for="hrmsId">REMARKS/COMMENTS</label>
 				<textarea name='remark_comment' class="form-control" style='resize:none; height:110px;'></textarea>
@@ -438,6 +445,30 @@
 		</script>
 		<?php
 	}
+	else if ($request == 'show_intro') 
+	{
+		
+		?><div class="form-group">
+		<label for="company">INTRO LETTER</label><br/><?php  
+		
+		if (is_array($stores)) 
+		{
+
+			foreach ($stores as $key => $value) 
+			{
+				$s = explode('/', $value);
+				$bunit_id = $s[0];
+				
+				$bu = $this->contract_model->show_bu_details($bunit_id);
+				?>
+					*<?=$bu->bunit_name?> <input type="file" name="<?=$bu->bunit_intro?>" id="<?=$bu->bunit_intro?>" class="form-control" required onchange="validateForm(this.id)">
+				<?php  
+			}
+			?></div><?php  
+		}
+		
+	}
+	
 	else if($request == "applicant_record")
 	{
 		?>
