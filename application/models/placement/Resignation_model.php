@@ -321,7 +321,7 @@ class Resignation_model extends CI_Model
 
     public function secure_clearance_promo($data)
     {
-        if (isset($data['emp_id2'])) {
+        if (isset($data['emp_id'])) {
             $this->db->where('emp_id', $data['emp_id']);
         }
 
@@ -414,5 +414,31 @@ class Resignation_model extends CI_Model
             'generatedby' => $this->loginId
         );
         return $this->db->insert('secure_clearance_reprint', $insert);
+    }
+
+    public function fetch_secured_clearance_promo()
+    {
+        $query = $this->db->order_by('scpr_id', 'DESC')
+            ->get('secure_clearance_promo');
+        return $query->result();
+    }
+
+    public function show_secured_clerance_details($scpr_id)
+    {
+        $query = $this->db->get_where('secure_clearance_promo_details', array('scpr_id' => $scpr_id));
+        return $query->result();
+    }
+
+    public function fetch_authorization_letter($emp_id)
+    {
+        $query = $this->db->get_where('secure_clearance_deceased', array('emp_id' => $emp_id));
+        $auth = $query->row();
+        $letter = '';
+        if (!empty($auth)) {
+
+            $letter = $auth->authorization_letter;
+        }
+
+        return $letter;
     }
 }

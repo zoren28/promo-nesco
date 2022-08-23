@@ -579,4 +579,40 @@ class Resignation extends CI_Controller
 
         echo json_encode(['status' => 'success', 'reason' => $reason, 'scdetails_id' => $scdetails_id, 'base_url' => $this->base_url]);
     }
+
+    public function fetch_secured_clearance()
+    {
+        $employees = $this->resignation_model->fetch_secured_clearance_promo();
+
+        $data = array();
+        foreach ($employees as $row) {
+
+            $emp = $this->employee_model->employee_info($row->emp_id);
+            $scd = $this->resignation_model->secure_clearance_promo_details(['scpr_id' => $row->scpr_id, 'emp_id' => $row->emp_id]);
+            if (!empty($scd)) {
+
+                $sub_array = array();
+                $sub_array[] = ucwords(strtolower($emp->name));
+                $sub_array[] = date('m/d/Y', strtotime($scd->date_secure));
+                $sub_array[] = date('m/d/Y', strtotime($scd->date_effectivity));
+                $sub_array[] = $row->status;
+                $sub_array[] = $row->promo_type;
+                $sub_array[] = $row->reason;
+                $sub_array[] = '<button id="view_' . $row->scpr_id . '" title="Click to view details" class="btn btn-primary btn-sm action">View Details</button>';
+                $data[] = $sub_array;
+            }
+        }
+
+        echo json_encode(array('data' => $data));
+    }
+
+    public function show_secured_clerance_details()
+    {
+        $scpr_id = $this->input->get('id', TRUE);
+        $data['details'] = $this->resignation_model->show_secured_clerance_details($scpr_id);
+        $data['request'] = 'show_secured_clerance_details';
+        $data['base_url'] = $this->base_url;
+
+        $this->load->view('body/placement/modal_response', $data);
+    }
 }

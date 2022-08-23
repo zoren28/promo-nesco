@@ -22,6 +22,8 @@ $route['browse_epas'] = 'placement/resignation/browse_epas';
 $route['store_upload_clearance'] = 'placement/resignation/store_upload_clearance';
 $route['record_reprint_clearance'] = 'placement/resignation/record_reprint_clearance';
 $route['reprint_details'] = 'placement/resignation/reprint_details';
+$route['fetch_secured_clearance'] = 'placement/resignation/fetch_secured_clearance';
+$route['show_secured_clerance_details'] = 'placement/resignation/show_secured_clerance_details';
 
 // for setup module
 $route['company_list'] = 'placement/setup/company_list';

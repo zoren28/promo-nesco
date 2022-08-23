@@ -228,10 +228,15 @@ class Initial extends CI_Controller
 			}  */
 		}
 		$dataCount = $this->initial_model->check_employee_existince($fetch_data['appid']);
+		
 		if($dataCount > 0)
 		{
 			$oldData = $this->initial_model->employee_oldData($fetch_data['appid']);
-			$this->initial_model->employmentRecord($oldData); 
+			$this->initial_model->employmentRecord($oldData); // save old employee record
+			//$previous_record_no = $this->db->insert_id(); // get the last inserted
+			
+			//print_r($oldData);
+			//print_r($previous_record_no);
 		}
 	}
 	

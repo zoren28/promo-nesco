@@ -621,38 +621,55 @@ class Initial_model extends CI_Model
 	
 	public function employmentRecord($oldData)
 	{
-		$data = array(
-						'emp_id'				=> $oldData['emp_id'],
-						'emp_no'				=> $oldData['emp_no'],
-						'emp_pins'				=> $oldData['emp_pins'],
-						'company_code'			=> $oldData['company_code'],
-						'bunit_code'			=> $oldData['bunit_code'],
-						'dept_code'				=> $oldData['dept_code'],
-						'section_code'			=> $oldData['section_code'],
-						'sub_section_code'		=> $oldData['sub_section_code'],
-						'unit_code'				=> $oldData['unit_code'],
-						'barcodeId'				=> $oldData['barcodeId'],
-						'bioMetricId'			=> $oldData['bioMetricId'],
-						'payroll_no'			=> $oldData['payroll_no'],
-						'startdate'				=> $oldData['startdate'],
-						'eocdate'				=> $oldData['eocdate'],
-						'emp_type'				=> $oldData['emp_type'],				
-						'position'				=> $oldData['position'],
-						'positionlevel'			=> $oldData['positionlevel'],
-						'current_status'		=> $oldData['current_status'],
-						'lodging'				=> $oldData['lodging'],
-						'pos_desc'				=> $oldData['pos_desc'],
-						'remarks'				=> $oldData['remarks'],
-						'epas_code'				=> $oldData['epas_code'],
-						'contract'				=> $oldData['contract'],
-						'permit'				=> $oldData['permit'],
-						'clearance'				=> $oldData['clearance'],
-						'comments'				=> $oldData['comments'],
-						'date_updated'			=> $oldData['date_updated'],
-						'updatedby'				=> $oldData['updatedby'],
-						'duration'				=> $oldData['duration'],
-						);
-		$this->db->insert('employmentrecord_', $data);
+		foreach ($oldData as $field => $value) 
+		{
+            $fields = array('record_no', 'tag_as', 'date_added', 'added_by', 'Details', 'DepCode', 'Branch', 'Branchcode', 'tag_request', 'sub_status');
+            if (!in_array($field, $fields)) {
+
+                if ($field == 'name') {
+
+                    $field = 'names';
+                } else if ($field == 'position_desc') {
+
+                    $field = 'pos_desc';
+                } else if ($field == 'updated_by') {
+
+                    $field = 'updatedby';
+                }
+
+                $fields1[$field] = $value;
+            }
+        }
+		 // insert the data to employmentrecord_ table and get its record_no
+        $this->db->insert('employmentrecord_', $fields1);
+		$previous_record_no = $this->db->insert_id();
+
+        // update appraisal details table
+        $this->db->set('record_no', $previous_record_no)
+            ->where(array('record_no' => $oldData['record_no'], 'emp_id' => $oldData['emp_id']))
+            ->update('appraisal_details');
+		print_r($oldData);
+        // fetch promo record
+        //$query = $this->db->get_where('promo_record', array('record_no' => $oldData['record_no'], 'emp_id' => $oldData['emp_id']));
+        //$old_promo_data = $query->row();
+		//print_r($old_promo_data);
+        // insert the data to promo_history_table table
+        //$fields2 = array();
+        /* foreach ($old_promo_data as $field => $value) {
+
+            $fields = array('promo_id');
+            if (!in_array($field, $fields)) {
+
+                if ($field == 'record_no') {
+
+                    $fields2[$field] = $previous_record_no;
+                } else {
+
+                    $fields2[$field] = $value;
+                }
+            }
+        } */
+        //$this->db->insert('promo_history_record', $fields2);
 	}
 	
 	public function save_applicant_employment_history($fetch_data, $z)

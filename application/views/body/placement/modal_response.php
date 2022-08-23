@@ -6185,4 +6185,147 @@ if ($request == "update_blacklist_form") {
         });
     </script>
 <?php
+} else if ($request == 'list_secured_clerance') {
+
+?>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            EMPLOYEE LIST
+        </div>
+        <div class="panel-body">
+            <div class="table-responsive">
+                <input type="hidden" name="process" value="list-secured-clerance">
+                <table id="dt-secured-clearance" class="table table-bordered table-hover" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Secure</th>
+                            <th>Effective</th>
+                            <th>Status</th>
+                            <th>Type</th>
+                            <th>Reason</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function() {
+
+            let dt_secured_clearance = $("table#dt-secured-clearance").DataTable({
+                "destroy": true,
+                "ajax": {
+                    url: "<?php echo site_url('fetch_secured_clearance'); ?>",
+                    type: "POST"
+                },
+                "order": [],
+                "columnDefs": [{
+                    "targets": [6],
+                    "orderable": false,
+                    "className": "text-center",
+                }],
+            });
+
+            $('table#dt-secured-clearance').on('click', 'button.action', function() {
+
+                let [action, id] = this.id.split("_");
+
+                if (!$(this).parents('tr').hasClass('selected')) {
+                    dt_secured_clearance.$('tr.selected').removeClass('selected');
+                    $(this).parents('tr').addClass('selected');
+                }
+
+                $("div#view-clerance").modal({
+                    backdrop: 'static',
+                    keyboard: false,
+                    show: true
+                });
+
+                $("div.view-clerance").html("");
+                $.ajax({
+                    type: "GET",
+                    url: "<?= site_url('show_secured_clerance_details') ?>",
+                    data: {
+                        id
+                    },
+                    success: function(data) {
+
+                        $("div.view-clerance").html(data);
+                    }
+                });
+
+            });
+        });
+    </script>
+<?php
+} else if ($request == 'show_secured_clerance_details') {
+?>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Store</th>
+                <th>EPAS</th>
+                <th>Date Secure</th>
+                <th>Date Effectivity</th>
+                <th>Date Cleared</th>
+                <th>Clearance Status</th>
+                <th>
+                    <center>Doc.</center>
+                </th>
+                <th>Added By</th>
+                <th>
+                    <center>Action</center>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            foreach ($details as $row) {
+
+                $sc = $this->resignation_model->secure_clearance_promo(['scpr_id' => $row->scpr_id]);
+                $date_cleared = '';
+                if ($row->date_cleared != '0000-00-00' && $row->date_cleared != '') {
+                    $date_cleared = date('m/d/Y', strtotime($row->date_cleared));
+                }
+
+                $generated_clerance = '';
+                if ($row->generated_clearance == '') {
+
+                    $generated_clerance = '
+                        <a href="javascript:void(0)" onclick=print_clearance("' . trim($sc->reason) . '","' . $row->emp_id . '","' . $row->scdetails_id . '","' . $base_url . '")><i class="fa fa-print"></i></a>
+                    ';
+                }
+
+                $letter = '';
+                if ($row->resignation_letter != '') {
+
+                    $letter = '<button class="btn btn-sm btn-primary btn-block" onclick=view_letter("' . $base_url . '/hrms/promo/' . $row->resignation_letter . '")>View</button>';
+                }
+
+                $deceased = $this->resignation_model->fetch_authorization_letter($row->emp_id);
+                if ($deceased) {
+
+                    $letter = '<button class="btn btn-sm btn-primary btn-block" onclick=view_letter("' . $base_url . '/hrms/promo/' . $deceased . '")>View</button>';
+                }
+
+                echo '
+                    <tr>
+                        <td>' . $row->store . '</td>
+                        <td></td>
+                        <td>' . date('m/d/Y', strtotime($row->date_secure)) . '</td>
+                        <td>' . date('m/d/Y', strtotime($row->date_effectivity)) . '</td>
+                        <td>' . $date_cleared . '</td>
+                        <td>' . $row->clearance_status . '</td>
+                        <td>' . $letter . '</td>
+                        <td>' . ucwords(strtolower($this->employee_model->employee_info($row->added_by)->name)) . '</td>
+                        <td align="center">' . $generated_clerance . '</td>
+                    </tr>
+                ';
+            }
+            ?>
+        </tbody>
+    </table>
+<?php
 }

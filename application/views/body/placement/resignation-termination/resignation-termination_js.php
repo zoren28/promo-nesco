@@ -695,6 +695,7 @@
 
     function print_clearance(reason, emp_id, scdetails_id, base_url) {
 
+        let process = $("input[name = 'process']").val();
         if (reason == "Deceased") {
             $.alert.open({
                 type: 'warning',
@@ -709,7 +710,9 @@
                 callback: function(button) {
                     if (button == 'OK') {
 
-                        clearanceProcess('reprint_clearance');
+                        if (process == 'reprint_clearance') {
+                            clearanceProcess('reprint_clearance');
+                        }
                         window.open(base_url + '/hrms/report/deceased_clearance.php?empid=' + emp_id, 'new');
                     }
                 }
@@ -728,7 +731,9 @@
                 callback: function(button) {
                     if (button == 'OK') {
 
-                        clearanceProcess('reprint_clearance');
+                        if (process == 'reprint_clearance') {
+                            clearanceProcess('reprint_clearance');
+                        }
                         window.open(base_url + '/hrms/report/promo_clearance.php?empid=' + emp_id + "&scprdetailsid=" + scdetails_id, 'new');
                     }
                 }
@@ -824,5 +829,16 @@
                 }
             });
         }
+    }
+
+    function view_letter(letter) {
+
+        $("div#show-letter").modal({
+            backdrop: 'static',
+            keyboard: false,
+            show: true
+        });
+
+        $("div.show-letter").html(`<img src="${letter}" title="Document Letter" width="100%" height="100%">`);
     }
 </script>

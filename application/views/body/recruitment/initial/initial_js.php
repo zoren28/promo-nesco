@@ -672,7 +672,7 @@
 				{
 					if (stores.length == 1) 
 					{
-						alert("Please select two or more Store..");
+						alert("Employee type is ROVING, Please select two or more Store..");
 						$("input[name='check[]']")[0].focus();	
 					}
 				}
@@ -680,7 +680,7 @@
 				{
 					if (stores.length > 1 ) 
 					{
-						alert("Please select one Store only..");
+						alert("Employee type is STATION, Please select one Store only..");
 						$("input[name='check[]']")[0].focus();
 					}
 				}
