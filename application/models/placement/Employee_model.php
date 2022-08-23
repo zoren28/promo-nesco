@@ -247,7 +247,7 @@ class Employee_model extends CI_Model
         return $this->db->get();
     }
 
-    public function find_promo_for_clearance($str)
+    public function find_promo_for_secureclearance($str)
     {
         $this->db->query('SET SESSION sql_mode = ""');
 
@@ -259,10 +259,78 @@ class Employee_model extends CI_Model
                               ",ONLY_FULL_GROUP_BY", ""),
                               "ONLY_FULL_GROUP_BY", "")');
 
-        $this->db->select('employee3.emp_id, name, promo_type')
+        $this->db->select('employee3.emp_id, name, type')
             ->from('employee3')
             ->join('promo_record', 'promo_record.record_no = employee3.record_no AND promo_record.emp_id = employee3.emp_id')
             ->where('current_status !=', 'blacklisted')
+            ->group_start()
+            ->like('name', $str)
+            ->or_where('employee3.emp_id', $str)
+            ->group_end();
+
+        if ($this->hr == 'nesco') {
+            $this->db->where('emp_type', 'Promo-NESCO');
+        } else {
+            $this->db->like('emp_type', 'Promo', 'after');
+        }
+
+        $this->db->order_by('name', 'ASC')
+            ->limit(10);
+        return $this->db->get();
+    }
+
+    public function find_promo_for_uploadclearance($str)
+    {
+        $this->db->query('SET SESSION sql_mode = ""');
+
+        // ONLY_FULL_GROUP_BY
+        $this->db->query('SET SESSION sql_mode =
+                              REPLACE(REPLACE(REPLACE(
+                              @@sql_mode,
+                              "ONLY_FULL_GROUP_BY,", ""),
+                              ",ONLY_FULL_GROUP_BY", ""),
+                              "ONLY_FULL_GROUP_BY", "")');
+
+        $this->db->select('employee3.emp_id, name, type')
+            ->from('employee3')
+            ->join('promo_record', 'promo_record.record_no = employee3.record_no AND promo_record.emp_id = employee3.emp_id')
+            ->where('current_status !=', 'blacklisted')
+            ->where('sub_status !=', 'Cleared')
+            ->group_start()
+            ->like('name', $str)
+            ->or_where('employee3.emp_id', $str)
+            ->group_end();
+
+        if ($this->hr == 'nesco') {
+            $this->db->where('emp_type', 'Promo-NESCO');
+        } else {
+            $this->db->like('emp_type', 'Promo', 'after');
+        }
+
+        $this->db->order_by('name', 'ASC')
+            ->limit(10);
+        return $this->db->get();
+    }
+
+    public function find_promo_for_reprintclearance($str)
+    {
+        $this->db->query('SET SESSION sql_mode = ""');
+
+        // ONLY_FULL_GROUP_BY
+        $this->db->query('SET SESSION sql_mode =
+                              REPLACE(REPLACE(REPLACE(
+                              @@sql_mode,
+                              "ONLY_FULL_GROUP_BY,", ""),
+                              ",ONLY_FULL_GROUP_BY", ""),
+                              "ONLY_FULL_GROUP_BY", "")');
+
+        $this->db->select('employee3.emp_id, name, type')
+            ->from('employee3')
+            ->join('promo_record', 'promo_record.record_no = employee3.record_no AND promo_record.emp_id = employee3.emp_id')
+            ->join('secure_clearance_promo', 'secure_clearance_promo.emp_id = employee3.emp_id')
+            ->where('current_status !=', 'blacklisted')
+            ->where('sub_status !=', 'Cleared')
+            ->where('secure_clearance_promo.status', 'Pending')
             ->group_start()
             ->like('name', $str)
             ->or_where('employee3.emp_id', $str)

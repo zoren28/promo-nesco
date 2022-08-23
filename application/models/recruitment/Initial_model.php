@@ -35,6 +35,34 @@ class Initial_model extends CI_Model
 		return compact("duplicate","blacklist");
 	}
 	
+	public function check_employee_existince($data)
+	{
+		/* $que = $this->db->select('count(emp_id) as val')
+					->where("emp_id = '$data'")
+					->get('employee3');
+		return $que->row_array()['val']; */
+		
+		return $this->db->select('emp_id')
+		->from('employee3')
+		->where('emp_id', $data)
+		->count_all_results();
+	}
+	
+	public function applicant_otherrequirment($fileType,$fetch_data)
+	{
+		$data = array(
+				'filename' 				=> $fileType,
+				'app_id'				=> $fetch_data['appid'],
+				'requirement_name' 		=> "Intro",
+				'receiving_staff'		=> $_SESSION['emp_id'],
+				'date_time'				=> date("Y-m-d"),
+				'requirement_status'	=> "passed"
+			);
+		
+		$this->db->insert('application_otherreq', $data); 
+		return $this->db->insert_id(); 
+	}
+	
 	public function insert_finalreq_info($fileV,$fileType,$fetch_data)
 	{
 		if($fileV == "police_clearance")
@@ -591,6 +619,42 @@ class Initial_model extends CI_Model
 		$this->db->insert('application_seminarsandeligibility', $data);
 	}
 	
+	public function employmentRecord($oldData)
+	{
+		$data = array(
+						'emp_id'				=> $oldData['emp_id'],
+						'emp_no'				=> $oldData['emp_no'],
+						'emp_pins'				=> $oldData['emp_pins'],
+						'company_code'			=> $oldData['company_code'],
+						'bunit_code'			=> $oldData['bunit_code'],
+						'dept_code'				=> $oldData['dept_code'],
+						'section_code'			=> $oldData['section_code'],
+						'sub_section_code'		=> $oldData['sub_section_code'],
+						'unit_code'				=> $oldData['unit_code'],
+						'barcodeId'				=> $oldData['barcodeId'],
+						'bioMetricId'			=> $oldData['bioMetricId'],
+						'payroll_no'			=> $oldData['payroll_no'],
+						'startdate'				=> $oldData['startdate'],
+						'eocdate'				=> $oldData['eocdate'],
+						'emp_type'				=> $oldData['emp_type'],				
+						'position'				=> $oldData['position'],
+						'positionlevel'			=> $oldData['positionlevel'],
+						'current_status'		=> $oldData['current_status'],
+						'lodging'				=> $oldData['lodging'],
+						'pos_desc'				=> $oldData['pos_desc'],
+						'remarks'				=> $oldData['remarks'],
+						'epas_code'				=> $oldData['epas_code'],
+						'contract'				=> $oldData['contract'],
+						'permit'				=> $oldData['permit'],
+						'clearance'				=> $oldData['clearance'],
+						'comments'				=> $oldData['comments'],
+						'date_updated'			=> $oldData['date_updated'],
+						'updatedby'				=> $oldData['updatedby'],
+						'duration'				=> $oldData['duration'],
+						);
+		$this->db->insert('employmentrecord_', $data);
+	}
+	
 	public function save_applicant_employment_history($fetch_data, $z)
 	{
 		$data = array(
@@ -1001,6 +1065,12 @@ class Initial_model extends CI_Model
 	{
 		$que = $this->db->select('exam_cat')
 					->get_where('application_exams2take', array('app_id' => $fetch_data['id']));
+		return $que->row_array();	
+	}
+	
+	public function employee_oldData($data)
+	{
+		$que = $this->db->get_where('employee3', array('emp_id' => $data));
 		return $que->row_array();	
 	}
 	

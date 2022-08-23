@@ -18,6 +18,10 @@ $route['check_secure_clearance'] = 'placement/resignation/check_secure_clearance
 $route['promo_details_clearance'] = 'placement/resignation/promo_details_clearance';
 $route['get_rb_form'] = 'placement/resignation/get_rb_form';
 $route['store_secure_clearance'] = 'placement/resignation/store_secure_clearance';
+$route['browse_epas'] = 'placement/resignation/browse_epas';
+$route['store_upload_clearance'] = 'placement/resignation/store_upload_clearance';
+$route['record_reprint_clearance'] = 'placement/resignation/record_reprint_clearance';
+$route['reprint_details'] = 'placement/resignation/reprint_details';
 
 // for setup module
 $route['company_list'] = 'placement/setup/company_list';

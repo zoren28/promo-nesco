@@ -5557,7 +5557,7 @@ if ($request == "update_blacklist_form") {
                             }
                         }
 
-                        $no_epas = $this->resignation_model->check_promo_epas($subordinate->emp_id, $subordinate->record_no, $epas);
+                        $no_epas = $this->resignation_model->check_promo_epas($subordinate->emp_id, $subordinate->emp_recordno, $epas);
                         if ($no_epas > 0) {
 
                     ?>
@@ -5760,7 +5760,7 @@ if ($request == "update_blacklist_form") {
                 <div class="promo-details"></div>
                 <div class="clearance-form" style="display: none;">
                     <div class="form-group">
-                        <label for="">Reason for asking clearance</label>
+                        <label for=""><span class="text-red">*</span> Reason for asking clearance</label>
                         <select class="form-control" name='reason' required onchange='getRL(this.value)'>
                             <option value=''> - Please Choose - </option>
                             <option value="V-Resigned"> VOLUNTARY RESIGNATION FROM EMPLOYMENT WITH THE COMPANY </option>
@@ -5895,7 +5895,10 @@ if ($request == "update_blacklist_form") {
 <?php
 } else if ($request == 'promo_details_clearance') {
 
+    $scpr_id = $this->resignation_model->fetch_scpr_id($emp_id);
+
 ?>
+    <input type="hidden" name="scpr_id" value="<?= $scpr_id ?>">
     <div class="form-group">
         <label for=""><span class="text-red">*</span> Promo Type</label>
         <input type="text" name="promo_type" class="form-control" value="<?= $emp_details->promo_type ?>" readonly>
@@ -5911,11 +5914,36 @@ if ($request == "update_blacklist_form") {
                 $hasBU = $this->dashboard_model->promo_has_bu($emp_id, $bu->bunit_field);
                 if ($hasBU > 0) {
 
-                    $exist = $this->resignation_model->check_secure_clearance_details($emp_id, $bu->bunit_name);
-                    if ($exist) {
-                        echo '<option value="' . $bu->bunit_name . '" disabled>' . $bu->bunit_name . ' - DONE </option>';
+                    if ($process == 'secure-clearance') {
+
+                        $exist = $this->resignation_model->check_secure_clearance_details($emp_id, $bu->bunit_name);
+                        if ($exist) {
+                            echo '<option value="' . $bu->bunit_name . '" disabled>' . $bu->bunit_name . ' - DONE </option>';
+                        } else {
+                            echo '<option value="' . $bu->bunit_name . '">' . $bu->bunit_name . '</option>';
+                        }
+                    } else if ($process == 'upload-clearance') {
+
+                        $exist = $this->resignation_model->check_upload_clearance_details($emp_id, $bu->bunit_name, 'Completed');
+                        if ($exist) {
+                            echo '<option value="' . $bu->bunit_name . '" disabled>' . $bu->bunit_name . ' - Completed </option>';
+                        } else {
+
+                            $exist = $this->resignation_model->check_upload_clearance_details($emp_id, $bu->bunit_name, '');
+                            if ($exist) {
+                                echo '<option value="' . $bu->bunit_name . '">' . $bu->bunit_name . '</option>';
+                            } else {
+                                echo '<option value="' . $bu->bunit_name . '" disabled>' . $bu->bunit_name . ' - Not Secured Yet </option>';
+                            }
+                        }
                     } else {
-                        echo '<option value="' . $bu->bunit_name . '">' . $bu->bunit_name . '</option>';
+
+                        $exist = $this->resignation_model->check_upload_clearance_details($emp_id, $bu->bunit_name, 'Pending');
+                        if ($exist) {
+                            echo '<option value="' . $bu->bunit_name . '">' . $bu->bunit_name . '</option>';
+                        } else {
+                            echo '<option value="' . $bu->bunit_name . '" disabled>' . $bu->bunit_name . ' - Not Secured Yet/ Already Cleared </option>';
+                        }
                     }
                 }
             }
@@ -5989,6 +6017,172 @@ if ($request == "update_blacklist_form") {
         });
 
         $("[data-mask]").inputmask();
+    </script>
+<?php
+} else if ($request == 'upload_clearance') {
+?>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            UPLOAD CLEARANCE & CHANGE STATUS
+        </div>
+        <div class="panel-body">
+            <form id="upload-clearance" autocomplete="off">
+                <input type="hidden" name="process" value="upload-clearance">
+                <div class="form-group">
+                    <label><span class="text-red">*</span> Search Promo</label>
+                    <div class="input-group">
+                        <input class="form-control" type="text" name="employee" onkeyup="nameSearch(this.value)">
+                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                    </div>
+                    <div class="search-results" style="display: none;"></div>
+                </div>
+                <div class="promo-details"></div>
+                <div class="clearance-form" style="display: none;">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary btn-xs" onclick="browseEpas()">Browse EPAS</button>
+                    </div>
+                    <div class="show-epas" style="display:none;">
+                        <div class="form-group">
+                            <label for=""><span class="text-red">*</span> EPAS</label>
+                            <input type="text" name="epas" class="form-control input-form">
+                        </div>
+                        <div class="form-group">
+                            <label for=""><span class="text-red">*</span> Succeeding Status</label>
+                            <input type="text" name="status" class="form-control input-form">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for=""><span class="text-red">*</span> Remarks</label>
+                        <textarea name="remarks" class="form-control disabled-form" cols="30" rows="2" disabled required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for=""><span class="text-red">*</span> Signed Clearance (Scanned)</label>
+                        <input type="file" name="clearance" class="form-control disabled-form" disabled required accept="image/*">
+                    </div>
+                    <div class="reason-based"></div>
+                    <button type="submit" id="upload-clearance-btn" class="btn btn-primary disabled-form" disabled>Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        $(function() {
+
+            $("form#upload-clearance").submit(function(e) {
+
+                e.preventDefault();
+                let formData = new FormData(this);
+
+                $.alert.open({
+                    type: 'warning',
+                    title: 'Info',
+                    icon: 'confirm',
+                    cancel: false,
+                    content: "Are you sure to submit signed clearace?",
+                    buttons: {
+                        OK: 'Yes',
+                        NO: 'Not now'
+                    },
+                    callback: function(button) {
+                        if (button == 'OK') {
+
+                            $.ajax({
+                                type: "POST",
+                                url: "<?= site_url('store_upload_clearance'); ?>",
+                                data: formData,
+                                success: function(data) {
+
+                                    let response = JSON.parse(data);
+                                    if (response.status == 'success') {
+
+                                        $.alert.open({
+                                            type: 'warning',
+                                            cancel: false,
+                                            content: 'Employee Successfully Cleared',
+                                            buttons: {
+                                                OK: 'Yes',
+                                            },
+                                            callback: function(button) {
+                                                if (button == 'OK') {
+
+                                                    clearanceProcess('upload_clearance');
+                                                }
+                                            }
+                                        });
+                                    } else {
+                                        console.log(data);
+                                    }
+                                },
+                                async: false,
+                                cache: false,
+                                contentType: false,
+                                processData: false
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+<?php
+} else if ($request == 'reprint_clearance') {
+
+?>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            UPLOAD CLEARANCE & CHANGE STATUS
+        </div>
+        <div class="panel-body">
+            <form id="reprint-clearance" autocomplete="off">
+                <input type="hidden" name="process" value="reprint-clearance">
+                <div class="form-group">
+                    <label><span class="text-red">*</span> Search Promo</label>
+                    <div class="input-group">
+                        <input class="form-control" type="text" name="employee" onkeyup="nameSearch(this.value)">
+                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                    </div>
+                    <div class="search-results" style="display: none;"></div>
+                </div>
+                <div class="promo-details"></div>
+                <div class="clearance-form" style="display: none;">
+                    <div class="form-group">
+                        <label for=""><span class="text-red">*</span> Reason for Clearance Reprint</label>
+                        <textarea name="reprint_reason" class="form-control" rows="3"></textarea>
+                    </div>
+                    <button type="button" id="req-reprint" class="btn btn-primary" onclick="req_reprint_clearance()">Submit</button>
+                    <button type="submit" id="view-clearance" class="btn btn-primary" disabled>View Clearance</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        $(function() {
+            $("form#reprint-clearance").submit(function(e) {
+
+                e.preventDefault();
+                let [emp_id, name] = $("input[name = 'employee']").val().split('*');
+                let store = $("select[name = 'store']").val();
+
+                $.ajax({
+                    type: "POST",
+                    url: "<?= site_url('reprint_details') ?>",
+                    data: {
+                        emp_id: emp_id.trim(),
+                        store: store
+                    },
+                    success: function(data) {
+
+                        let response = JSON.parse(data);
+                        if (response.status == 'success') {
+
+                            print_clearance(response.reason, emp_id.trim(), response.scdetails_id, response.base_url)
+                        } else {
+                            console.log(data);
+                        }
+                    }
+                });
+            });
+        });
     </script>
 <?php
 }

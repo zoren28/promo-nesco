@@ -666,42 +666,45 @@
 			promo_type = $("select[name = 'promotype']").val();
 			let stores = $("input[name='check[]']:checked").map(function() { return this.value; }).get();
 			
-			if(promo_type == "Roving")
+			if(stores.length != 0) // checking if store checkbox 
 			{
-				if (stores.length == 1 || stores.length == 0) 
+				if(promo_type == "Roving")
 				{
-					alert("Please select two or more Store..");
-					$("input[name='check[]']")[0].focus();
+					if (stores.length == 1) 
+					{
+						alert("Please select two or more Store..");
+						$("input[name='check[]']")[0].focus();	
+					}
 				}
+				else
+				{
+					if (stores.length > 1 ) 
+					{
+						alert("Please select one Store only..");
+						$("input[name='check[]']")[0].focus();
+					}
+				}
+			
+				$.ajax({
+					url: "<?php echo site_url('hire_applicant'); ?>",
+					type: 'POST',
+					data:formData,
+					success: function(response) {
+						
+					alert(response);	
+						
+					},
+					async: false,
+					cache: false,
+					contentType: false,
+					processData: false
+				});
 			}
 			else
 			{
-				if (stores.length > 1 ) 
-				{
-					alert("Please select one Store only..");
-					$("input[name='check[]']")[0].focus();
-				}
-				else if(stores.length == 0)
-				{
-					alert("Please select one Store..");
-					$("input[name='check[]']")[0].focus();
-				}
+				alert("Please check atleast 1 for STATION 2 for ROVING");
+				$("input[name='check[]']")[0].focus();
 			}
-			
-			$.ajax({
-				url: "<?php echo site_url('hire_applicant'); ?>",
-				type: 'POST',
-				data:formData,
-				success: function(response) {
-					
-				alert(response);	
-					
-				},
-				async: false,
-				cache: false,
-				contentType: false,
-				processData: false
-			});
         });
 		
 		

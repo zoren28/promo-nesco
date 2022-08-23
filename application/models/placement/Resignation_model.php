@@ -219,6 +219,27 @@ class Resignation_model extends CI_Model
             ->count_all_results();
     }
 
+    public function check_upload_clearance_details($emp_id, $store, $status)
+    {
+        $scpr_id = $this->fetch_scpr_id($emp_id);
+        $this->db->from('secure_clearance_promo_details')
+            ->where(array('emp_id' => $emp_id, 'store' => $store, 'scpr_id' => $scpr_id));
+
+        if ($status) {
+            $this->db->where('clearance_status', $status);
+        }
+
+        return $this->db->count_all_results();
+    }
+
+    public function fetch_scpr_id($emp_id)
+    {
+        $query = $this->db->select_max('scpr_id')
+            ->get_where('secure_clearance_promo', array('emp_id' => $emp_id));
+        $scpr = $query->row();
+        return $scpr->scpr_id;
+    }
+
     public function store_secure_clearance_promo($data)
     {
         $insert = array(
@@ -290,5 +311,108 @@ class Resignation_model extends CI_Model
         $query = $this->db->select('ratee')
             ->get_where('leveling_subordinates', array('subordinates_rater' => $emp_id));
         return $query->result();
+    }
+
+    public function browse_epas($record_no, $emp_id, $store)
+    {
+        $query = $this->db->get_where('appraisal_details', array('record_no' => $record_no, 'emp_id' => $emp_id, 'store' => $store));
+        return $query->row();
+    }
+
+    public function secure_clearance_promo($data)
+    {
+        if (isset($data['emp_id2'])) {
+            $this->db->where('emp_id', $data['emp_id']);
+        }
+
+        if (isset($data['status'])) {
+            $this->db->where('status', $data['status']);
+        }
+
+        if (isset($data['promo_type'])) {
+            $this->db->where('promo_type', $data['promo_type']);
+        }
+
+        $query = $this->db->get('secure_clearance_promo');
+        return $query->row();
+    }
+
+    public function secure_clearance_promo_details($data)
+    {
+        if (isset($data['emp_id'])) {
+            $this->db->where('emp_id', $data['emp_id']);
+        }
+
+        if (isset($data['scpr_id'])) {
+            $this->db->where('scpr_id', $data['scpr_id']);
+        }
+
+        if (isset($data['store'])) {
+            $this->db->where('store', $data['store']);
+        }
+
+        if (isset($data['clearance_status'])) {
+            $this->db->where('clearance_status', $data['clearance_status']);
+        }
+
+        $query = $this->db->get('secure_clearance_promo_details');
+        return $query->row();
+    }
+
+    public function update_secure_clearance_promo_details($data)
+    {
+        $update = array(
+            'date_cleared' => $this->date,
+            'clearance_status' => 'Completed'
+        );
+
+        $this->db->where(array('emp_id' => $data['emp_id'], 'clearance_status' => 'Pending', 'store' => $data['store']));
+        return $this->db->update('secure_clearance_promo_details', $update);
+    }
+
+    public function promo_locate_business_unit($data)
+    {
+        if (isset($data['bunit_id'])) {
+            $this->db->where('bunit', $data['bunit_id']);
+        }
+
+        if (isset($data['bunit_name'])) {
+            $this->db->where('bunit_name', $data['bunit_name']);
+        }
+
+        if (isset($data['bunit_field'])) {
+            $this->db->where('bunit_field', $data['bunit_field']);
+        }
+
+        $query = $this->db->get('locate_promo_business_unit');
+        return $query->row();
+    }
+
+    public function update_promo_record($data)
+    {
+        $update = array(
+            $data['bunit_clearance'] => $data['clearance_path']
+        );
+
+        $this->db->where('emp_id', $data['emp_id']);
+        $this->db->update('promo_record', $update);
+    }
+
+    public function update_secure_clearance_promo($emp_id)
+    {
+        $this->db->set('status', 'Completed');
+        $this->db->where(array('emp_id' => $emp_id, 'status' => 'Pending'));
+        $this->db->update('secure_clearance_promo');
+    }
+
+    public function store_secure_clearance_reprint($data)
+    {
+        $insert = array(
+            'sc_id' => $data['scpr_id'],
+            'reason' => $data['reason'],
+            'date' => $this->datetime,
+            'generatedby' => $this->loginId
+        );
+        return $this->db->insert('secure_clearance_reprint', $insert);
     }
 }

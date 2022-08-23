@@ -285,6 +285,7 @@
 			
 			<div class="form-group">
 				 <label for="hrmsId">APPLICANT NAME</label>
+				 <input type="hidden" name='appid' class="form-control" id="appid"  value='<?=$hired['app_id']?>'>
 				 <input type="text" name='name' class="form-control" id="name"  value='<?=$hired['app_id']." - ".$hired['lastname'].", ".$hired['firstname']." ".$hired['middlename']." ".$hired['suffix']?>' readonly>
 			</div>
 			
@@ -398,8 +399,8 @@
 				<label for="company">INCLUSIVE DATES</label>
 				<table class="table table-bordered">
 					<tr>
-						<td><input type="text" name="startDate" id="startDate" class="form-control datepicker" placeholder="Start Date" autocomplete='off'></td>
-						<td><input type="text" name="endDate" id='endDate' class="form-control datepicker" placeholder="End Date" onchange="getDuration()" autocomplete='off'></td>
+						<td><input type="text" name="startDate" id="startDate" class="form-control datepicker" placeholder="Start Date" autocomplete='off' required></td>
+						<td><input type="text" name="endDate" id='endDate' class="form-control datepicker" placeholder="End Date" onchange="getDuration()" autocomplete='off' required></td>
 					</tr>
 					
 				</table>	 
@@ -461,7 +462,8 @@
 				
 				$bu = $this->contract_model->show_bu_details($bunit_id);
 				?>
-					*<?=$bu->bunit_name?> <input type="file" name="<?=$bu->bunit_intro?>" id="<?=$bu->bunit_intro?>" class="form-control" required onchange="validateForm(this.id)">
+					<input type="hidden" name="bunit_intro[]" value="<?=$bu->bunit_intro?>">
+					<label style='color:red;'><?=$bu->bunit_name?></b> <input type="file" name="<?=$bu->bunit_intro?>" id="<?=$bu->bunit_intro?>" class="form-control" required onchange="validateForm(this.id)">
 				<?php  
 			}
 			?></div><?php  

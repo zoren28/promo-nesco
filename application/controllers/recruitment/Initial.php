@@ -30,8 +30,7 @@ class Initial extends CI_Controller
     {
 		$data['stores'] = $this->input->get('check', TRUE);
         $data['request'] = 'show_intro';
-        $this->load->view('body/recruitment/function_query',$data);
-		
+        $this->load->view('body/recruitment/function_query',$data);	
     }
 	
 	public function proceed_record_applicants() 
@@ -215,8 +214,25 @@ class Initial extends CI_Controller
 	public function hire_applicant()
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
-		print_r($fetch_data);
-		//$fetch_data['app_status'] = $this->initial_model->get_interview_result($fetch_data);
+		
+		$temp 			= 	'jpg';
+		$target_folder	= "../document/final_requirements/others/";
+		
+		foreach ($fetch_data['bunit_intro'] as $key => $value) 
+		{
+			$filename = $target_folder."".$fetch_data['appid']."=".date("Y-m-d")."=".$value."=".date('H-i-s-A').".".$temp;
+				
+			/* if(move_uploaded_file($_FILES[$value]["tmp_name"],$filename))
+			{
+				$this->initial_model->applicant_otherrequirment($filename,$fetch_data);
+			}  */
+		}
+		$dataCount = $this->initial_model->check_employee_existince($fetch_data['appid']);
+		if($dataCount > 0)
+		{
+			$oldData = $this->initial_model->employee_oldData($fetch_data['appid']);
+			$this->initial_model->employmentRecord($oldData); 
+		}
 	}
 	
 	public function final_interview()

@@ -554,11 +554,14 @@
             $(".search-results").hide();
         } else {
 
+            let process = $("input[name = 'process']").val();
+
             $.ajax({
                 type: "POST",
                 url: "<?php echo site_url('find_promo_for_clearance'); ?>",
                 data: {
-                    str
+                    str,
+                    process
                 },
                 success: function(data) {
 
@@ -583,14 +586,15 @@
         $("div.search-results").hide();
         $("input[name = 'employee']").css("border-color", "#ccc");
 
+        let process = $("input[name = 'process']").val();
         $("div.clearance-form").show();
 
-        if (promo_type == 'ROVING') {
-            $("select[name = 'reason']").append('<option value="Remove-BU">REMOVE BUSINESS UNIT</option>');
-        }
+        if (process == 'secure-clearance') {
 
-        let process = $("input[name = 'process']").val();
-        if (process) {
+            if (promo_type == 'ROVING') {
+                $("select[name = 'reason']").append('<option value="Remove-BU">REMOVE BUSINESS UNIT</option>');
+            }
+
             $.ajax({
                 type: "POST",
                 url: "<?php echo site_url('check_secure_clearance'); ?>",
@@ -611,11 +615,196 @@
             type: "POST",
             url: "<?php echo site_url('promo_details_clearance'); ?>",
             data: {
-                emp_id: emp_id.trim()
+                emp_id: emp_id.trim(),
+                process: process
             },
             success: function(data) {
 
                 $("div.promo-details").html(data);
+            }
+        });
+    }
+
+    function req_reprint_clearance() {
+
+        let scpr_id = $("input[name = 'scpr_id']").val();
+        let store = $("select[name = 'store']").val();
+        let reason = $("textarea[name = 'reprint_reason']").val();
+
+        if (scpr_id && reason) {
+
+            $.ajax({
+                type: "POST",
+                url: "<?php echo site_url('record_reprint_clearance'); ?>",
+                data: {
+                    scpr_id,
+                    reason
+                },
+                success: function(data) {
+
+                    let response = JSON.parse(data);
+                    if (response.status == 'success') {
+                        $.alert.open({
+                            type: 'warning',
+                            title: 'Info',
+                            icon: 'confirm',
+                            cancel: false,
+                            content: "You can now view the Clearance",
+                            buttons: {
+                                OK: 'OK'
+                            },
+
+                            callback: function(button) {
+                                if (button == 'OK') {
+
+                                    $("button#req-reprint").prop('disabled', true);
+                                    $("button#view-clearance").prop('disabled', false);
+                                }
+                            }
+                        });
+                    } else {
+                        console.log(data);
+                    }
+                }
+            });
+        } else {
+
+            $.alert.open({
+                type: 'warning',
+                cancel: false,
+                content: "Please Fill-up Required Fields!",
+                buttons: {
+                    OK: 'Ok'
+                },
+
+                callback: function(button) {
+                    if (button == 'OK') {
+
+                        if (store == "") {
+                            $("select[name = 'store']").css("border-color", "#dd4b39");
+                        }
+
+                        if (reason == "") {
+                            $("textarea[name = 'reprint_reason']").css("border-color", "#dd4b39");
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function print_clearance(reason, emp_id, scdetails_id, base_url) {
+
+        if (reason == "Deceased") {
+            $.alert.open({
+                type: 'warning',
+                title: 'Info',
+                icon: 'confirm',
+                cancel: false,
+                content: "Generating Clearance...",
+                buttons: {
+                    OK: 'OK'
+                },
+
+                callback: function(button) {
+                    if (button == 'OK') {
+
+                        clearanceProcess('reprint_clearance');
+                        window.open(base_url + '/hrms/report/deceased_clearance.php?empid=' + emp_id, 'new');
+                    }
+                }
+            });
+        } else {
+            $.alert.open({
+                type: 'warning',
+                title: 'Info',
+                icon: 'confirm',
+                cancel: false,
+                content: "Generating Clearance...",
+                buttons: {
+                    OK: 'OK'
+                },
+
+                callback: function(button) {
+                    if (button == 'OK') {
+
+                        clearanceProcess('reprint_clearance');
+                        window.open(base_url + '/hrms/report/promo_clearance.php?empid=' + emp_id + "&scprdetailsid=" + scdetails_id, 'new');
+                    }
+                }
+            });
+        }
+    }
+
+    function browseEpas() {
+
+        let store = $("select[name = 'store']").val();
+        if (!store) {
+            $("select[name = 'store']").focus();
+            return;
+        }
+        let [emp_id, name] = $("input[name = 'employee']").val().split("*");;
+
+        $.ajax({
+            type: "POST",
+            url: "<?= site_url('browse_epas'); ?>",
+            data: {
+                emp_id: emp_id.trim(),
+                store: store
+            },
+            success: function(data) {
+
+                let response = JSON.parse(data);
+                if (response.secure == 'no') {
+
+                    if (response.reason == 'Seasonal') {
+
+                        $.alert.open({
+                            type: 'warning',
+                            cancel: false,
+                            content: 'No EPAS for seasonal with 15days below contract',
+                            buttons: {
+                                OK: 'OK',
+                            },
+                            callback: function(button) {
+                                if (button == 'OK') {
+
+                                    $("div.show-epas").hide();
+                                    $(".disabled-form").prop('disabled', false);
+                                    $("input.input-form").val('');
+                                }
+                            }
+                        });
+
+
+                    } else {
+
+                        $.alert.open({
+                            type: 'warning',
+                            cancel: false,
+                            content: response.reason,
+                            buttons: {
+                                OK: 'OK',
+                            },
+                            callback: function(button) {
+                                if (button == 'OK') {
+
+                                    $("div.show-epas").hide();
+                                    $(".disabled-form").prop('disabled', true);
+                                    $("input.input-form").val('');
+                                }
+                            }
+                        });
+                    }
+                } else {
+
+                    $("div.show-epas").show();
+                    $(".disabled-form").prop('disabled', false);
+                    $("input.input-form").prop('readonly', true);
+                    $("input.input-form").prop('required', true);
+                    $("input[name = 'epas']").val(response.epas);
+                    $("input[name = 'status']").val(response.status);
+                }
             }
         });
     }

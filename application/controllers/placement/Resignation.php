@@ -247,9 +247,17 @@ class Resignation extends CI_Controller
     public function find_promo_for_clearance()
     {
         $str = $this->input->post('str', TRUE);
+        $process = $this->input->post('process', TRUE);
         $val = "";
 
-        $query = $this->employee_model->find_promo_for_clearance($str);
+        if ($process == 'secure-clearance') {
+            $query = $this->employee_model->find_promo_for_secureclearance($str);
+        } else if ($process == 'upload-clearance') {
+            $query = $this->employee_model->find_promo_for_uploadclearance($str);
+        } else {
+            $query = $this->employee_model->find_promo_for_reprintclearance($str);
+        }
+
         if ($query->num_rows() > 0) {
 
             $info = $query->result_array();
@@ -260,7 +268,7 @@ class Resignation extends CI_Controller
 
                 if ($val != $empId) {
                 ?>
-                    <a href="javascript:void(0);" onclick="promoClearance('<?= $emp['emp_id'] . '*' . $emp['name'] . '*' . $emp['promo_type']  ?>')"><?= $emp['emp_id'] . ' * ' . $name  ?></a></br>
+                    <a href="javascript:void(0);" onclick="promoClearance('<?= $emp['emp_id'] . '*' . $emp['name'] . '*' . $emp['type']  ?>')"><?= $emp['emp_id'] . ' * ' . $name  ?></a></br>
 <?php
                 } else {
                     echo 'No Result Found';
@@ -288,6 +296,7 @@ class Resignation extends CI_Controller
     public function promo_details_clearance()
     {
         $data['emp_id'] = $this->input->post('emp_id', TRUE);
+        $data['process'] = $this->input->post('process', TRUE);
         $data['emp_details'] = $this->employee_model->employee_info($data['emp_id']);
         $data['request'] = 'promo_details_clearance';
 
@@ -429,5 +438,145 @@ class Resignation extends CI_Controller
                 echo json_encode(array('status' => 'failure'));
             }
         }
+    }
+
+    public function browse_epas()
+    {
+        $data = $this->input->post(NULL, TRUE);
+        $emp = $this->employee_model->employee_info($data['emp_id']);
+
+        // calculate how many days does the employee work.
+        $dF =  new DateTime($emp->startdate);
+        $dT =  new DateTime($emp->eocdate);
+        $interval = $dT->diff($dF);
+        $duration = $interval->format('%a') + 1;
+
+        // fetch epas for
+        $epas = $this->resignation_model->browse_epas($emp->record_no, $data['emp_id'], $data['store']);
+        $appraisal = '';
+        if (!empty($epas)) {
+            $appraisal = "$epas->numrate [$epas->descrate]";
+        }
+
+        // fetch reason in secure_clearance_promo
+        $data['status'] = 'Pending';
+        $sc = $this->resignation_model->secure_clearance_promo($data);
+        $reasons = array('V-Resigned', 'Ad-Resigned', 'Deceased');
+        if (in_array($sc->reason, $reasons)) {
+            $current_status = $sc->reason;
+        } else {
+            $current_status = 'End of Contract';
+        }
+
+        if ($emp->type == 'Seasonal' && $duration < 15) {
+
+            echo json_encode(array('secure' => 'no', 'reason' => 'Seasonal'));
+        } else if (empty($appraisal)) {
+
+            echo json_encode(array('secure' => 'no', 'reason' => 'Employee must secure EPAS first'));
+        } else {
+
+            echo json_encode(array('secure' => 'yes', 'epas' => $appraisal, 'status' => "$current_status (Cleared)"));
+        }
+    }
+
+    public function store_upload_clearance()
+    {
+        $data = $this->input->post(NULL, TRUE);
+
+        $emp = explode('*', $data['employee']);
+        $data['emp_id'] = trim(current($emp));
+        $data['status'] = 'Pending';
+
+        $sc = $this->resignation_model->secure_clearance_promo($data);
+        $reasons = array('V-Resigned', 'Ad-Resigned', 'Deceased');
+        if (in_array($sc->reason, $reasons)) {
+            $current_status = $sc->reason;
+        } else {
+            $current_status = 'End of Contract';
+        }
+
+        $scd = $this->resignation_model->secure_clearance_promo_details($data);
+        $data['dateEffective'] = $scd->date_effectivity;
+        $data['resignation_path'] = $scd->resignation_letter;
+        if (isset($_FILES['clearance']['name'])) {
+            $image_name   = addslashes($_FILES['clearance']['name']);
+            $array        = explode(".", $image_name);
+
+            $filename     = $data['emp_id'] . "=" . date('Y-m-d') . "=" . 'Clearance' . "=" . date('H-i-s-A') . "." . end($array);
+            $clearance_path  = "../document/clearance/" . $filename;
+
+            if (move_uploaded_file($_FILES['clearance']['tmp_name'], $clearance_path)) {
+
+                $store = $this->resignation_model->store_termination($data);
+                $update = $this->resignation_model->update_secure_clearance_promo_details($data);
+
+                $bunit = $this->resignation_model->promo_locate_business_unit(array('bunit_name' => $data['store']));
+                $data['bunit_clearance'] = $bunit->bunit_clearance;
+                $data['clearance_path'] = $clearance_path;
+
+                // update clearance of the promo
+                $this->resignation_model->update_promo_record($data);
+
+                $bUs = $this->dashboard_model->businessUnit_list();
+                $totalBU = $countBU = 0;
+                $data['clearance_status'] = 'Completed';
+                foreach ($bUs as $bu) {
+
+                    $hasBU = $this->dashboard_model->promo_has_bu($data['emp_id'], $bu->bunit_field);
+                    if ($hasBU > 0) {
+
+                        ++$totalBU;
+
+                        $s = $this->resignation_model->secure_clearance_promo_details($data);
+                        if ($bu->bunit_name == $s->store) {
+                            ++$countBU;
+                        }
+                    }
+                }
+
+                // if all stores are completed time to update the employee3 status
+                if ($totalBU == $countBU) {
+                    $data['status'] = $current_status;
+                    $data['sub_status'] = 'Cleared';
+                    $this->resignation_model->update_employee_status($data);
+                    $this->resignation_model->update_secure_clearance_promo($data['emp_id']);
+                }
+
+                if ($store && $update) {
+                    echo json_encode(array('status' => 'success'));
+                } else {
+                    echo json_encode(array('status' => 'failure'));
+                }
+            }
+        }
+    }
+
+    public function record_reprint_clearance()
+    {
+        $data = $this->input->post(NULL, TRUE);
+        $store = $this->resignation_model->store_secure_clearance_reprint($data);
+        if ($store) {
+            echo json_encode(array('status' => 'success'));
+        } else {
+            echo json_encode(array('status' => 'failure'));
+        }
+    }
+
+    public function reprint_details()
+    {
+        $data = $this->input->post(NULL, TRUE);
+
+        // get secure_clearance_promo
+        $data['status'] = 'Pending';
+        $sc = $this->resignation_model->secure_clearance_promo($data);
+        $reason = $sc->reason;
+
+        // get secure_clearance_promo_details
+        $data['clearance_status'] = 'Pending';
+        $scd = $this->resignation_model->secure_clearance_promo_details($data);
+        $scdetails_id = $scd->scdetails_id;
+
+        echo json_encode(['status' => 'success', 'reason' => $reason, 'scdetails_id' => $scdetails_id, 'base_url' => $this->base_url]);
     }
 }
