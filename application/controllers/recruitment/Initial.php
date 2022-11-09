@@ -21,8 +21,25 @@ class Initial extends CI_Controller
 	public function check_applicant_duplicate_or_blacklist() {
 
 		$fetch_data = $this->input->post(NULL, TRUE);
-        $data['request'] = "applicant_duplicate_or_blacklist";
-        $data['fetch'] = $this->initial_model->check_applicant_duplicate_or_blacklist($fetch_data);
+		$data['request'] = "applicant_duplicate_or_blacklist";
+		
+		if($fetch_data['gender'] == 'female' && $fetch_data['civilstatus'] != 'single')
+		{
+			
+			$data['blacklist_suggest'] = $this->initial_model->check_applicant_blacklist_suggest($fetch_data);
+			$data['blacklist'] = $this->initial_model->check_applicant_blacklist($fetch_data);
+			$data['duplicate'] = $this->initial_model->check_duplicate_applicant($fetch_data);
+			$data['duplicate_MI'] = $this->initial_model->check_duplicate_MI_applicant($fetch_data);
+		}
+		else
+		{
+			$data['blacklist_suggest'] = $this->initial_model->check_applicant_blacklist_suggest($fetch_data);
+			$data['blacklist'] = $this->initial_model->check_applicant_blacklist($fetch_data);
+			$data['duplicate'] = $this->initial_model->check_duplicate_applicant($fetch_data);
+			$data['duplicate_MI'] = [];
+			
+		}
+		
 		$this->load->view('body/recruitment/function_query',$data);
 	}
 	
@@ -196,6 +213,7 @@ class Initial extends CI_Controller
 		$explode_val = explode("|",$fetch_data['id']);
 		$fetch_data['id'] = $explode_val[1];
 		$data['hired'] = $this->initial_model->applicant_examinee($fetch_data);
+		$data['apposition'] = $this->initial_model->applicant_position_apply($data['hired']['appcode']);
 		$data['request'] = "hiring_setup";
 		$this->load->view('body/recruitment/function_query', $data);
 	}
@@ -214,30 +232,31 @@ class Initial extends CI_Controller
 	public function hire_applicant()
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
-		
-		$temp 			= 	'jpg';
-		$target_folder	= "../document/final_requirements/others/";
-		
-		foreach ($fetch_data['bunit_intro'] as $key => $value) 
-		{
-			$filename = $target_folder."".$fetch_data['appid']."=".date("Y-m-d")."=".$value."=".date('H-i-s-A').".".$temp;
-				
-			/* if(move_uploaded_file($_FILES[$value]["tmp_name"],$filename))
-			{
-				$this->initial_model->applicant_otherrequirment($filename,$fetch_data);
-			}  */
-		}
+		$fetch_data['app_status'] = "new employee";
+		//print_r($fetch_data);
+		$this->db->trans_start();
 		$dataCount = $this->initial_model->check_employee_existince($fetch_data['appid']);
-		
 		if($dataCount > 0)
 		{
 			$oldData = $this->initial_model->employee_oldData($fetch_data['appid']);
-			$this->initial_model->employmentRecord($oldData); // save old employee record
-			//$previous_record_no = $this->db->insert_id(); // get the last inserted
-			
-			//print_r($oldData);
-			//print_r($previous_record_no);
+			$this->initial_model->employmentRecord($oldData,$fetch_data);
+			$this->initial_model->applicant_status($fetch_data);
 		}
+		else
+		{
+			$this->initial_model->employment_New_Record($fetch_data);
+			$this->initial_model->applicant_status($fetch_data);
+		}
+		
+		$this->db->trans_complete();
+		if ($this->db->trans_status() === TRUE)
+		{ 
+			echo json_encode(array('status'=> 1, 'message' => "Applicant Hiring Done... Proceed to Deployment"));
+		}
+		else
+		{ 
+			echo json_encode(array('status'=> 2, 'message' => "Error Found!")); 
+		}	 
 	}
 	
 	public function final_interview()
@@ -356,15 +375,35 @@ class Initial extends CI_Controller
 	{
 		$fetch_data = 	$this->input->post(NULL, TRUE);
 		
-		$this->db->trans_start();
-		$this->initial_model->save_exam_scores($fetch_data);
-		$this->db->trans_complete();
-		if ($this->db->trans_status() === TRUE)
-		{ 
-			echo json_encode(array('status'=> 1, 'message' => "Applicant examination successfully save!")); 
+		if($fetch_data['exam_stat'] == 'passed')
+		{
+			$fetch_data['app_status'] = 'exam passed';
+		}
+		else if($fetch_data['exam_stat'] == 'failed')
+		{
+			$fetch_data['app_status'] = 'exam failed';
+		}
+		else if($fetch_data['exam_stat'] == 'assessment')
+		{
+			$fetch_data['app_status'] = 'assessment';
+		}
+		
+		$ret_exam = $this->initial_model->save_exam_scores($fetch_data);
+		if($ret_exam == 1)
+		{
+			$ret_exam_stat = $this->initial_model->exam_stats($fetch_data);
+			if($ret_exam_stat == 1)
+			{
+				$ret_app_status = $this->initial_model->applicant_status($fetch_data);
+			}
+		}
+
+		if($ret_app_status == 1)
+		{
+			echo json_encode(array('status'=> 1, 'message' => "Applicant successfully save examination!")); 
 		}
 		else
-		{ 
+		{
 			echo json_encode(array('status'=> 0, 'message' => "Error Found!")); 
 		}
 	}
@@ -508,6 +547,7 @@ class Initial extends CI_Controller
 		$files 		= 	array('resume', 'application', 'transcript');
 		$target_dir	=	"../document/initial_requirements/";
 		
+		
 		$check_initial = $this->initial_model->insert_initial_applicant_info($fetch_data);
 		
 		if($fetch_data['updt_or_appnd'] == 'INSERT')
@@ -521,7 +561,7 @@ class Initial extends CI_Controller
 		
 		$transcript_flag = 0;
 		$resume_flag = 0;
-		$application_flag = 0;
+		$application_flag = 0; 
 		
 		foreach($files as $file => $value) 
 		{
@@ -537,8 +577,6 @@ class Initial extends CI_Controller
 					'image/png'
 				);
 				
-				
-				
 				if($value == 'resume')
 				{
 					for($i=0; $i< count($_FILES[$value]['name']); $i++)
@@ -549,25 +587,12 @@ class Initial extends CI_Controller
 						$resume 	= 	"resumebiodata_".$i."_".$appcode."_".date("Y-m-d").".".$temp;
 						$location 	= 	$target_dir."resume/".$resume;
 						
-						if($filesize >= $maxsize || $filesize == 0) 
+						echo $filesize;
+						/* if(move_uploaded_file($_FILES["resume"]["tmp_name"][$i], $target_dir."resume/".$resume))
 						{
-							echo 'Resume file too large. File must be less than 2 megabytes.';
-						}
-						else
-						{
-							if((!in_array($filetype, $acceptable)) && (!empty($filetype))) 
-							{
-								echo 'Resume file is invalid file type. Only PDF, JPG, GIF and PNG types are accepted.';
-							}
-							else
-							{
-								if(move_uploaded_file($_FILES["resume"]["tmp_name"][$i], $target_dir."resume/".$resume))
-								{
-									$resume_upload = $this->initial_model->insert_uploaded_info($value,$location,$appcode);
-									$resume_flag = 1;
-								}
-							}	
-						}
+							$resume_upload = $this->initial_model->insert_uploaded_info($value,$location,$appcode);
+							$resume_flag = 1;
+						} */
 					}	
 				}
 				elseif($value == 'application')
@@ -580,25 +605,12 @@ class Initial extends CI_Controller
 						$application 	= 	"application_".$x."_".$appcode."_".date("Y-m-d").".".$temp;
 						$location 		= 	$target_dir."application_letter/".$application;
 						
-						if($filesize >= $maxsize || $filesize == 0) 
+						echo $filesize;
+						/* if(move_uploaded_file($_FILES["application"]["tmp_name"][$x], $target_dir."application_letter/".$application))
 						{
-							echo 'Application file too large. File must be less than 2 megabytes.';
-						}
-						else
-						{
-							if((!in_array($filetype, $acceptable)) && (!empty($filetype))) 
-							{
-								echo 'Application file is invalid file type. Only PDF, JPG, GIF and PNG types are accepted.';
-							}
-							else
-							{
-								if(move_uploaded_file($_FILES["application"]["tmp_name"][$x], $target_dir."application_letter/".$application))
-								{
-									$application_upload = $this->initial_model->insert_uploaded_info($value,$location,$appcode);
-									$application_flag = 1;
-								}
-							}
-						}		
+							$application_upload = $this->initial_model->insert_uploaded_info($value,$location,$appcode);
+							$application_flag = 1;
+						} */
 					}
 				}
 				elseif($value == 'transcript')
@@ -611,30 +623,17 @@ class Initial extends CI_Controller
 						$transcript 	= 	"transcript_".$n."_".$appcode."_".date("Y-m-d").".".$temp;
 						$location 		= 	$target_dir."tor/".$transcript;
 						
-						if($filesize >= $maxsize || $filesize == 0) 
+						echo $filesize;
+						/* if(move_uploaded_file($_FILES["transcript"]["tmp_name"][$n], $target_dir."tor/".$transcript))
 						{
-							echo 'TOR file too large. File must be less than 2 megabytes.';
-						}
-						else
-						{
-							if((!in_array($filetype, $acceptable)) && (!empty($filetype))) 
-							{
-								echo 'TOR file is invalid file type. Only PDF, JPG, GIF and PNG types are accepted.';
-							}
-							else
-							{
-								if(move_uploaded_file($_FILES["transcript"]["tmp_name"][$n], $target_dir."tor/".$transcript))
-								{
-									$transcript_upload = $this->initial_model->insert_uploaded_info($value,$location,$appcode);
-									$transcript_flag = 1;
-								}
-							}	
-						}	
+							$transcript_upload = $this->initial_model->insert_uploaded_info($value,$location,$appcode);
+							$transcript_flag = 1;
+						} */
 					}
 				}
 				
 			}	
-		}
+		} 
 		
 		if($transcript_flag == 1 && $resume_flag == 1 && $application_flag == 1)
 		{

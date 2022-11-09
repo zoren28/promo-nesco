@@ -359,7 +359,7 @@ class Contract_model extends CI_Model
         $this->db->insert('application_otherreq', $insert);
     }
 
-    public function update_employment_contract($data, $intros_path)
+    public function update_employment_contract($data)
     {
         $company_duration = '';
         if (isset($data['companyDuration'])) {
@@ -515,10 +515,10 @@ class Contract_model extends CI_Model
             $this->db->set(end($bunit_field), 'T');
         }
 
-        foreach ($data['bunit_intro'] as $key => $value) {
+        // foreach ($data['bunit_intro'] as $key => $value) {
 
-            $this->db->set($value, $intros_path[$value]);
-        }
+        //     $this->db->set($value, $intros_path[$value]);
+        // }
 
         $this->db->set('record_no', $record_no);
         $this->db->set('emp_id', $data['empId']);

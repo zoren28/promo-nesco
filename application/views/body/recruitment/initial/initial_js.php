@@ -14,20 +14,22 @@
 				type: 'POST',
 				data:formData,
 				success: function(response) {
-					
-					
-					
+
 					$("div#upload_success_proceed_record").modal({
 						backdrop: 'static',
 						keyboard: false,
 						show: true
 					}); 
-					
-					response = JSON.parse(response);
+					$("div.upload_success_proceed_record").html(response);
+					/* response = JSON.parse(response);
 					if(response.status === 1)
 					{
 						$("div.upload_success_proceed_record").html(response.message);
 					}
+					else
+					{
+						$("div.upload_success_proceed_record").html(response.message);
+					} */
 					
 				},
 				async: false,
@@ -37,8 +39,11 @@
 			});
         });
 		
-		$("button#proceed_Record").click(function() {
+		
+		$("button#update_applicant").click(function()
+		{
 			
+			var procedure = $("[name='procedure']").val();
 			var gender = $("[name='gender']").val();
 			var civilstatus = $("[name='civilstatus']").val();
 			var firstname = $("[name='firstname']").val();
@@ -46,6 +51,197 @@
 			var lastname = $("[name='lastname']").val();
 			var suffix = $("[name='suffix']").val();
 			
+			alert(procedure);
+			
+			if(procedure == "UPDATE")
+			{
+				var_dup1 =$("input[name='duplicate[]']:checked").map(function() { return this.value; }).get();
+				var_dup2 =$("input[name='duplicate_MI[]']:checked").map(function() { return this.value; }).get();
+				
+				var n = var_dup1.length+var_dup2.length
+				
+				if(n > 1 )
+				{
+					$("div#small_alert").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});
+								
+					$("div.small_alert_display").html("Can't proceed, please select one name only to be updated!");
+				}
+				else
+				{
+					let name1 = $(`span#${var_dup1[0]}`).text();
+					let name2 = $(`span#${var_dup2[0]}`).text();
+					
+					//alert(name1+" "+name2);
+					
+					if(name1 == "" && name2 == "")
+					{
+						$("div#small_alert").modal({
+							backdrop: 'static',
+							keyboard: false,
+							show: true
+						});
+						
+						$("div.small_alert_display").html("Please check atleast one name on checkbox!!");
+						
+						/* $("[name='updt_or_appnd']").val('INSERT');
+						$("[name='hidden_code']").val('');
+						$("[name='hidden_gender']").val(gender); 
+						$("[name='hidden_civil_status']").val(civilstatus);
+						$("[name='hidden_firstname']").val(firstname); 
+						$("[name='hidden_middlename']").val(middlename); 
+						$("[name='hidden_lastname']").val(lastname); 
+						$("[name='hidden_suffix']").val(suffix);
+						
+						$("button#proceed_Record").prop('disabled', true);
+						$("button#upload_save").prop('disabled', false);
+						$("div#browse_blacklist").modal('hide');	 */
+					}
+					else
+					{
+						var res1 = name1.split('|');
+						var res2 = name2.split('|');
+						if(name1 != "")
+						{
+							$("[name='updt_or_appnd']").val('UPDATE');
+							$("[name='hidden_code']").val(res1[0]);
+							$("[name='hidden_gender']").val(gender); 
+							$("[name='hidden_civil_status']").val(civilstatus);
+							$("[name='hidden_firstname']").val(res1[2]); 
+							$("[name='hidden_middlename']").val(res1[3]); 
+							$("[name='hidden_lastname']").val(res1[1]); 
+							$("[name='hidden_suffix']").val(suffix);
+						}
+						else if(name2 != "")
+						{
+							$("[name='updt_or_appnd']").val('UPDATE');
+							$("[name='hidden_code']").val(res2[0]);
+							$("[name='hidden_gender']").val(gender); 
+							$("[name='hidden_civil_status']").val(civilstatus);
+							$("[name='hidden_firstname']").val(res2[2]); 
+							$("[name='hidden_middlename']").val(res2[3]); 
+							$("[name='hidden_lastname']").val(res2[1]); 
+							$("[name='hidden_suffix']").val(suffix);
+						}
+						
+						$("button#proceed_Record").prop('disabled', true);
+						$("button#upload_save").prop('disabled', false);
+						$("div#browse_blacklist").modal('hide');
+					} 	
+				}
+			}
+			else if(procedure == "BLACKLIST")
+			{
+				var_dup1 =$("input[name='duplicate[]']:checked").map(function() { return this.value; }).get();
+				var_dup2 =$("input[name='duplicate_MI[]']:checked").map(function() { return this.value; }).get()
+				
+				var n = var_dup1.length+var_dup2.length
+				
+				//alert(n);
+				
+				if(n>0)
+				{
+					if(n > 1 )
+					{
+						$("div#small_alert").modal({
+							backdrop: 'static',
+							keyboard: false,
+							show: true
+						});
+									
+						$("div.small_alert_display").html("Can't proceed, please select one name only to be updated!");
+					}
+					else
+					{
+						let name1 = $(`span#${var_dup1[0]}`).text();
+						let name2 = $(`span#${var_dup2[0]}`).text();
+						
+						alert(name1+" "+name2);
+						
+						if(name1 == "" && name2 == "")
+						{
+							$("div#small_alert").modal({
+								backdrop: 'static',
+								keyboard: false,
+								show: true
+							});
+							
+							$("div.small_alert_display").html("Please check atleast one name on checkbox!");
+						}
+						else
+						{
+							var res1 = name1.split('|');
+							var res2 = name2.split('|');
+							if(name1 != "")
+							{
+								$("[name='updt_or_appnd']").val('UPDATE');
+								$("[name='hidden_code']").val(res1[0]);
+								$("[name='hidden_gender']").val(gender); 
+								$("[name='hidden_civil_status']").val(civilstatus);
+								$("[name='hidden_firstname']").val(res1[2]); 
+								$("[name='hidden_middlename']").val(res1[3]); 
+								$("[name='hidden_lastname']").val(res1[1]); 
+								$("[name='hidden_suffix']").val(suffix);
+							}
+							else if(name2 != "")
+							{
+								$("[name='updt_or_appnd']").val('UPDATE');
+								$("[name='hidden_code']").val(res2[0]);
+								$("[name='hidden_gender']").val(gender); 
+								$("[name='hidden_civil_status']").val(civilstatus);
+								$("[name='hidden_firstname']").val(res2[2]); 
+								$("[name='hidden_middlename']").val(res2[3]); 
+								$("[name='hidden_lastname']").val(res2[1]); 
+								$("[name='hidden_suffix']").val(suffix);
+							}
+							
+							$(':button[type="submit"]').prop('disabled', false);
+							$("div#browse_blacklist").modal('hide');
+						} 	
+					}		
+				}
+				else
+				{
+					$("div#small_alert").modal({
+					backdrop: 'static',
+					keyboard: false,
+					show: true
+					});
+						
+					$("div.small_alert_display").html("Can't Proceed, Applicant is Blacklisted");
+				}	
+			}
+			else if(procedure == "INSERT")
+			{
+				
+				$("[name='updt_or_appnd']").val('INSERT');
+				$("[name='hidden_code']").val('');
+				$("[name='hidden_gender']").val(gender); 
+				$("[name='hidden_civil_status']").val(civilstatus);
+				$("[name='hidden_firstname']").val(firstname); 
+				$("[name='hidden_middlename']").val(middlename); 
+				$("[name='hidden_lastname']").val(lastname); 
+				$("[name='hidden_suffix']").val(suffix);
+				
+				//$("button#proceed_Record").prop('disabled', true);
+				$("button#proceed_Record").prop('disabled', true);
+				$("button#upload_save").prop('disabled', false);
+				$("div#browse_blacklist").modal('hide');	
+			}	
+		});
+		
+		$("button#proceed_Record").click(function()
+		{
+			var gender = $("[name='gender']").val();
+			var civilstatus = $("[name='civilstatus']").val();
+			var firstname = $("[name='firstname']").val();
+			var middlename = $("[name='middlename']").val();
+			var lastname = $("[name='lastname']").val();
+			var suffix = $("[name='suffix']").val();
+
 			var formData = {
 				gender,
 				civilstatus,
@@ -55,63 +251,75 @@
 				suffix
 			}
 			
-			if(gender != '' && civilstatus != '' && firstname != '' && lastname != '')
+			if(gender == 'female' && civilstatus != 'single')
 			{
-				//alert(gender+" "+civilstatus+" "+firstname+" "+middlename+" "+lastname+" "+suffix);
-				
-				$("div#browse_blacklist").modal({
-						backdrop: 'static',
-						keyboard: false,
-						show: true
-					});
-				
-				$.ajax({
-				type: "POST",
-				url: "<?php echo site_url('check_applicant_duplicate_or_blacklist'); ?>",
-				data : formData,
-				success: function(response) 
-				{
-					response = JSON.parse(response);
-					console.log(response.message);
-					
-					$("div.browse_blacklist").html(response.message);
-					
-					if(response.proceed === 1 && response.status === 1)
+				if(gender != '' && civilstatus != '' && middlename != '' && firstname != '' && lastname != '')
+				{ 					
+					$.ajax({
+					type: "POST",
+					url: "<?php echo site_url('check_applicant_duplicate_or_blacklist'); ?>",
+					data : formData,
+					success: function(response) 
 					{
-						$('#upload_save').prop('disabled', false);
 						
-						$("[name='updt_or_appnd']").val('UPDATE');
-						$("[name='hidden_gender']").val(gender); 
-						$("[name='hidden_civil_status']").val(civilstatus);
-						$("[name='hidden_firstname']").val(firstname); 
-						$("[name='hidden_middlename']").val(middlename); 
-						$("[name='hidden_lastname']").val(lastname); 
-						$("[name='hidden_suffix']").val(suffix); 
+						
+						$("div#browse_blacklist").modal({
+							backdrop: 'static',
+							keyboard: false,
+							show: true
+						});
+						
+						$("div.dbrowse_blacklist").html(response);
+						//alert($("[name='procedure']").val());	
 					}
-					else if(response.proceed === 1 && response.status === 0)
-					{
-						$('#upload_save').prop('disabled', false);
-						
-						$("[name='updt_or_appnd']").val('INSERT');
-						$("[name='hidden_gender']").val(gender); 
-						$("[name='hidden_civil_status']").val(civilstatus);
-						$("[name='hidden_firstname']").val(firstname); 
-						$("[name='hidden_middlename']").val(middlename); 
-						$("[name='hidden_lastname']").val(lastname); 
-						$("[name='hidden_suffix']").val(suffix);
-					}	
+					});	
 				}
-				});	
+				else
+				{
+					$("div#browse_blacklist").modal({
+							backdrop: 'static',
+							keyboard: false,
+							show: true
+						});
+						
+					$("div.dbrowse_blacklist").html("Please fill the middlename input box!");
+					//$("input[name='middlename']")[0].focus();
+				}
 			}
 			else
 			{
-				$("div#browse_blacklist").modal({
-						backdrop: 'static',
-						keyboard: false,
-						show: true
-					});
+				if(gender != '' && civilstatus != '' && firstname != '' && lastname != '')
+				{
 					
-				$("div.browse_blacklist").html("Please fill the required box!");
+					$.ajax({
+					type: "POST",
+					url: "<?php echo site_url('check_applicant_duplicate_or_blacklist'); ?>",
+					data : formData,
+					success: function(response) 
+					{
+						
+						
+						$("div#browse_blacklist").modal({
+							backdrop: 'static',
+							keyboard: false,
+							show: true
+						});	
+						$("button#update_applicant").prop('disabled', false);
+						$("div.dbrowse_blacklist").html(response);
+					}
+					});	
+				}
+				else
+				{
+					$("div#browse_blacklist").modal({
+							backdrop: 'static',
+							keyboard: false,
+							show: true
+						});
+						
+					$("button#update_applicant").prop('disabled', true);
+					$("div.dbrowse_blacklist").html("Please fill the required box!");
+				}
 			}
 		});
 		
@@ -593,21 +801,17 @@
 				data:formData,
 				success: function(response) {
 					
-					//alert(response);
-					
 					$("div#info_exam").modal({
-						backdrop: 'static',
-						keyboard: false,
-						show: true
-					});	
-					
-					$("div.info_exam").html(response);
-					
+						 backdrop: 'static',
+						 keyboard: false,
+						 show: true
+					 });
+
 					response = JSON.parse(response);
 					
 					if(response.status === 1)
 					{
-						$("div.info_exam").html(response.message);
+						$("div.info_exam_msg").html(response.message);
 					}
 				},
 				async: false,
@@ -663,48 +867,69 @@
             var formData = new FormData(this);
 			console.log(formData);
 			
+			
+			
+			emp = $("input[name = 'appid']").val();
+			strtDate = $("input[name = 'startDate']").val();
+			eocDate = $("input[name = 'endDate']").val();
+			company = $("select[name = 'company']").val();
+			name = $("input[name = 'hidden_name']").val();
+			
+			join_emp = emp+"|"+strtDate+"|"+eocDate+"|"+name+"|"+company;
+			
 			promo_type = $("select[name = 'promotype']").val();
+			
 			let stores = $("input[name='check[]']:checked").map(function() { return this.value; }).get();
 			
-			if(stores.length != 0) // checking if store checkbox 
+			var flag = 0;
+			
+			if(promo_type == "Roving")
 			{
-				if(promo_type == "Roving")
+				if (stores.length == 1 || stores.length == 0) 
 				{
-					if (stores.length == 1) 
-					{
-						alert("Employee type is ROVING, Please select two or more Store..");
-						$("input[name='check[]']")[0].focus();	
-					}
+					alert("Employee type is ROVING, Please select two or more Store..");
+					$("input[name='check[]']")[0].focus();	
 				}
 				else
 				{
-					if (stores.length > 1 ) 
-					{
-						alert("Employee type is STATION, Please select one Store only..");
-						$("input[name='check[]']")[0].focus();
-					}
+					flag = 1;
 				}
+			}
+			else
+			{
+				if (stores.length > 1 || stores.length == 0) 
+				{
+					alert("Employee type is STATION, Please select one Store only..");
+					$("input[name='check[]']")[0].focus();
+				}
+				else
+				{
+					flag = 1;
+				}
+			}
 			
+			if(flag == 1)
+			{
 				$.ajax({
 					url: "<?php echo site_url('hire_applicant'); ?>",
 					type: 'POST',
 					data:formData,
 					success: function(response) {
 						
-					alert(response);	
-						
+					response = JSON.parse(response);
+					if(response.status === 1)
+					{
+						 alert(response.message);
+						 window.open("http://172.16.43.134:81/hrms/report/new_intro.php?val="+stores+"&emp="+join_emp);
+					}
+					
 					},
 					async: false,
 					cache: false,
 					contentType: false,
 					processData: false
 				});
-			}
-			else
-			{
-				alert("Please check atleast 1 for STATION 2 for ROVING");
-				$("input[name='check[]']")[0].focus();
-			}
+			}	
         });
 		
 		
@@ -874,4 +1099,23 @@
             return 1;
         }
     }
+	
+	/* function dupcheck()
+	{
+		var_duplicate =$("input[name='duplicate[]']:checked").map(function() { return this.value; }).get();
+		if(var_duplicate.length > 1)
+		{
+			$("div#small_alert").modal({
+				backdrop: 'static',
+				keyboard: false,
+				show: true
+			});
+						
+			$("div.small_alert_display").html("Please select one name only to be updated..");
+		}
+		else
+		{
+			
+		}
+	} */
 </script>

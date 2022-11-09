@@ -1,19 +1,74 @@
 <?php
 	if($request == "applicant_duplicate_or_blacklist")
-	{
-		if(!empty($fetch['blacklist']))
+	{					
+		//echo count($blacklist_suggest);
+		if(count($blacklist) == 0 && count($duplicate) == 0 && count($duplicate_MI) == 0 && count($blacklist_suggest) == 0)
 		{
-			echo json_encode(array('status'=> 1, 'proceed'=>0, 'message' => "Sorry! We can't proceed!  ".$fetch['blacklist'][0]['name']." has a blacklist history!"));
-		}
-		elseif(!empty($fetch['duplicate']))
-		{
-			$name = $fetch['duplicate'][0]['firstname']." ".$fetch['duplicate'][0]['middlename']." ".$fetch['duplicate'][0]['lastname'];
-			echo json_encode(array('status'=> 1, 'proceed'=>1, 'message' => "Duplicate found "." '' ".$name." '' "." please update application history!"));	
+			?>
+			<div class="row">
+				<div class="col-sm-12">No Entry Found! You can proceed and Add applicant's data.</div>
+			</div><input type='hidden' name='procedure' value='INSERT'>
+			<?php
 		}
 		else
 		{
-			echo json_encode(array('status'=> 0, 'proceed'=>1, 'message' => "You can proceed and Add applicant's data/initial requirements.."));
-		}	
+			if(count($blacklist) > 0)
+			{
+				foreach ($blacklist as $i) 
+				{ 
+					?>
+						<div class="row">
+							<div class="col-sm-6"><?= $i['name']; ?>( <i style='color:red;'>Blacklisted</i> )</div>
+							<div class="col-sm-6"><?= $i['reason']; ?></div>
+						</div><input type='hidden' name='procedure' value='BLACKLIST'>
+					<?php
+				} 
+			}
+			else if(count($blacklist_suggest) > 0)
+			{
+				foreach ($blacklist_suggest as $i) 
+				{ 
+					?>
+						<div class="row">
+							<div class="col-sm-6"><?= $i['name']; ?>( <i style='color:red;'>Blacklisted?</i> )</div>
+							<div class="col-sm-6"><?= $i['reason']; ?></div>
+						</div><input type='hidden' name='procedure' value='BLACKLIST'>
+					<?php
+				} 
+			}
+			else
+			{
+				foreach ($duplicate as $key => $n) 
+				{
+					?>
+						<div class="row" style='padding-left:5px; border-bottom:1px solid grey;'>	
+							<div class="col-sm-8" style='padding-top:5px; padding-bottom:5px;'>
+								<span style='display:none;' id="<?= $key ?>"><?= $n['app_code']."|".$n['lastname']."|".$n['firstname']."|".$n['middlename'];?></span>
+								<span><?= $n['app_code']." | ".$n['lastname'].", ".$n['firstname']." ".$n['middlename'];?>( <i style='color:red;'>Duplicate?</i> )</span>
+							</div>
+							<div class="col-sm-4" style='padding-top:5px; padding-bottom:5px;'>
+								<input type="checkbox" name="duplicate[]" value="<?= $key; ?>">
+							</div>	
+						</div><input type='hidden' name='procedure' value='UPDATE'>
+					<?php 				
+				}
+				
+				foreach ($duplicate_MI as $keys => $n) 
+				{ 
+					?>
+					<div class="row" style='padding-left:5px; border-bottom:1px solid grey;'>
+						<div class="col-sm-8" style='padding-top:5px; padding-bottom:5px;'>
+							<span style='display:none;' id="<?= $keys ?>"><?= $n['app_code']."|".$n['lastname']."|".$n['firstname']."|".$n['middlename'];?></span>
+							<span><?= $n['app_code']." | ".$n['lastname'].", ".$n['firstname']." ".$n['middlename'];?> ( <i style='color:red;'>Duplicate?</i> )</span>
+						</div>
+						<div class="col-sm-4" style='padding-top:5px; padding-bottom:5px;'>
+							<input type="checkbox" name="duplicate_MI[]" value="<?= $keys; ?>">
+						</div>
+					</div><input type='hidden' name='procedure' value='UPDATE'>	
+					<?php 
+				}
+			}
+		}
 	}
 	else if($request == "final_completion")
 	{
@@ -285,7 +340,10 @@
 			
 			<div class="form-group">
 				 <label for="hrmsId">APPLICANT NAME</label>
+				 <input type="hidden" name='appcode' class="form-control" id="appcode"  value='<?=$hired['appcode']?>' readonly required>
+				 <input type="hidden" name='position' class="form-control" id="position"  value='<?=$apposition['position']?>'>
 				 <input type="hidden" name='appid' class="form-control" id="appid"  value='<?=$hired['app_id']?>'>
+				 <input type="hidden" name='hidden_name' class="form-control" id="hidden_name"  value='<?=$hired['lastname'].", ".$hired['firstname']." ".$hired['middlename']." ".$hired['suffix']?>'>
 				 <input type="text" name='name' class="form-control" id="name"  value='<?=$hired['app_id']." - ".$hired['lastname'].", ".$hired['firstname']." ".$hired['middlename']." ".$hired['suffix']?>' readonly>
 			</div>
 			
@@ -338,7 +396,10 @@
 					
 					foreach ($result as $i) { ?>
 					<tr>
-						<td><input type="checkbox" name='check[]' value="<?php echo $i['bunit_id'].'/'.$i['bunit_field']; ?>" onchange="intro_letter()"></td>
+						<td>
+							<input type="checkbox" name='check[]' value="<?php echo $i['bunit_id'].'/'.$i['bunit_field']; ?>">
+							<!--input type="checkbox" name='check[]' value="<?php //echo $i['bunit_id'].'/'.$i['bunit_field']; ?>" onchange="intro_letter()"-->
+						</td>
 						<td><?= $i['bunit_name'] ?></td>
 					</tr>
 					<?php }?>
@@ -371,7 +432,7 @@
 			<div class="form-group">
 				<label for="company">PRODUCT</label>
 				<select id="states" name="product[]" class="form-control select2" multiple="multiple" onchange="showSelected();">
-					<option value="">Sefsdfsdflect</option>
+					<option value="">Select</option>
 				</select>
 
 				<!--input type="text" id="productSelect" class="form-control" name='pro' autocomplete='off'-->
@@ -379,9 +440,7 @@
 			
 			<div class="form-group">
 				<label for="company">EMPLOYEE TYPE</label>
-				<select name="emptype" class="form-control" required>
-					<option value="">Select</option>
-					<option value="Promo">Promo</option>
+				<select name="emptype" class="form-control">
 					<option value="Promo-Nesco">Promo-Nesco</option>
 				</select>	 
 			</div>
@@ -686,7 +745,7 @@
 								</div>
 								<div class="form-group"><span class="text-red">*</span>
 									 <label for="contact_person">Contact Person</label><i style='color:red; font-size:11px;'> ( Required )</i>
-									 <input type="text" name='contact_person' class="form-control" id="contact_person" required>
+									 <input type="text" name='contact_person' class="form-control" autocomplete="off" id="contact_person" required>
 								</div>
 								<div class="form-group"><span class="text-red">*</span>
 									 <label for="contact_person_address">Contact Person Address</label><i style='color:red; font-size:11px;'> ( Required )</i>
@@ -1141,7 +1200,7 @@
 									<select class="form-control" name="exam_stat" required>
 									<option value=''>Select Status</option>
 									<option value='passed'>Pass</option>
-									<option value='assessment'>For Assessment</option>
+									<!--option value='assessment'>For Assessment</option-->
 									<option value='failed'>Fail</option>
 									</select>
 								</td>

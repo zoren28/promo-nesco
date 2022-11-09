@@ -60,10 +60,27 @@
 				</a>
 			</li>
 			
+			<li class="treeview">
+				<a href="<?php echo base_url('recruitment/page/menu/initial/deploy'); ?>">
+					<i class="fa fa-arrow-right"></i> <span>Deploy</span>
+				</a>
+			</li>
+			
+			<!--li class="treeview">
+				<a href="<?php //echo base_url('recruitment/page/menu/initial/transfer'); ?>">
+					<i class="fa fa-arrow-right"></i> <span>Transfer</span>
+				</a>
+			</li>
 			
 			<li class="treeview">
-				<a href="<?php echo base_url('recruitment/page/menu/initial/transfer'); ?>">
+				<a href="<?php //echo base_url('recruitment/page/menu/initial/transfer'); ?>">
 					<i class="fa fa-arrow-right"></i> <span>Transfer</span>
+				</a>
+			</li-->
+			
+			<li class="treeview">
+				<a href="<?php echo base_url('recruitment/page/menu/initial/hold'); ?>">
+					<i class="fa fa-arrow-right"></i> <span>Hold Applicants</span>
 				</a>
 			</li>
 			

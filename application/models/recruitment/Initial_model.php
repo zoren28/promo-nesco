@@ -11,8 +11,91 @@ class Initial_model extends CI_Model
         $this->load->library('nativesession');
 		$this->db2 = $this->load->database('timekeeping', TRUE);
     }
-
-	public function check_applicant_duplicate_or_blacklist($data)
+	
+	public function check_applicant_blacklist_suggest($data)
+	{
+		if($data['gender'] == 'female' && $data['civilstatus'] != 'single')
+		{
+			$name1	= 	trim($data['lastname']).', '.trim($data['firstname']);
+			$name2	= 	trim($data['lastname']).','.trim($data['firstname']);
+			$name3	= 	trim($data['middlename']).', '.trim($data['firstname']);
+			$name4	= 	trim($data['middlename']).','.trim($data['firstname']);
+			
+			$query = $this->db->select('blacklist_no,name,reason,status')
+									->from('blacklist')
+									->like('name', ucwords(strtolower($name1)))
+									->or_like('name', ucwords(strtolower($name2)))
+									->or_like('name', ucwords(strtolower($name3)))
+									->or_like('name', ucwords(strtolower($name4)))
+									->get();
+			return $blacklist = $query->result_array();
+		}
+		else
+		{
+			$name1	= 	trim($data['lastname']).', '.trim($data['firstname']);
+			$name2	= 	trim($data['lastname']).','.trim($data['firstname']);
+			
+			$query = $this->db->select('blacklist_no,name,reason,status')
+									->from('blacklist')
+									->like('name', ucwords(strtolower($name1)))
+									->or_like('name', ucwords(strtolower($name2)))
+									->get();
+			return $blacklist = $query->result_array();
+		}
+		
+	}
+	public function check_applicant_blacklist($data)
+	{
+		if (trim($data['suffix']) != '' && trim($data['middlename']) != '') 
+		{	
+			$name1	= 	trim($data['lastname']).', '.trim($data['firstname']).' '.trim($data['suffix']).' '.trim($data['middlename']);
+			$name2	= 	trim($data['lastname']).','.trim($data['firstname']).' '.trim($data['suffix']).' '.trim($data['middlename']);
+		} 
+		else if (trim($data['middlename']) != '') 
+		{	
+			$name1	= 	trim($data['lastname']).', '.trim($data['firstname']).' '.trim($data['middlename']);
+			$name2	= 	trim($data['lastname']).','.trim($data['firstname']).' '.trim($data['middlename']);
+		} 
+		else 
+		{
+			$name1	= 	trim($data['lastname']).', '.trim($data['firstname']);
+			$name2	= 	trim($data['lastname']).','.trim($data['firstname']);
+		}
+		$query = $this->db->select('blacklist_no,name,reason,status')
+								->from('blacklist')
+								->where('name', ucwords(strtolower($name1)))
+								->or_where('name', ucwords(strtolower($name2)))
+								->get();
+		return $blacklist = $query->result_array();
+	}
+	public function check_duplicate_MI_applicant($data)
+	{
+		$query = $this->db->select('app_code,firstname, middlename,lastname')
+									->from('applicants')
+									->group_start()
+									->where('firstname',trim($data['firstname']))
+									->where('lastname',trim($data['lastname']))
+									->group_end()
+									->or_group_start()
+									->where('firstname',trim($data['firstname']))
+									->where('lastname',trim($data['middlename']))
+									->group_end()
+									->get();
+		return $duplicate_MI = $query->result_array();
+	}
+	public function check_duplicate_applicant($data)
+	{
+		$query = $this->db->select('app_code,firstname, middlename,lastname')
+									->from('applicants')
+									->where('firstname',trim($data['firstname']," "))
+									->where('lastname',trim($data['lastname']," "))
+									->where('middlename',trim($data['middlename']," "))
+									->where('suffix',trim($data['suffix']," "))
+									->get();
+		return $duplicate = $query->result_array();
+	}
+	
+	/* public function check_applicant_duplicate_or_blacklist($data)
 	{
 		$name	= 	$data['lastname'].", ".$data['firstname'];
 		$name1	= 	$data['lastname'].",".$data['firstname'];
@@ -33,15 +116,10 @@ class Initial_model extends CI_Model
 		$blacklist = $query->result_array();
 
 		return compact("duplicate","blacklist");
-	}
+	} */
 	
 	public function check_employee_existince($data)
-	{
-		/* $que = $this->db->select('count(emp_id) as val')
-					->where("emp_id = '$data'")
-					->get('employee3');
-		return $que->row_array()['val']; */
-		
+	{		
 		return $this->db->select('emp_id')
 		->from('employee3')
 		->where('emp_id', $data)
@@ -418,19 +496,6 @@ class Initial_model extends CI_Model
 	
 	public function save_exam_scores($fetch_data)
 	{
-		if($fetch_data['exam_stat'] == 'passed')
-		{
-			$stat_value = 'exam passed';
-		}
-		else if($fetch_data['exam_stat'] == 'failed')
-		{
-			$stat_value = 'exam failed';
-		}
-		else if($fetch_data['exam_stat'] == 'assessment')
-		{
-			$stat_value = 'assessment';
-		}
-		
 		// query for getting the exam category
 		$query = $this->db->select('no,exam_cat')
 							->from('application_exams2take')
@@ -451,20 +516,21 @@ class Initial_model extends CI_Model
 										'exam_score'	=> $fetch_data['inputscore'][$i],
 										'exam_code'		=> 'manual'
 									);
-									
-				$this->db->insert('application_examdetails', $data);
+								
+				$rtrnV =  $this->db->insert('application_examdetails', $data);
 			}
 		}
+		
+		return $rtrnV;	
+	}
+	public function exam_stats($fetch_data)
+	{		
 		// set data for updating
-		$data_1 = array('stats' => 'done','result' 	=> $fetch_data['exam_stat']);				
-		$data_2 = array('status' => $stat_value);	
+		$data = array('stats' => 'done','result' 	=> $fetch_data['exam_stat']);
+		
 		//query for updating exam status // application_exams2take table
 		$this->db->where('app_id', $fetch_data['appid']);
-		$this->db->update('application_exams2take', $data_1); 
-		//query for updating applicants status // applicants table
-		$this->db->where('app_code', $fetch_data['appcode']);
-		$this->db->update('applicants', $data_2); 
-		
+		return $this->db->update('application_exams2take', $data);
 	}
 	public function setup_examination_info_append($fetch_data)
 	{
@@ -573,7 +639,7 @@ class Initial_model extends CI_Model
 	{
 		$this->db->set('status', $fetch_data['app_status']);
 		$this->db->where(array('app_code' => $fetch_data['appcode']));
-		$this->db->update('applicants'); 
+		return $this->db->update('applicants'); 
 	}
 	public function update_applicant_status($fetch_data)
 	{
@@ -619,7 +685,45 @@ class Initial_model extends CI_Model
 		$this->db->insert('application_seminarsandeligibility', $data);
 	}
 	
-	public function employmentRecord($oldData)
+	public function employment_New_Record($fetch_data)
+	{
+		$insert = array(
+            'name'				=> $fetch_data['name'],
+			'emp_id'    		=> $fetch_data['appid'],
+            'startdate' 		=> date("Y-m-d", strtotime($fetch_data['startDate'])),
+            'eocdate'   		=> date("Y-m-d", strtotime($fetch_data['endDate'])),
+            'emp_type' 	 		=> $fetch_data['emptype'],
+            'current_status' 	=> 'Active',
+            'position'      	=> $fetch_data['position'],
+            'remarks'   		=> $fetch_data['remark_comment'],
+            'date_added'    	=> date("Y-m-d"),
+            'added_by'  		=> $_SESSION['emp_id'],
+            'duration'  		=> $fetch_data['duration_display']
+        );
+		// save to employee3 table
+        $this->db->insert('employee3', $insert);
+		$record_no = $this->db->insert_id();
+
+		foreach ($fetch_data['check'] as $key => $value) {
+
+            $bunit_field = explode('/', $value);
+            $this->db->set(end($bunit_field), 'T');
+        }
+		
+		$this->db->set('record_no', $record_no);
+        $this->db->set('emp_id', $fetch_data['appid']);
+        $this->db->set('agency_code', $fetch_data['agency']);
+        $this->db->set('promo_company', $fetch_data['company']);
+        $this->db->set('promo_department', $fetch_data['department']);
+        $this->db->set('vendor_code', $fetch_data['vendor']);
+        $this->db->set('company_duration', $fetch_data['duration_display']);
+        $this->db->set('promo_type', $fetch_data['promotype']);
+        $this->db->set('type', $fetch_data['contract']);
+        $this->db->set('hr_location', "asc");
+        $this->db->insert('promo_record');
+		
+	}
+	public function employmentRecord($oldData,$fetch_data)
 	{
 		foreach ($oldData as $field => $value) 
 		{
@@ -640,7 +744,7 @@ class Initial_model extends CI_Model
                 $fields1[$field] = $value;
             }
         }
-		 // insert the data to employmentrecord_ table and get its record_no
+		// insert the data to employmentrecord_ table and get its record_no
         $this->db->insert('employmentrecord_', $fields1);
 		$previous_record_no = $this->db->insert_id();
 
@@ -648,28 +752,78 @@ class Initial_model extends CI_Model
         $this->db->set('record_no', $previous_record_no)
             ->where(array('record_no' => $oldData['record_no'], 'emp_id' => $oldData['emp_id']))
             ->update('appraisal_details');
-		print_r($oldData);
+
         // fetch promo record
-        //$query = $this->db->get_where('promo_record', array('record_no' => $oldData['record_no'], 'emp_id' => $oldData['emp_id']));
-        //$old_promo_data = $query->row();
-		//print_r($old_promo_data);
+        $query = $this->db->get_where('promo_record', array('record_no' => $oldData['record_no'], 'emp_id' => $oldData['emp_id']));
+        $cntRw = $query->num_rows();
+		$old_promo_data = $query->row();
+		
         // insert the data to promo_history_table table
-        //$fields2 = array();
-        /* foreach ($old_promo_data as $field => $value) {
+       if($cntRw > 0 )
+	   {
+			$fields2 = array();
+			foreach ($old_promo_data as $field => $value) 
+			{
+				$fields = array('promo_id');
+				if (!in_array($field, $fields)) 
+				{
+					if ($field == 'record_no') 
+					{	$fields2[$field] = $previous_record_no; } 
+					else 
+					{	$fields2[$field] = $value;	}
+				}
+			}
+			// save to promo_history_record table
+			$this->db->insert('promo_history_record', $fields2); 
+		}
+		
+		// delete employee3
+        $this->db->delete('employee3', array('record_no' => $oldData['record_no'], 'emp_id' => $oldData['emp_id']));
 
-            $fields = array('promo_id');
-            if (!in_array($field, $fields)) {
+        // delete promo_record
+        $this->db->delete('promo_record', array('record_no' => $oldData['record_no'], 'emp_id' => $oldData['emp_id']));
+		
+		$insert = array(
+            'emp_id'    		=> $oldData['emp_id'],
+            'emp_no'    		=> $oldData['emp_no'],
+            'emp_pins'  		=> $oldData['emp_pins'],
+            'barcodeId' 		=> $oldData['barcodeId'],
+            'bioMetricId'   	=> $oldData['bioMetricId'],
+            'payroll_no'   	 	=> $oldData['payroll_no'],
+            'name'      		=> $oldData['name'],
+            'startdate' 		=> date("Y-m-d", strtotime($fetch_data['startDate'])),
+            'eocdate'   		=> date("Y-m-d", strtotime($fetch_data['endDate'])),
+            'emp_type' 	 		=> $fetch_data['emptype'],
+            'current_status' 	=> 'Active',
+            'position'      	=> $fetch_data['position'],
+            'remarks'   		=> $fetch_data['remark_comment'],
+            'date_added'    	=> date("Y-m-d"),
+            'added_by'  		=> $_SESSION['emp_id'],
+            'duration'  		=> $fetch_data['duration_display']
+        );
+		// save to employee3 table
+        $this->db->insert('employee3', $insert);
+        $record_no = $this->db->insert_id();
+		
+		//$company_name = $this->employee_model->get_company_name($fetch_data['company'])->pc_name;
+		foreach ($fetch_data['check'] as $key => $value) {
 
-                if ($field == 'record_no') {
-
-                    $fields2[$field] = $previous_record_no;
-                } else {
-
-                    $fields2[$field] = $value;
-                }
-            }
-        } */
-        //$this->db->insert('promo_history_record', $fields2);
+            $bunit_field = explode('/', $value);
+            $this->db->set(end($bunit_field), 'T');
+        }
+		
+		$this->db->set('record_no', $record_no);
+        $this->db->set('emp_id', $fetch_data['appid']);
+        $this->db->set('agency_code', $fetch_data['agency']);
+        $this->db->set('promo_company', $fetch_data['company']);
+        $this->db->set('promo_department', $fetch_data['department']);
+        $this->db->set('vendor_code', $fetch_data['vendor']);
+        $this->db->set('company_duration', $fetch_data['duration_display']);
+        $this->db->set('promo_type', $fetch_data['promotype']);
+        $this->db->set('type', $fetch_data['contract']);
+        $this->db->set('hr_location', "asc");
+        $this->db->insert('promo_record');
+		
 	}
 	
 	public function save_applicant_employment_history($fetch_data, $z)
@@ -727,10 +881,10 @@ class Initial_model extends CI_Model
 			else
 			{
 				$update_data_cndtn = array(
-												'lastname' 		=> $fetch_data['hidden_lastname'],
-												'firstname' 	=> $fetch_data['hidden_firstname'],
+												'app_code' 		=> $fetch_data['hidden_code']
+												/* 'firstname' 	=> $fetch_data['hidden_firstname'],
 												'middlename' 	=> $fetch_data['hidden_middlename'],
-												'suffix' 		=> $fetch_data['hidden_suffix']
+												'suffix' 		=> $fetch_data['hidden_suffix'] */
 												);
 				
 				$this->db->where($update_data_cndtn);
@@ -816,6 +970,30 @@ class Initial_model extends CI_Model
 							->order_by('app_code', 'ASC')
 							->get();
         return $query->result_array();
+    }
+	
+	public function hold_applicants()
+    {
+		$query = $this->db->from('applicants')
+							->where("status = 'exam failed' AND tagged_to = 'nesco'")
+							->order_by('app_code', 'ASC')
+							->get();
+        return $query->result_array();
+    }
+	
+	public function deploy_applicants()
+    {
+		$query = $this->db->from('applicants')
+							->join('applicant', 'applicants.app_code = applicant.appcode')
+							->where("applicants.status = 'new employee' AND applicants.tagged_to = 'nesco'")
+							->order_by('app_code', 'ASC')
+							->get();
+        return $query->result_array();
+		// $query = $this->db->from('applicants')
+							// ->where("status = 'new employee' AND tagged_to = 'nesco'")
+							// ->order_by('app_code', 'ASC')
+							// ->get();
+        // return $query->result_array();
     }
 	
 	public function applicants_for_exam()
@@ -1081,7 +1259,9 @@ class Initial_model extends CI_Model
 	public function applicant_exam_cat($fetch_data)
 	{
 		$que = $this->db->select('exam_cat')
+					->order_by('no', 'DESC')
 					->get_where('application_exams2take', array('app_id' => $fetch_data['id']));
+					
 		return $que->row_array();	
 	}
 	

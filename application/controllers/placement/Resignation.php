@@ -248,6 +248,7 @@ class Resignation extends CI_Controller
     {
         $str = $this->input->post('str', TRUE);
         $process = $this->input->post('process', TRUE);
+
         $val = "";
 
         if ($process == 'secure-clearance') {
@@ -503,7 +504,7 @@ class Resignation extends CI_Controller
             $image_name   = addslashes($_FILES['clearance']['name']);
             $array        = explode(".", $image_name);
 
-            $filename     = $data['emp_id'] . "=" . date('Y-m-d') . "=" . 'Clearance' . "=" . date('H-i-s-A') . "." . end($array);
+            $filename  = $data['emp_id'] . "=" . date('Y-m-d') . "=" . 'Clearance' . "=" . date('H-i-s-A') . "." . end($array);
             $clearance_path  = "../document/clearance/" . $filename;
 
             if (move_uploaded_file($_FILES['clearance']['tmp_name'], $clearance_path)) {

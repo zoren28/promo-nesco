@@ -63,7 +63,7 @@
 				<div class="modal-body final_completion_display" style='font-size=10px;'>		
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn" data-dismiss="modal">Close</button>
+					<button type="button" class="btn" data-dismiss="modal" id='reloadpage'>Close</button>
 					<!--button type="button" class="btn" data-dismiss="modal" id='reloadpage'>Close</button-->
 				</div>
 			</div>

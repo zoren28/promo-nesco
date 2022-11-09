@@ -80,7 +80,7 @@
 						<div class="modal-body view_examination" style='font-size=10px;'>		
 						</div>
 						<div class="modal-footer">
-							<button type="button" class="btn" data-dismiss="modal">Close</button>
+							<button type="button" class="btn" data-dismiss="modal" id='reloadpage'>Close</button>
 							<button type="submit" class="btn btn-primary">Submit</button>
 						</div>
 					</form>

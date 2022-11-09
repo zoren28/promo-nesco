@@ -103,8 +103,8 @@
 
                                 callback: function(button) {
 
-                                    location.reload();
-                                    // window.location.href = "<?php echo base_url('placement/page/menu/blacklisted/add-blacklisted'); ?>";
+                                    // location.reload();
+                                    // window.location.href = <?php echo base_url('placement/page/menu/blacklisted/add-blacklisted'); ?>
                                 }
                             });
                         } else {

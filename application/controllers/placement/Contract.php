@@ -65,7 +65,7 @@ class Contract extends CI_Controller
     {
         $data = $this->input->post(NULL, TRUE);
 
-        $intros_path = array();
+        /* $intros_path = array();
         $errors     = array();
         $maxsize    = 2097152;
         $acceptable = array(
@@ -112,11 +112,11 @@ class Contract extends CI_Controller
 
                 die(json_encode(array('status' => 'failure')));
             }
-        }
+        } */
 
         $this->db->trans_start();
 
-        $record_no = $this->contract_model->update_employment_contract($data, $intros_path);
+        $record_no = $this->contract_model->update_employment_contract($data);
 
         $this->db->trans_complete();
 
