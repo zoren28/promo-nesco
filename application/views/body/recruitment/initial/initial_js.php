@@ -13,24 +13,36 @@
 				url: "<?php echo site_url('upload_initial'); ?>",
 				type: 'POST',
 				data:formData,
-				success: function(response) {
-
+				dataType: 'json',
+				success: function(response) 
+				{
 					$("div#upload_success_proceed_record").modal({
 						backdrop: 'static',
 						keyboard: false,
 						show: true
 					}); 
-					$("div.upload_success_proceed_record").html(response);
-					/* response = JSON.parse(response);
-					if(response.status === 1)
+					//console.log(response, response.message);
+					
+					if(response.status === 0)
 					{
-						$("div.upload_success_proceed_record").html(response.message);
+						let err_message = '';
+						
+						err_message += '<ul>';
+						for(var i = 0; i < response.message.length; i++)
+						{
+							err_message += '<li>'+response.message[i]+'</li>';
+						}
+						
+						err_message += '</ul>';
+						
+						$("div.upload_success_proceed_record").html(err_message);
+						$("button#record").prop('disabled', true);
 					}
 					else
 					{
 						$("div.upload_success_proceed_record").html(response.message);
-					} */
-					
+						$("button#record").prop('disabled', false);
+					} 	
 				},
 				async: false,
 				cache: false,
@@ -39,7 +51,12 @@
 			});
         });
 		
-		
+		$("button#sheet").click(function()
+		{
+			var code = $("[name='appcode']").val();
+			var id = $("[name='appid']").val();
+			window.open("http://172.16.43.134:81/hrms/report/interviewsheet.php?code="+code+"&emp="+id);
+		});
 		$("button#update_applicant").click(function()
 		{
 			
@@ -51,7 +68,7 @@
 			var lastname = $("[name='lastname']").val();
 			var suffix = $("[name='suffix']").val();
 			
-			alert(procedure);
+			//alert(procedure);
 			
 			if(procedure == "UPDATE")
 			{
@@ -85,46 +102,62 @@
 							show: true
 						});
 						
-						$("div.small_alert_display").html("Please check atleast one name on checkbox!!");
-						
-						/* $("[name='updt_or_appnd']").val('INSERT');
-						$("[name='hidden_code']").val('');
-						$("[name='hidden_gender']").val(gender); 
-						$("[name='hidden_civil_status']").val(civilstatus);
-						$("[name='hidden_firstname']").val(firstname); 
-						$("[name='hidden_middlename']").val(middlename); 
-						$("[name='hidden_lastname']").val(lastname); 
-						$("[name='hidden_suffix']").val(suffix);
-						
-						$("button#proceed_Record").prop('disabled', true);
-						$("button#upload_save").prop('disabled', false);
-						$("div#browse_blacklist").modal('hide');	 */
+						$("div.small_alert_display").html("Please check atleast one Name on checkbox!!");
 					}
 					else
 					{
 						var res1 = name1.split('|');
 						var res2 = name2.split('|');
+						
 						if(name1 != "")
 						{
-							$("[name='updt_or_appnd']").val('UPDATE');
-							$("[name='hidden_code']").val(res1[0]);
-							$("[name='hidden_gender']").val(gender); 
-							$("[name='hidden_civil_status']").val(civilstatus);
-							$("[name='hidden_firstname']").val(res1[2]); 
-							$("[name='hidden_middlename']").val(res1[3]); 
-							$("[name='hidden_lastname']").val(res1[1]); 
-							$("[name='hidden_suffix']").val(suffix);
+							if(gender == "female" && civilstatus == "married")
+							{
+								$("[name='updt_or_appnd']").val('UPDATE');
+								$("[name='hidden_code']").val(res2[0]);
+								$("[name='hidden_gender']").val(gender); 
+								$("[name='hidden_civil_status']").val(civilstatus);
+								$("[name='hidden_firstname']").val(firstname); 
+								$("[name='hidden_middlename']").val(middlename); 
+								$("[name='hidden_lastname']").val(lastname); 
+								$("[name='hidden_suffix']").val(suffix);
+							}
+							else
+							{
+								$("[name='updt_or_appnd']").val('UPDATE');
+								$("[name='hidden_code']").val(res1[0]);
+								$("[name='hidden_gender']").val(gender); 
+								$("[name='hidden_civil_status']").val(civilstatus);
+								$("[name='hidden_firstname']").val(res1[2]); 
+								$("[name='hidden_middlename']").val(res1[3]); 
+								$("[name='hidden_lastname']").val(res1[1]); 
+								$("[name='hidden_suffix']").val(suffix);
+							}
 						}
 						else if(name2 != "")
 						{
-							$("[name='updt_or_appnd']").val('UPDATE');
-							$("[name='hidden_code']").val(res2[0]);
-							$("[name='hidden_gender']").val(gender); 
-							$("[name='hidden_civil_status']").val(civilstatus);
-							$("[name='hidden_firstname']").val(res2[2]); 
-							$("[name='hidden_middlename']").val(res2[3]); 
-							$("[name='hidden_lastname']").val(res2[1]); 
-							$("[name='hidden_suffix']").val(suffix);
+							if(gender == "female" && civilstatus == "married")
+							{
+								$("[name='updt_or_appnd']").val('UPDATE');
+								$("[name='hidden_code']").val(res2[0]);
+								$("[name='hidden_gender']").val(gender); 
+								$("[name='hidden_civil_status']").val(civilstatus);
+								$("[name='hidden_firstname']").val(firstname); 
+								$("[name='hidden_middlename']").val(middlename); 
+								$("[name='hidden_lastname']").val(lastname); 
+								$("[name='hidden_suffix']").val(suffix);
+							}
+							else
+							{
+								$("[name='updt_or_appnd']").val('UPDATE');
+								$("[name='hidden_code']").val(res2[0]);
+								$("[name='hidden_gender']").val(gender); 
+								$("[name='hidden_civil_status']").val(civilstatus);
+								$("[name='hidden_firstname']").val(res2[2]); 
+								$("[name='hidden_middlename']").val(res2[3]); 
+								$("[name='hidden_lastname']").val(res2[1]); 
+								$("[name='hidden_suffix']").val(suffix);
+							}
 						}
 						
 						$("button#proceed_Record").prop('disabled', true);
@@ -169,7 +202,7 @@
 								show: true
 							});
 							
-							$("div.small_alert_display").html("Please check atleast one name on checkbox!");
+							$("div.small_alert_display").html("Please check atleast one Name on checkbox!");
 						}
 						else
 						{
@@ -261,8 +294,6 @@
 					data : formData,
 					success: function(response) 
 					{
-						
-						
 						$("div#browse_blacklist").modal({
 							backdrop: 'static',
 							keyboard: false,
@@ -356,7 +387,7 @@
 		
 		const tableViewEmp_interview = $('#tableViewEmp_interview').DataTable();
 		
-		// event on clicking record applicant
+		// event on clicking initial_interview applicant
 		$('#tableViewEmp_interview').on('click', 'button.initial_interview', function() 
 		{
             var id = this.id;
@@ -440,7 +471,10 @@
 			});
 		});
 		
-		
+		$('#ty').on('click', 'button.interview_sheets', function() 
+		{
+            alert("try? test");
+		});
 		const tableViewEmp = $('#tableViewEmp').DataTable();
 		
 		// event on clicking record applicant
@@ -706,10 +740,7 @@
 					if(response.status === 1)
 					{
 						$("div.final_completion_display").html(response.message);
-					}
-					
-					//$("div.final_completion_display").html(response);
-					
+					}	
 				},
 				async: false,
 				cache: false,
@@ -940,13 +971,14 @@
             var formData = new FormData(this);
 
 			console.log(formData);
+
 			$.ajax({
 				url: "<?php echo site_url('applicant_information'); ?>",
 				type: 'POST',
 				data:formData,
 				success: function(response) {
 					
-					response = JSON.parse(response);
+					//response = JSON.parse(response);
 					
 					$("div#applicant_record_success").modal({
 						backdrop: 'static',
@@ -954,11 +986,11 @@
 						show: true
 					});	
 					
-					if(response.status === 1)
-					{
-						$("div.applicant_record_success").html(response.message);
-					} 
-					
+					// if(response.status === 1)
+					// {
+					// 	$("div.applicant_record_success").html(response.message);
+					// }
+					$("div.applicant_record_success").html(response);
 				},
 				async: false,
 				cache: false,
@@ -1075,7 +1107,8 @@
 	
 	function validateForm(imgid) 
 	{
-        var img = $("#" + imgid).val();
+       
+		var img = $("#" + imgid).val();
         var res = '';
         var i = img.length - 1;
         while (img[i] != ".") {

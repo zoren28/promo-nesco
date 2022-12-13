@@ -62,7 +62,7 @@
 			
 			<li class="treeview">
 				<a href="<?php echo base_url('recruitment/page/menu/initial/deploy'); ?>">
-					<i class="fa fa-arrow-right"></i> <span>Deploy</span>
+					<i class="fa fa-arrow-right"></i> <span>Deployed/New Employee</span>
 				</a>
 			</li>
 			

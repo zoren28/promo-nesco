@@ -2,6 +2,9 @@
 		<div class="col-sm-12" style="padding-right:5px">
 			<div class="panel panel-default">		
 				<div class="panel-body">
+					FINAL COMPLETION APPLICANT LIST	
+				</div>
+				<div class="panel-body">
 					<?php
 					$result_applicants = $this->initial_model->applicants_for_finalcompletion();
 					?>

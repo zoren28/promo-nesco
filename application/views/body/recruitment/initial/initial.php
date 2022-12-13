@@ -148,9 +148,7 @@
 									<input type="text" name='hidden_suffix' class="form-control" id="hidden_suffix" readonly="readonly">
 							</div>	
 						</div>
-					</div>
 					
-					<div class="panel-body">
 						
 						<div class="row" >	
 							<div class="col-sm-3" style='padding-top:5px; padding-bottom:5px; text-align:right'>
@@ -182,7 +180,7 @@
 									<label class="form-label" >RESUME</label>	
 								</div>
 								<div class="col-sm-9" style='padding-top:5px; padding-bottom:5px; padding-right:10%;'>
-									<input type="file" name='resume[]' class="form-control" id="resume" multiple="" required onchange="validateForm(this.id)">
+									<input type="file" name='resume[]' class="form-control" id="resume" multiple="" required>
 								</div>	
 							</div>
 						</div>
@@ -193,7 +191,7 @@
 									<label for="pwd">APPLICATION</label>
 								</div>
 								<div class="col-sm-9" style='padding-top:5px; padding-bottom:5px; padding-right:10%;'>
-									<input type="file" name='application[]' class="form-control" id="application" multiple="" required onchange="validateForm(this.id)">
+									<input type="file" name='application[]' class="form-control" id="application" multiple="" required>
 								</div>	
 							</div>
 						</div>
@@ -204,7 +202,7 @@
 									<label for="pwd">TOR</label>
 								</div>
 								<div class="col-sm-9" style='padding-top:5px; padding-bottom:5px; padding-right:10%;'>
-									<input type="file" name='transcript[]' class="form-control" id="transcript" multiple="" required onchange="validateForm(this.id)">
+									<input type="file" name='transcript[]' class="form-control" id="transcript" multiple="" required>
 								</div>	
 							</div>
 						</div>
@@ -241,7 +239,7 @@
 	
 	
 	<div class="modal fade" id="upload_success_proceed_record">
-		<div class="modal-dialog modal-sm">
+		<div class="modal-dialog modal-md">
 			<div class="modal-content">
 				<div class="modal-header bg-light-blue color-palette">
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -252,11 +250,13 @@
 						
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn" id='record'>Proceed</button>
+				
+				<button type="button" class="btn btn-primary" id='record'>Proceed</button>
 				</div>
 			</div>
 		</div>
 	</div>
+
 	
 	<div class="modal fade" id="small_alert">
 		<div class="modal-dialog modal-sm">

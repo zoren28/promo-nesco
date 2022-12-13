@@ -259,6 +259,7 @@ $route['view_exam_setup'] = 'recruitment/initial/view_exam_setup';
 $route['setup_examination'] = 'recruitment/initial/setup_examination';
 $route['save_examination'] = 'recruitment/initial/save_examination';
 $route['append_character_ref'] = 'recruitment/initial/append_character_ref';
+$route['append_character_ref_old'] = 'recruitment/initial/append_character_ref_old';
 
 $route['tag_applicant_interview'] = 'recruitment/initial/tag_applicant_interview';
 $route['tag_applicant_transfer'] = 'recruitment/initial/tag_applicant_transfer';
