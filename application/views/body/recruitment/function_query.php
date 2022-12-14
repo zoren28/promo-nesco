@@ -488,8 +488,9 @@
 				<label for="hrmsId">FINAL INTERVIEWER</label>
 				<table class='table table-bordered table-hover dataTable dtr-inline' id='ty'>
 					<thead>
-						<th style='width:70%; background-color:lightblue;'>INTERVIEWER</th>
-						<th style='width:30%; background-color:lightblue;'>GRADE</th>
+						<th style='width:60%; background-color:lightblue;'>INTERVIEWER</th>
+						<th style='width:20%; background-color:lightblue;'>GRADE</th>
+						<th style='width:20%; background-color:lightblue;'>ACTION</th>
 					</thead>
 					<tbody>
 						<tr>
@@ -498,6 +499,7 @@
 							<td style='color:red; background-color:lightblue;'>
 							<?=$this->initial_model->getGrade($interviewer_list['interview_code'])['num_rate']." - ".
 							$this->initial_model->getGrade($interviewer_list['interview_code'])['desc_rate']?></td>
+							<td><button type="button" class="btn btn-default" id='sheet'>Print Sheet</button><td>
 						</tr>	
 					</tbody>
 				</table>
