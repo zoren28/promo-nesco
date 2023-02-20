@@ -1,12 +1,12 @@
 
-	<div class="wrapper" style='padding:20px; '>
+<div class="wrapper" style='padding:20px; '>
 		<div class="col-sm-12" style="padding-right:5px">
 			<div class="panel panel-default">
-				<div class="wrapper" style='padding:10px; color:white; background-color:#3399cc;'><i class="fa fa-th-large"> <u> DEPLOYED</u> </i> 
+				<div class="wrapper" style='padding:10px; color:white; background-color:#3399cc;'><i class="fa fa-th-large"> <u> NEW EMPLOYEE</u> </i> 
 				</div>
 				<div class="panel-body">
 					<?php
-					$result_applicants = $this->initial_model->deploy_applicants();
+					$result_applicants = $this->initial_model->new_employee_applicants();
 					?>
 						<table id="tableViewEmp" class="table table-bordered">
 							<thead>

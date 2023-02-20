@@ -1,8 +1,7 @@
 	<div class="wrapper" style='padding:20px; '>
 		<div class="col-sm-12" style="padding-right:5px">
 			<div class="panel panel-default">		
-				<div class="panel-body">
-					FINAL COMPLETION APPLICANT LIST	
+				<div class="wrapper" style='padding:10px; color:white; background-color:#3399cc;'><i class="fa fa-th-large"> <u> FINAL COMPLETION</u> </i> 
 				</div>
 				<div class="panel-body">
 					<?php
@@ -66,8 +65,25 @@
 				<div class="modal-body final_completion_display" style='font-size=10px;'>		
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn" data-dismiss="modal" id='reloadpage'>Close</button>
+					<button type="button" class="btn" data-dismiss="modal">Close</button>
 					<!--button type="button" class="btn" data-dismiss="modal" id='reloadpage'>Close</button-->
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="final_completion_modal_success_response" >
+		<div class="modal-dialog modal-md">
+			<div class="modal-content">
+				<div class="modal-header bg-light-blue color-palette">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span></button>
+					<h5 class="modal-title">Final Completion Info</h5>
+				</div>
+				<div class="modal-body final_completion_response" style='font-size=10px;'>		
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn" data-dismiss="modal" id='reloadpage'>Close</button>
 				</div>
 			</div>
 		</div>

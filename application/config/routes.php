@@ -260,6 +260,8 @@ $route['setup_examination'] = 'recruitment/initial/setup_examination';
 $route['save_examination'] = 'recruitment/initial/save_examination';
 $route['append_character_ref'] = 'recruitment/initial/append_character_ref';
 $route['append_character_ref_old'] = 'recruitment/initial/append_character_ref_old';
+$route['append_otherDocs'] = 'recruitment/initial/append_otherDocs';
+$route['append_other_Docs'] = 'recruitment/initial/append_other_Docs';
 
 $route['tag_applicant_interview'] = 'recruitment/initial/tag_applicant_interview';
 $route['tag_applicant_transfer'] = 'recruitment/initial/tag_applicant_transfer';
@@ -278,6 +280,12 @@ $route['selproduct'] = 'recruitment/initial/selproduct';
 $route['get_duration'] = 'recruitment/initial/get_duration';
 $route['hire_applicant'] = 'recruitment/initial/hire_applicant';
 $route['show_intro_check'] = 'recruitment/initial/show_intro_check';
+$route['input_grades'] = 'recruitment/initial/input_grades';
+$route['interview_grade'] = 'recruitment/initial/interview_grade';
+$route['deploy_applicant'] = 'recruitment/initial/deploy_applicant';
+$route['transfer_app'] = 'recruitment/initial/transfer_app';
+$route['save_transfer_process'] = 'recruitment/initial/save_transfer_process';
+
 // for menu module
 $route['logout'] = 'logout';
 $route['placement/page/menu/(:any)/(:any)/(:any)'] = 'placement/page/menu/$1/$2/$3';

@@ -21,7 +21,6 @@
 						keyboard: false,
 						show: true
 					}); 
-					//console.log(response, response.message);
 					
 					if(response.status === 0)
 					{
@@ -51,12 +50,41 @@
 			});
         });
 		
+		$("button#inputGrade").click(function()
+		{
+			var code = $("[name='appcode']").val();
+			var id = $("[name='appid']").val();
+			var interviewer = $("[name='interviewer']").val();
+			var interview_code = $("[name='interview_code']").val();
+
+			//$('#interviewdetails_modal').modal('hide');
+			$("div#interview_grade").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});
+
+			$.ajax({
+					url: "<?php echo site_url('input_grades'); ?>",
+					type: 'POST',
+					success: function(response) 
+					{
+						$("div.grade_display").html(response);
+						$("[name='interview_code']").val(interview_code);
+						$("[name='app_id']").val(id);
+						$("[name='interviewer']").val(interviewer);
+						$("[name='appcode']").val(code);
+					}
+			});	
+		});
+
 		$("button#sheet").click(function()
 		{
 			var code = $("[name='appcode']").val();
 			var id = $("[name='appid']").val();
 			window.open("http://172.16.43.134:81/hrms/report/interviewsheet.php?code="+code+"&emp="+id);
 		});
+
 		$("button#update_applicant").click(function()
 		{
 			
@@ -354,6 +382,10 @@
 			}
 		});
 		
+		$("[name='ten_selection']").change(function() {
+			
+			alert('try');
+		});
 		
 		$("[name='position']").change(function() {
 			
@@ -372,13 +404,20 @@
 			}
 		});
 		
-		
 		$("button#reloadpage").click(function() {
 			setTimeout(function(){
 			location.reload();
 			},500);
 		});
-		
+
+		$('#final_completion_modal').on('hidden.bs.modal', function (e) {
+			$("body").addClass("modal-open");
+		})
+
+		$('#success_info').on('hidden.bs.modal', function (e) {
+			$("body").addClass("modal-open");
+		})
+
 		$("button#record").click(function() {
 			setTimeout(function(){
             window.location = "<?php echo base_url('recruitment/page/menu/initial/record'); ?>";
@@ -415,6 +454,76 @@
 			});
 		});
 		
+		
+		$('#tableViewEmp').on('click', 'button.transferHold', function() 
+		{
+            var id = this.id;
+			
+            if (!$(this).parents('tr').hasClass('selected')) 
+			{
+                tableViewEmp.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+			
+			$.ajax({
+					url: "<?php echo site_url('transfer_app'); ?>",
+					type: 'POST',
+					data:{id},
+					success: function(response)
+					{	
+						$("div#save_transfer").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+						});	
+
+						$("div.transfer_display").html(response);
+						//alert(response);		
+					}
+				});
+		});
+
+		$('#tableViewEmp').on('click', 'button.deploy', function() 
+		{
+            var id = this.id;
+			
+            if (!$(this).parents('tr').hasClass('selected')) 
+			{
+                tableViewEmp.$('tr.selected').removeClass('selected');
+                $(this).parents('tr').addClass('selected');
+            }
+				Swal.fire({
+				title: 'Are you sure you want to Update?',
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Yes, Update!'
+				}).then((result) => {
+				if (result.isConfirmed)
+				{
+					$.ajax({
+					url: "<?php echo site_url('deploy_applicant'); ?>",
+					type: 'POST',
+					data:{id},
+					success: function(response)
+					{	
+						//alert(response);
+						response = JSON.parse(response);
+							Swal.fire({
+								icon: response.status,
+								text: response.message		
+							}).then((result)=> {
+								if (result.isConfirmed)
+								{
+								location.reload();
+								}
+							});			
+					}
+					});	
+				}})	
+		});
+
 		$('#tableViewEmp_interview').on('click', 'button.setup_interview', function() 
 		{
             var id = this.id;
@@ -459,6 +568,7 @@
 				data:{id},
 				success: function(response)
 				{
+					
 					
 					$("div#interviewdetails_modal").modal({
 						backdrop: 'static',
@@ -585,6 +695,7 @@
 							keyboard: false,
 							show: true
 						});	
+						//$("div.info_exam_msg").html(response);
 						
 						if(response.status === 1)
 						{
@@ -682,6 +793,73 @@
 				});
 		});
 		
+		
+		$("form#save_transfer_process").submit(function(e) {
+
+			e.preventDefault();
+
+			var formData = new FormData(this);
+
+			console.log(formData);
+			
+			Swal.fire({
+						icon:'info',
+						title: 'Are you sure want to transfer?',
+						showDenyButton: true,
+						confirmButtonText: 'Yes',
+						denyButtonText: `No`,
+					}).then((result) => 
+						{
+							if (result.isConfirmed) 
+							{
+								$.ajax({
+									url: "<?php echo site_url('save_transfer_process'); ?>",
+									type: 'POST',
+									data:formData,
+									success: function(response) 
+									{
+										response = JSON.parse(response);
+										if(response.status == 1)
+										{
+											Swal.fire({
+													icon:'success',		
+													text: response.message,
+													icon: 'success',
+													confirmButtonColor: '#3085d6',
+													confirmButtonText: 'Okay'
+													}).then((result) => {
+														if (result.isConfirmed) 
+														{
+															location.reload();
+														}
+													})
+										}
+										else
+										{
+											Swal.fire({
+													icon:'success',		
+													text: response.message,
+													icon: 'success',
+													confirmButtonColor: '#3085d6',
+													confirmButtonText: 'Okay'
+													}).then((result) => {
+														if (result.isConfirmed) 
+														{
+															location.reload();
+														}
+													})
+										}
+										
+									},
+									async: false,
+									cache: false,
+									contentType: false,
+									processData: false
+								});
+							}
+						})
+		});
+
 		$("form#setup_interviewee").submit(function(e) {
 
             e.preventDefault();
@@ -728,18 +906,42 @@
 				data:formData,
 				
 				success: function(response) {
-					
-					$("div#final_completion_modal").modal({
-						backdrop: 'static',
-						keyboard: false,
-						show: true
-					});	
-					
+					//alert(response);
 					response = JSON.parse(response);
-					
-					if(response.status === 1)
+
+					if(response.status === 0)
 					{
-						$("div.final_completion_display").html(response.message);
+						$("div#final_completion_modal").modal({
+							backdrop: 'static',
+							keyboard: false,
+							show: true
+						});	
+					}
+					else
+					{
+						$("div#final_completion_modal_success_response").modal({
+							backdrop: 'static',
+							keyboard: false,
+							show: true
+						});	
+					}
+					
+					if(response.status === 0)
+					{
+						let err_message = '';
+						
+						err_message += '<ul>';
+						for(var i = 0; i < response.message.length; i++)
+						{
+							err_message += '<li>'+response.message[i]+'</li>';
+						}
+						
+						err_message += '</ul>';
+						$("div.final_completion_display").html(err_message);
+					}
+					else
+					{
+						$("div.final_completion_response").html(response.message);	
 					}	
 				},
 				async: false,
@@ -898,27 +1100,21 @@
             var formData = new FormData(this);
 			console.log(formData);
 			
-			
-			
 			emp = $("input[name = 'appid']").val();
 			strtDate = $("input[name = 'startDate']").val();
 			eocDate = $("input[name = 'endDate']").val();
 			company = $("select[name = 'company']").val();
 			name = $("input[name = 'hidden_name']").val();
-			
 			join_emp = emp+"|"+strtDate+"|"+eocDate+"|"+name+"|"+company;
-			
 			promo_type = $("select[name = 'promotype']").val();
-			
 			let stores = $("input[name='check[]']:checked").map(function() { return this.value; }).get();
-			
 			var flag = 0;
 			
 			if(promo_type == "Roving")
-			{
-				if (stores.length == 1 || stores.length == 0) 
+			{	
+				if (stores.length < 2) 
 				{
-					alert("Employee type is ROVING, Please select two or more Store..");
+					alert("Employee type is ROVING, Please select two or more Store.");
 					$("input[name='check[]']")[0].focus();	
 				}
 				else
@@ -928,9 +1124,9 @@
 			}
 			else
 			{
-				if (stores.length > 1 || stores.length == 0) 
+				if (stores.length === 0) 
 				{
-					alert("Employee type is STATION, Please select one Store only..");
+					alert("Employee type is STATION, Please select a Store.");
 					$("input[name='check[]']")[0].focus();
 				}
 				else
@@ -938,7 +1134,6 @@
 					flag = 1;
 				}
 			}
-			
 			if(flag == 1)
 			{
 				$.ajax({
@@ -948,10 +1143,32 @@
 					success: function(response) {
 						
 					response = JSON.parse(response);
+					
+					// $("div#pro_success").modal({
+					// 	backdrop: 'static',
+					// 	keyboard: false,
+					// 	show: true
+					// });
+					
 					if(response.status === 1)
 					{
-						 alert(response.message);
-						 window.open("http://172.16.43.134:81/hrms/report/new_intro.php?val="+stores+"&emp="+join_emp);
+						
+						Swal.fire({
+							icon: 'info',
+							title: response.message,
+							showDenyButton: true,
+							showCancelButton: true,
+							confirmButtonText: 'Okay',
+							denyButtonText: `Not now!`,
+							}).then((result) => {
+							if (result.isConfirmed) {
+								location.reload();
+								window.open("http://172.16.43.134:81/hrms/report/new_intro.php?val="+stores+"&emp="+join_emp);
+							} else if (result.isDenied) {
+								location.reload();
+								window.location = "<?php echo base_url('recruitment/page/menu/initial/deploy'); ?>";
+							}
+							})
 					}
 					
 					},
@@ -959,11 +1176,43 @@
 					cache: false,
 					contentType: false,
 					processData: false
-				});
-			}	
+				});	
+			}
         });
 		
-		
+		$("form#interview_grade").submit(function(e) {
+
+			e.preventDefault();
+
+			var formData = $(this).serialize();
+			//var formData = new FormData(this);
+
+			$("div#grade_modal_info").modal({
+						backdrop: 'static',
+						keyboard: false,
+						show: true
+					});	
+
+			$.ajax({
+				url: "<?php echo site_url('interview_grade'); ?>",
+				type: 'POST',
+				data:formData,
+				success: function(response) {
+					
+					//alert(response);
+					response = JSON.parse(response)	
+
+					//$("div.grade_modal_info_display").html(response);
+					$("div.grade_modal_info_display").html(response.message);
+					//alert(response.message);
+				},
+					// async: false,
+					// cache: false,
+					// contentType: false,
+					// processData: false
+				});
+			});
+
 		$("form#applicant_information").submit(function(e) {
 
             e.preventDefault();
@@ -976,21 +1225,20 @@
 				url: "<?php echo site_url('applicant_information'); ?>",
 				type: 'POST',
 				data:formData,
-				success: function(response) {
-					
-					//response = JSON.parse(response);
-					
-					$("div#applicant_record_success").modal({
-						backdrop: 'static',
-						keyboard: false,
-						show: true
-					});	
-					
-					// if(response.status === 1)
-					// {
-					// 	$("div.applicant_record_success").html(response.message);
-					// }
-					$("div.applicant_record_success").html(response);
+				success: function(response) 
+				{
+					response = JSON.parse(response);	
+
+					Swal.fire({
+						icon: 'info',
+						title: response.message,
+						showDenyButton: true,
+						confirmButtonText: 'Okay',
+						}).then((result) => {
+						/* Read more about isConfirmed, isDenied below */
+						if (result.isConfirmed) {
+							location.reload();
+						}})
 				},
 				async: false,
 				cache: false,
@@ -1132,6 +1380,59 @@
             return 1;
         }
     }
+
+	function getTotal()
+	{
+		let grade_total = 0;
+		let selected = $("select.selection").each(function() {
+			grade_total += parseFloat($(this).val());
+		});
+
+		console.log(grade_total);
+		
+		if(grade_total < 70)
+		{
+			var desc_rate = "VERY UNSATISFACTORY";
+		}
+		else if(grade_total > 69 && grade_total < 85)
+		{
+			var desc_rate = "UNSATISFACTORY";
+		}
+		else if(grade_total > 84 && grade_total < 90)
+		{
+			var desc_rate = "SATISFACTORY";
+		}
+		else if(grade_total > 89 && grade_total < 100)
+		{
+			var desc_rate = "VERY SATISFACTORY";
+		}
+		else if(grade_total == 100)
+		{
+			var desc_rate = "EXCELLENT";
+		}
+		$("input[name = 'num_rate']").val(grade_total);
+		$("input[name = 'desc_rate']").val(desc_rate);
+	}
+	
+	function getV(val)
+	{
+		//var selectV = $("input[name = 'promoV']").val();
+
+		if(val == 'Roving')
+		{
+			document.getElementById( 'rovingDiv' ).style.display = '';
+			document.getElementById( 'stationDiv' ).style.display = 'none';
+			$("#stationDiv *").attr({disabled:"true",checked:false});
+			$("#rovingDiv *").removeAttr("disabled");
+		}
+		else
+		{
+			document.getElementById( 'rovingDiv' ).style.display = 'none';
+			document.getElementById( 'stationDiv' ).style.display = '';
+			$("#rovingDiv *").attr({disabled:"true",checked:false});
+			$("#stationDiv *").removeAttr("disabled");
+		}
+	}
 	
 	/* function dupcheck()
 	{

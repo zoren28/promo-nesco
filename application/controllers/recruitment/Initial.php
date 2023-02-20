@@ -88,15 +88,20 @@ class Initial extends CI_Controller
 	
 	public function tag_applicant_interview()  
 	{
-		$fetch_data 				= $this->input->post(NULL, TRUE);
-		$explode_val				= explode("|",$fetch_data['id']);
-		$fetch_data['app_status']  	= 	'for interview';
+		$fetch_data 	= 	$this->input->post(NULL, TRUE);
+		$explode_val	= 	explode("|",$fetch_data['id']);
+		$fetch_data['app_status']	=	'for interview';
 		$fetch_data['appcode']  	= 	$explode_val[1];
-		//print_r($fetch_data);
-		$this->db->trans_start();
-		$data['tag_interview'] 		= $this->initial_model->applicant_status($fetch_data);
-		$this->db->trans_complete();
-		if ($this->db->trans_status() === TRUE)
+		$fetch_data['app_id']  	= 	$explode_val[0];
+		$fetch_data['app_history_tag'] 	=	6;
+		
+		$position = $this->initial_model->applicant_position_apply($fetch_data['appcode']);
+		$fetch_data['position'] = $position['position'];
+		
+		$updateStat = $this->initial_model->applicant_status($fetch_data);
+		$appHistory = $this->initial_model->save_application_history($fetch_data);
+
+		if($updateStat)
 		{ 
 			echo json_encode(array('status'=> 1, 'message' => "Applicant successfully tag for interview!")); 
 		}
@@ -109,10 +114,14 @@ class Initial extends CI_Controller
 	public function save_initial_interview()
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
-		$this->db->trans_start();
-		$this->initial_model->save_initial_interview($fetch_data);
-		$this->db->trans_complete();
-		if ($this->db->trans_status() === TRUE)
+		$fetch_data['app_history_tag'] = 7;
+		$applicantCode = $this->initial_model->get_application_code($fetch_data['appid']);
+		$fetch_data['app_code'] = $applicantCode['appcode'];
+		
+		$initial = $this->initial_model->save_initial_interview($fetch_data);
+		$this->initial_model->save_application_history($fetch_data);
+		
+		if($initial == 1)
 		{ 
 			echo json_encode(array('status'=> 1, 'message' => "Applicant Initial Interview Done!")); 
 		}
@@ -123,13 +132,18 @@ class Initial extends CI_Controller
 	}
 	public function save_final_completion()
 	{
+		
 		$fetch_data = $this->input->post(NULL, TRUE);
+		$temp 		= 	'jpg';
+		$target_dir	=	"../document/final_requirements/";
+		$fetch_data['app_history_tag'] = 10;
 
 		$dataposition['position'] = $this->initial_model->applicant_position_apply($fetch_data['appcode']);
 
 		if($dataposition['position']['position'] == "Merchandiser Seasonal" || $dataposition['position']['position'] == "Promodiser Seasonal")
 		{
 			$files = array('police_clearance',
+							'recommend_letter',
 							'otherDoc');
 
 			$this->db->trans_start();
@@ -137,13 +151,55 @@ class Initial extends CI_Controller
 			{
 				if(isset($_FILES[$value])) 
 				{
-					$this->initial_model->check_upload_finalcompletion($value,$fetch_data);	
+					if($value == 'police_clearance')
+					{
+						$file_name 		= "Police Clearance";
+						$target_folder 	= $target_dir."police_clearance/";
+						$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-dhis").".".$temp;
+						$location 		= $target_folder.$filename;
+
+						if(move_uploaded_file($_FILES[$value]["tmp_name"],$target_folder.''.$filename))
+						{
+							$requirement_info = $this->initial_model->insert_finalreq_info($value,$location,$fetch_data);
+						}	
+					}
+					else if($value == 'recommend_letter')
+					{
+						$file_name 		= "Recommendation Letter";
+						$target_folder 	= $target_dir."recommendation_letter/";
+						$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-dhis").".".$temp;
+						$location 		= $target_folder.$filename;
+
+						if(move_uploaded_file($_FILES[$value]["tmp_name"],$target_folder.''.$filename))
+						{
+							$requirement_info = $this->initial_model->insert_finalreq_info($value,$location,$fetch_data);
+						}	
+					}
+					else if($value == 'otherDoc')
+					{					
+						for($i=0; $i< count($_FILES[$value]['name']); $i++)
+						{
+							$file_name 		= "Other Document";
+							$target_folder 	= $target_dir."others/";
+							$filename 		= $fetch_data['documentName'][$i]."_".$i."_".$fetch_data['appid']."_".date("Y-m-dhis").".".$temp;
+							$location 		= $target_folder.$filename;
+							$fetch_data['doc'] = $fetch_data['documentName'][$i];
+							
+							if(move_uploaded_file($_FILES[$value]["tmp_name"][$i],$target_folder.''.$filename))
+							{
+								$requirement_info = $this->initial_model->insert_finalreq_info($value,$location,$fetch_data);
+							}	
+						}		
+					}	
 				}
 			}
 
 			$this->initial_model->insertRemarks($fetch_data);
 			$fetch_data['app_status'] = "for hiring";
 			$this->initial_model->applicant_status($fetch_data);
+			
+			$this->initial_model->save_application_history($fetch_data);
+			
 			$this->db->trans_complete();
 			if ($this->db->trans_status() === TRUE)
 			{ 
@@ -155,7 +211,7 @@ class Initial extends CI_Controller
 			}
 		}
 		else
-		{
+		{                    
 			$files = array('birthcertificate',
 							'police_clearance',
 							'fingerprint',
@@ -170,32 +226,98 @@ class Initial extends CI_Controller
 							'marriage',
 							'otherDoc');
 			
-			$this->db->trans_start();
-			
+			$maxsize    = 2097152;
+			$acceptable = array(
+				'image/jpeg',
+				'image/jpg',
+				'image/png'
+			);
+
+			$errors = array();
+
 			foreach($files as $file => $value) 
-			{
+			{				
 				if(isset($_FILES[$value])) 
 				{
-					$this->initial_model->check_upload_finalcompletion($value,$fetch_data);	
-				}
+					if($value == 'birthcertificate' || $value == 'otherDoc')
+					{
+						
+						for($i=0; $i< count($_FILES[$value]['name']); $i++)
+						{
+							$filesize 	= 	$_FILES[$value]['size'][$i];
+							$filetype	=	$_FILES[$value]['type'][$i];
+							
+							if($filesize >= $maxsize) 
+							{
+									$errors[] = strtoupper($value)." file is too large. File must be less than 2 megabytes.";
+							}
+							else
+							{
+								if((!in_array($filetype, $acceptable)) && (!empty($filetype))) 
+								{
+									$errors[] = strtoupper($value)." file is invalid file type. Only PDF, JPG, GIF and PNG types are accepted.";
+								}
+							}
+						}	
+					}	
+				}	
 			}
-			
-			$this->initial_model->updateBloodtype($fetch_data);
-			$this->initial_model->update_or_insert_cedula_benifits_numbers($fetch_data);
-			$this->initial_model->insertRemarks($fetch_data);
-			$this->initial_model->insertBenifits($fetch_data);
-			$fetch_data['app_status'] = "for hiring";
-			$this->initial_model->applicant_status($fetch_data);
-			
-			$this->db->trans_complete();
-			if ($this->db->trans_status() === TRUE)
-			{ 
-				echo json_encode(array('status'=> 1, 'message' => "Applicant Proceed to For Hiring"));				
+			// checking the filesize does not exceed 2MB
+			if(count($errors))
+			{	
+				echo json_encode(array('status'=> 0, 'message' => $errors));	
 			}
 			else
-			{ 
-				echo json_encode(array('status'=> 0, 'message' => "Error Found!")); 
+			{
+				foreach($files as $file => $value) 
+				{				
+					if(isset($_FILES[$value])) 
+					{
+						if($value == 'birthcertificate' || $value == 'otherDoc')
+						{
+							
+							for($i=0; $i< count($_FILES[$value]['name']); $i++)
+							{
+								if($value == 'birthcertificate')
+								{
+									$file_name 		= "Birth Certificate";
+									$target_folder 	= $target_dir."birth_certificate/";
+									$filename 		= $value."_".$i."_".$fetch_data['appid']."_".date("Y-m-d his").".".$temp;
+									$location 		= $target_folder.$filename;
+								}
+								else
+								{
+									$file_name 		= "Other Document";
+									$target_folder 	= $target_dir."others/";
+									$filename 		= $fetch_data['documentName'][$i]."_".$i."_".$fetch_data['appid']."_".date("Y-m-d his").".".$temp;
+									$location 		= $target_folder.$filename;
+									$fetch_data['doc'] = $fetch_data['documentName'][$i];
+								}
+								
+								if(move_uploaded_file($_FILES[$value]["tmp_name"][$i],$target_folder.''.$filename))
+								{
+									$requirement_info = $this->initial_model->insert_finalreq_info($value,$location,$fetch_data);
+								}
+							}	
+						}
+						else
+						{
+							$upload_checking = $this->initial_model->check_upload_finalcompletion($value,$fetch_data);
+						}		
+					}	
+				}
+				
+				$this->initial_model->updateBloodtype($fetch_data);
+				$this->initial_model->update_or_insert_cedula_benifits_numbers($fetch_data);
+				$this->initial_model->insertRemarks($fetch_data);
+				$this->initial_model->insertBenifits($fetch_data);
+				$fetch_data['app_status'] = "for hiring";
+				$this->initial_model->applicant_status($fetch_data);
+				$this->initial_model->save_application_history($fetch_data);
+
+				echo json_encode(array('status'=> 1, 'message' => "Final Requirements uploaded successfully!"));
 			}
+			
 		}	
 	}
 	
@@ -291,7 +413,9 @@ class Initial extends CI_Controller
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
 		$fetch_data['app_status'] = "new employee";
-		//print_r($fetch_data);
+		$fetch_data['agency'] = 29;
+		$fetch_data['app_history_tag'] = 11;
+
 		$this->db->trans_start();
 		$dataCount = $this->initial_model->check_employee_existince($fetch_data['appid']);
 		if($dataCount > 0)
@@ -306,10 +430,12 @@ class Initial extends CI_Controller
 			$this->initial_model->applicant_status($fetch_data);
 		}
 		
+		$this->initial_model->save_application_history($fetch_data);
+
 		$this->db->trans_complete();
 		if ($this->db->trans_status() === TRUE)
 		{ 
-			echo json_encode(array('status'=> 1, 'message' => "Applicant Hiring Done... Proceed to Deployment"));
+			echo json_encode(array('status'=> 1, 'message' => "Applicant’s Contract Details have been saved. Print Intro letter?"));
 		}
 		else
 		{ 
@@ -321,10 +447,17 @@ class Initial extends CI_Controller
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
 		$fetch_data['app_status'] = $this->initial_model->get_interview_result($fetch_data);
+		$fetch_data['app_history_tag'] = 9;
+		$applicantCode = $this->initial_model->get_application_code($fetch_data['appid']);
+		$fetch_data['app_code'] = $applicantCode['appcode'];
+		
 		if(!empty($fetch_data['grade']))
 		{
 			$this->db->trans_start();
+
 			$this->initial_model->applicant_status($fetch_data);
+		 	$this->initial_model->save_application_history($fetch_data);
+
 			$this->db->trans_complete();
 			if ($this->db->trans_status() === TRUE)
 			{ 
@@ -334,7 +467,7 @@ class Initial extends CI_Controller
 				}
 				else
 				{
-					echo json_encode(array('status'=> 1, 'message' => "Applicant Failed Interview! Proceed to Transfer"));
+					echo json_encode(array('status'=> 1, 'message' => "Applicant Failed Interview! Applicant is now on hold for future reference "));
 				}
 				
 			}
@@ -348,6 +481,7 @@ class Initial extends CI_Controller
 			echo json_encode(array('status'=> 0, 'message' => "Sorry! Can't Proceed, No Grades Yet!")); 
 		}
 	}
+	
 	// check interview details
 	public function check_interview()
 	{
@@ -366,10 +500,13 @@ class Initial extends CI_Controller
 	public function setup_interviewee()
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
-		$this->db->trans_start();
-		$this->initial_model->save_setUp_interview($fetch_data);
-		$this->db->trans_complete();
-		if ($this->db->trans_status() === TRUE)
+		$fetch_data['app_history_tag'] = 8;
+		$applicantCode = $this->initial_model->get_application_code($fetch_data['appid']);
+		$fetch_data['app_code'] = $applicantCode['appcode'];
+		$setup = $this->initial_model->save_setUp_interview($fetch_data);
+		$apphistory = $this->initial_model->save_application_history($fetch_data);
+
+		if ($setup == 1)
 		{ 
 			echo json_encode(array('status'=> 1, 'message' => "Applicant Set-up Interview Done!")); 
 		}
@@ -389,13 +526,62 @@ class Initial extends CI_Controller
 		$this->load->view('body/recruitment/function_query', $data);
 	}
 	
+	public function save_transfer_process()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE); 
+		$fetch_data['app_history_tag'] = 13;
+		$updateChange = $this->initial_model->update_status_and_change_position($fetch_data);
+		$this->initial_model->save_application_history($fetch_data);
+		if($updateChange)
+		{
+			echo json_encode(array('status'=> 1, 'message' => "Applicant successfully transfer!")); 
+		}
+		else
+		{
+			echo json_encode(array('status'=> 0, 'message' => "Oops, something went wrong. Please try again."));
+		}
+	}
+
+	public function transfer_app()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		$exp = explode("|",$fetch_data['id']);
+		$fetch_data['id'] = $exp[1];
+		$data['position'] = $this->initial_model->applicant_position_apply($exp[0]);
+		$data['applicant_info'] = $this->initial_model->applicant_info($fetch_data);
+		$data['request'] = "transfer_applicant";
+		$this->load->view('body/recruitment/function_query', $data);
+	}
+	
+	// deploye applicant/new employee
+	public function deploy_applicant()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		$exploded_val = explode("|",$fetch_data['id']);
+		$fetch_data['app_status'] = "deployed";
+		$fetch_data['appcode'] = $exploded_val[0];
+		$fetch_data['appid'] = $exploded_val[1];
+		$fetch_data['app_history_tag'] = 12;
+		
+		$appDeploy = $this->initial_model->applicant_status($fetch_data);
+		$this->initial_model->save_application_history($fetch_data);
+
+		if($appDeploy)
+		{
+			echo json_encode(array('status'=> "success", 'message' => "Applicant successfully deployed!")); 
+		}
+		else
+		{
+			echo json_encode(array('status'=> "error", 'message' => "Oops, something went wrong. Please try again."));
+		}
+	}
+	
 	public function initial_interview()  
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
 		$explode_val = explode("|",$fetch_data['id']);
 		$fetch_data['id'] = $explode_val[1];
 		$data['request'] = "applicant_initial_interview";
-		//print_r($fetch_data);
 		$data['initial_interview'] = $this->initial_model->applicant_examinee($fetch_data);
 		$this->load->view('body/recruitment/function_query', $data);
 	}
@@ -406,7 +592,7 @@ class Initial extends CI_Controller
 		$explode_val				= explode("|",$fetch_data['id']);
 		$fetch_data['app_status']  	= 	'failed exam';
 		$fetch_data['appcode']  	= 	$explode_val[1];
-		//print_r($fetch_data);
+		
 		$this->db->trans_start();
 		$data['tag_transfer'] 		= $this->initial_model->applicant_status($fetch_data);
 		$this->db->trans_complete();
@@ -432,7 +618,8 @@ class Initial extends CI_Controller
 	public function save_examination()
 	{
 		$fetch_data = 	$this->input->post(NULL, TRUE);
-		
+		$fetch_data['app_history_tag'] = 5;
+
 		if($fetch_data['exam_stat'] == 'passed')
 		{
 			$fetch_data['app_status'] = 'exam passed';
@@ -445,7 +632,7 @@ class Initial extends CI_Controller
 		{
 			$fetch_data['app_status'] = 'assessment';
 		}
-		
+
 		$ret_exam = $this->initial_model->save_exam_scores($fetch_data);
 		if($ret_exam == 1)
 		{
@@ -453,6 +640,7 @@ class Initial extends CI_Controller
 			if($ret_exam_stat == 1)
 			{
 				$ret_app_status = $this->initial_model->applicant_status($fetch_data);
+				$this->initial_model->save_application_history($fetch_data);
 			}
 		}
 
@@ -488,6 +676,55 @@ class Initial extends CI_Controller
 		}
 	}
 	
+
+	public function interview_grade()
+	{
+		$fetch_data = $this->input->post(NULL, TRUE);
+		
+		$fetch_data['app_history_tag'] = 4;
+		
+		if($fetch_data['num_rate'] < 85)
+		{ 
+			$fetch_data['interview_stat'] = 'failed'; 
+		}
+		else
+		{ 
+			$fetch_data['interview_stat'] = 'passed';
+		}
+		
+		if($fetch_data['num_rate'] > 0)
+		{
+			
+			$save_grader = $this->initial_model->save_interview_grade($fetch_data);
+			
+			if($save_grader == 1)
+			{
+				$save_rate = $this->initial_model->save_interview_rate($fetch_data);
+				if($save_rate)
+				{
+					$upDetail = $this->initial_model->update_interview_detail($fetch_data);
+					if($upDetail)
+					{
+						$save_history = $this->initial_model->save_application_history($fetch_data);
+						if($save_history)
+						{
+							$save_manual = $this->initial_model->save_interview_manual($fetch_data);
+							if($save_manual)
+							{
+								echo json_encode(array('status'=> 1, 'message' => "Applicant evaluation form completed!")); 
+							}
+							else
+							{
+								echo json_encode(array('status'=> 0, 'message' => "Error on saving!")); 
+							}
+						}	
+					}	
+				}
+			}
+		}
+			
+	}
+
 	public function applicant_information()
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
@@ -497,63 +734,70 @@ class Initial extends CI_Controller
 		$temp 				= 	'jpg';
 		$target_seminar		=	"../document/seminar_certificate/";
 		$target_employment	=	"../document/employment_certificate/";
-
-		 	$explode_Id = explode("|",$this->initial_model->get_appId());
-			$fetch_data['appId'] = $explode_Id[1];
-			$fetch_data['id'] = $explode_Id[0];
-
-			$saveAppInfo = $this->initial_model->save_applicant_info($fetch_data);
-			$saveAppCharacter = $this->initial_model->save_applicant_character_ref($fetch_data);
-
-			// saving application seminar/training/eligibility
-			for($i= 0 ; $i< count($fetch_data['seminar_name']);$i++)
-			{
-				if(isset($_FILES['seminar_certificate']['name'][$i])) 
-				{
-					$filesize 		= 	$_FILES['seminar_certificate']['size'][$i];
-					$filename		=	$_FILES['seminar_certificate']['name'][$i];
-					$filetype		=	$_FILES['seminar_certificate']['type'][$i];
-					$seminar_cert 	= 	"seminar_certificate_".$i."_".$fetch_data['appId']."_".date("Y-m-d H:i:s").".".$temp;
-					$location 		= 	$target_seminar.$seminar_cert;
-					
-					$fetch_data['location'] = $location;
-					
-					if(move_uploaded_file($_FILES["seminar_certificate"]["tmp_name"][$i], $target_seminar.$seminar_cert))
-					{
-						$this->initial_model->save_applicant_seminar_training_eligibility($fetch_data, $i);
-					}		
-				}
-				// else
-				// {
-				// 	$fetch_data['location'] = "";
-				// 	$this->initial_model->save_applicant_seminar_training_eligibility($fetch_data, $i);
-				// }	
-			}
-			// saving application history
-			for($z= 0; $z< count($fetch_data['company_name']);$z++)
-			{
-				if(isset($_FILES['certificate']['name'][$z])) 
-				{
-					$f_size 		= 	$_FILES['certificate']['size'][$z];
-					$f_name			=	$_FILES['certificate']['name'][$z];
-					$f_type			=	$_FILES['certificate']['type'][$z];
-					$f_cert 		= 	"certificate".$z."_".$fetch_data['appId']."_".date("Y-m-d H:i:s").".".$temp;
-					$location 		= 	$target_employment.$f_cert;
-					
-					$fetch_data['location'] = $location;
-					
-					if(move_uploaded_file($_FILES["certificate"]["tmp_name"][$z], $target_employment.$f_cert))
-					{
-						echo $this->initial_model->save_applicant_employment_history($fetch_data, $z);
-					}
-				}	
-			}
 		
-		$updateStat = $this->initial_model->update_applicant_status($fetch_data);
+		$explode_Id = explode("|",$this->initial_model->get_appId()); // getting the new applicant HRMS ID
+		$fetch_data['appId'] = $explode_Id[1];
+		$fetch_data['id'] = $explode_Id[0];
 
-		if($saveAppInfo && $updateStat)
+		$fetch_data['app_history_tag'] = 2;
+
+		if($fetch_data['procedure'] == "UPDATE")
 		{
-			echo json_encode(array('status'=> 1, 'message' => "Applicant successfully recorded. You can proceed and set-up examination!"));	
+			$fileId = $fetch_data['hrmsId'];
+		}
+		else
+		{
+			$fileId = $fetch_data['appId'];
+		}
+
+		$saveAppInfo = $this->initial_model->save_applicant_info($fetch_data); // applicant information like basic info, family background
+		$saveAppCharacter = $this->initial_model->save_applicant_character_ref($fetch_data); // character refference
+
+		// saving application seminar/training/eligibility
+		for($i= 0 ; $i< count($fetch_data['seminar_name']);$i++)
+		{
+			if(isset($_FILES['seminar_certificate']['name'][$i])) 
+			{
+				$filesize 		= 	$_FILES['seminar_certificate']['size'][$i];
+				$filename		=	$_FILES['seminar_certificate']['name'][$i];
+				$filetype		=	$_FILES['seminar_certificate']['type'][$i];
+				$seminar_cert 	= 	"seminar_certificate_".$i."_".$fileId."_".date("Y-m-d His").".".$temp;
+				$location 		= 	$target_seminar.$seminar_cert;
+				
+				$fetch_data['location'] = $location;
+				
+				if(move_uploaded_file($_FILES["seminar_certificate"]["tmp_name"][$i], $target_seminar.$seminar_cert)) // uploading seminar certificate
+				{
+					$this->initial_model->save_applicant_seminar_training_eligibility($fetch_data, $i); // saving seminar info
+				}		
+			}	
+		}
+			
+		for($z= 0; $z< count($fetch_data['company_name']);$z++)
+		{
+			if(isset($_FILES['certificate']['name'][$z])) 
+			{
+				$f_size 		= 	$_FILES['certificate']['size'][$z];
+				$f_name			=	$_FILES['certificate']['name'][$z];
+				$f_type			=	$_FILES['certificate']['type'][$z];
+				$f_cert 		= 	"certificate".$z."_".$fileId."_".date("Y-m-d His").".".$temp;
+				$location 		= 	$target_employment.$f_cert;
+				
+				$fetch_data['location'] = $location;
+				
+				if(move_uploaded_file($_FILES["certificate"]["tmp_name"][$z], $target_employment.$f_cert)) // uploading employment certificate
+				{
+					echo $this->initial_model->save_applicant_employment_history($fetch_data, $z); // saving employment info
+				}
+			}	
+		}
+
+		$updateStat = $this->initial_model->update_applicant_status($fetch_data); // updating the applicant status
+		$up_app_history = $this->initial_model->save_application_history($fetch_data); // saving application history
+		
+		if($saveAppInfo == 1)
+		{
+			echo json_encode(array('status'=> 1, 'message' => "Applicant successfully recorded. Proceed & set-up examination."));	
 		}
 		else
 		{
@@ -564,10 +808,14 @@ class Initial extends CI_Controller
 	public function upload_initial() 
 	{
 		$fetch_data = $this->input->post(NULL, TRUE);
+		$fetch_data['app_history_tag'] = 1; // upload requirements tag for application history
+		
 		
 		if($fetch_data['position'] == "Merchandiser Seasonal" || $fetch_data['position'] == "Promodiser Seasonal")
 		{
 			$check_initial = $this->initial_model->insert_initial_applicant_info($fetch_data);
+			$fetch_data['appcode'] = $check_initial;
+			$app_history = $this->initial_model->save_application_history($fetch_data); // saving application history
 			
 			if($check_initial)
 			{
@@ -623,6 +871,7 @@ class Initial extends CI_Controller
 			else
 			{
 				$check_initial = $this->initial_model->insert_initial_applicant_info($fetch_data);
+				$fetch_data['appcode'] = $check_initial;
 				$resume_flag = 0;
 				$application_flag = 0;
 				$transcript_upload = 0;
@@ -703,6 +952,8 @@ class Initial extends CI_Controller
 						}
 					} 
 				}
+				$app_history = $this->initial_model->save_application_history($fetch_data); // saving application history
+
 				if($transcript_flag == 1 && $application_flag == 1 && $resume_flag == 1)
 				{
 					echo json_encode(array('status'=> 1, 'message' => "Files Succesfully Uploaded, Applicant proceeded to Record list."));
@@ -717,9 +968,27 @@ class Initial extends CI_Controller
 		$this->load->view('body/recruitment/function_query', $data);
 	}
 
-	public function append_character_ref_old() {
-		
+	public function append_character_ref_old() 
+	{	
 		$data['request'] = 'append_character_ref_old';
+		$this->load->view('body/recruitment/function_query', $data);
+	}
+
+	public function append_otherDocs() 
+	{	
+		$data['request'] = 'append_otherDocs';
+		$this->load->view('body/recruitment/function_query', $data);
+	}
+
+	public function append_other_Docs() 
+	{	
+		$data['request'] = 'append_other_Docs';
+		$this->load->view('body/recruitment/function_query', $data);
+	}
+
+	public function input_grades()
+	{
+		$data['request'] = 'input_grades';
 		$this->load->view('body/recruitment/function_query', $data);
 	}
 	

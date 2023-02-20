@@ -78,20 +78,20 @@
 					
 					<div class="panel-body">
 						<div class="row">	
-							<div class="col-sm-3" style='padding-top:5px; padding-bottom:5px; text-align:right'>
+							<!-- <div class="col-sm-3" style='padding-top:5px; padding-bottom:5px; text-align:right'>
 								<label class="form-label" >PROCEDURE</label>	
-							</div>
+							</div> -->
 							<div class="col-sm-9" style='padding-top:5px; padding-bottom:5px; padding-right:10%;'>
-								<input type="text" name='updt_or_appnd' class="form-control" id="updt_or_appnd" readonly="readonly" >
+								<input type="hidden" name='updt_or_appnd' class="form-control" id="updt_or_appnd" >
 							</div>	
 						</div>
 						
 						<div class="row">	
-							<div class="col-sm-3" style='padding-top:5px; padding-bottom:5px; text-align:right'>
+							<!-- <div class="col-sm-3" style='padding-top:5px; padding-bottom:5px; text-align:right'>
 								<label class="form-label" >APP CODE</label>	
-							</div>
+							</div> -->
 							<div class="col-sm-9" style='padding-top:5px; padding-bottom:5px; padding-right:10%;'>
-								<input type="text" name='hidden_code' class="form-control" id="hidden_code" readonly="readonly">
+								<input type="hidden" name='hidden_code' class="form-control" id="hidden_code" >
 							</div>	
 						</div>
 						

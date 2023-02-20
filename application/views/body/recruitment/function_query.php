@@ -1,8 +1,6 @@
 <?php
 	if($request == "applicant_duplicate_or_blacklist")
-	{					
-		//echo count($blacklist_suggest);
-		//if(count($blacklist) == 0 && count($duplicate) == 0 && count($duplicate_MI) == 0 && count($blacklist_suggest) == 0)
+	{	
 		if(count($blacklist) == 0 && count($duplicate) == 0 && count($duplicate_MI) == 0)
 		{
 			?>
@@ -41,11 +39,20 @@
 			{
 				foreach ($duplicate as $key => $n) 
 				{
+					$app_status = $this->initial_model->get_appId_process($n['app_code']);
+					if($app_status != "")
+					{
+						$stats = $app_status;
+					}
+					else
+					{
+						$stats = "No Status";
+					}
 					?>
 						<div class="row" style='padding-left:5px; border-bottom:1px solid grey;'>	
 							<div class="col-sm-8" style='padding-top:5px; padding-bottom:5px;'>
-								<span style='display:none;' id="<?= $key ?>"><?= $n['app_code']."|".$n['lastname']."|".$n['firstname']."|".$n['middlename'];?></span>
-								<span><?= $n['app_code']." | ".$n['lastname'].", ".$n['firstname']." ".$n['middlename'];?>( <i style='color:red;'>Duplicate?</i> )</span>
+								<span style='display:none;' id="<?= $key ?>"><?= $n['app_code']."|".$n['lastname']."|".$n['firstname']."|".$n['middlename']."|".$n['suffix'];?></span>
+								<span><?= $n['app_code']." | ".$n['lastname'].", ".$n['firstname']." ".$n['middlename']." ".$n['suffix'];?>( <i style='color:red;'>Duplicate? ) ( <?=$stats?> ) </i></span>
 							</div>
 							<div class="col-sm-4" style='padding-top:5px; padding-bottom:5px;'>
 								<input type="checkbox" name="duplicate[]" value="<?= $key; ?>">
@@ -56,11 +63,20 @@
 				
 				foreach ($duplicate_MI as $keys => $n) 
 				{ 
+					$app_status = $this->initial_model->get_appId_process($n['app_code']);
+					if($app_status != "")
+					{
+						$stats = $app_status;
+					}
+					else
+					{
+						$stats = "No Status";
+					}
 					?>
 					<div class="row" style='padding-left:5px; border-bottom:1px solid grey;'>
 						<div class="col-sm-8" style='padding-top:5px; padding-bottom:5px;'>
-							<span style='display:none;' id="<?= $keys ?>"><?= $n['app_code']."|".$n['lastname']."|".$n['firstname']."|".$n['middlename'];?></span>
-							<span><?= $n['app_code']." | ".$n['lastname'].", ".$n['firstname']." ".$n['middlename'];?> ( <i style='color:red;'>Duplicate?</i> )</span>
+							<span style='display:none;' id="<?= $keys ?>"><?= $n['app_code']."|".$n['lastname']."|".$n['firstname']."|".$n['middlename']."|".$n['suffix'];?></span>
+							<span><?= $n['app_code']." | ".$n['lastname'].", ".$n['firstname']." ".$n['middlename']." ".$n['suffix'];?> ( <i style='color:red;'>Duplicate? ) ( <?=$stats?> ) </i></span>
 						</div>
 						<div class="col-sm-4" style='padding-top:5px; padding-bottom:5px;'>
 							<input type="checkbox" name="duplicate_MI[]" value="<?= $keys; ?>">
@@ -127,7 +143,7 @@
 							</div> -->
 							<div class="form-group">
 								 <label for="hrmsId">POLICE CLEARANCE</label><span class="text-red spouse-is-required"> * ( Required )</span>
-								 <input type="file" name='police_clearance' class="form-control" id="police_clearance" required>
+								 <input type="file" name='police_clearance' class="form-control" id="police_clearance" required onchange="validateForm(this.id)">
 							</div>
 							<!-- <div class="form-group">
 								 <label for="hrmsId">FINGERPRINT</label><span class="text-red spouse-is-required"> * ( Required )</span>
@@ -162,13 +178,13 @@
 								 <input type="text" data-inputmask='"mask": "9999-9999-9999"' data-mask name='pagibig_mid' class="form-control" id="pagibig_mid" >
 							</div> -->
 							<div class="form-group">
-								 <label for="hrmsId"><a href="#" id="addOtherDocs">* Add other documents</a></label>
-								 <table  id="seminar" class="order-list1">
+								 <label for="hrmsId"><a href="#" id="add_OtherDocs">* Add other documents</a></label>
+								 <table  id="seminar" class="order-list2">
 									
 									<tbody>
 											<tr>
 											  <td><input name="documentName[]" type="text" class="form-control"></td>
-											  <td><input name="otherDoc[]" id='otherDoc' onchange='validate(this.id)' type="file" class="form-control"></td>
+											  <td><input name="otherDoc[]" id='otherDoc' onchange='validateForm(this.id)' type="file" class="form-control"></td>
 											  <td><a class="deleteRow"></a></td>
 											</tr>		
 									</tbody>
@@ -187,7 +203,7 @@
 							</div> -->
 							<div class="form-group">
 								<label for="hrmsId">RECOMMENDATION LETTER</label><span class="text-red spouse-is-required"> * ( Required )</span>
-								<input type="file" name='recommend_letter' class="form-control" id="recommend_letter" required>
+								<input type="file" name='recommend_letter' class="form-control" id="recommend_letter" required onchange="validateForm(this.id)">
 							</div>
 							<!-- <div class="form-group">
 								<label for="hrmsId">MARRIAGE CERTIFICATE</label><span class="text-red spouse-is-required"> * ( Required )</span>
@@ -234,20 +250,19 @@
 		<script type="text/javascript">
 		var counter1 = 0;
 			
-		$("#addOtherDocs").on("click", function () 
+		$("#add_OtherDocs").on("click", function () 
 		{
-			var counter1 = $('#documentName tr').length - 2;
-			var newRow = $("<tr>");
-			var cols = "";
-			cols += '<td><input type="text" name="documentName[]" id="documentName' + counter1 + '" onchange="check(this)" class="form-control" ></td>';
-			cols += '<td><input name="otherDoc[]" id="otherDoc['+counter1+']" onchange="validate(this.id)" type="file" class="form-control" ></td>';
-			cols += '<td><input type="button" class="ibtnDelsem" value="Delete" class="form-control" ></td>';
-			newRow.append(cols);
-			$("table.order-list1").append(newRow);
-			counter1++;
+			$.ajax({
+					url: "<?php echo site_url('append_other_Docs'); ?>",
+					success: function(response)
+					{
+						$("table.order-list2").append(response);
+					}
+				});
+			
 		});
 		
-		$("table.order-list1").on("click", ".ibtnDelsem", function (event) 
+		$("table.order-list2").on("click", ".ibtnDelsem", function (event) 
 		{
 			$(this).closest("tr").remove();
 			counter1--;
@@ -301,7 +316,7 @@
 						<div class="col-sm-6" style='padding-left:0px; padding-right:5px;'>
 							<div class="form-group">
 								<label for="hrmsId">BLOOD TYPE</label><span class="text-red spouse-is-required"> * ( Required )</span>
-								<select class="form-control" name="bloodtype" required>
+								<select class="form-control" name="bloodtype" >
 									<option value=''>Select Type</option>
 									<option value='A+'>A+</option>
 									<option value='A-'>A-</option>
@@ -321,41 +336,41 @@
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">POLICE CLEARANCE</label><span class="text-red spouse-is-required"> * ( Required )</span>
-								 <input type="file" name='police_clearance' class="form-control" id="police_clearance" required onchange="validateForm(this.id)">
+								 <input type="file" name='police_clearance' class="form-control" id="police_clearance" required onchange="validateForm(this.id)" >
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">FINGERPRINT</label><span class="text-red spouse-is-required"> * ( Required )</span>
-								 <input type="file" name='fingerprint' class="form-control" id="fingerprint" required onchange="validateForm(this.id)">
+								 <input type="file" name='fingerprint' class="form-control" id="fingerprint" required onchange="validateForm(this.id)" >
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">SSS</label><span class="text-red spouse-is-required"> * ( Required )</span>
-								 <input type="file" name='sss' class="form-control" id="sss" required onchange="validateForm(this.id)">
+								 <input type="file" name='sss' class="form-control" id="sss" required onchange="validateForm(this.id)" >
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">CEDULA</label><span class="text-red spouse-is-required"> * ( Required )</span>
-								 <input type="file" name='cedula' class="form-control" id="cedula" required onchange="validateForm(this.id)">
+								 <input type="file" name='cedula' class="form-control" id="cedula" required onchange="validateForm(this.id)" >
 							</div>
 							<div class="form-group">
 								<?php // condition for AGE is below 18  
 									if($age_of_app < 18) { ?> 
 									<label for="hrmsId">PARENT CONSENT</label><span class="text-red spouse-is-required"> * ( Required )</span>
-									<input type="file" name='parentconsent' class="form-control" id="parentconsent" required onchange="validateForm(this.id)">
+									<input type="file" name='parentconsent' class="form-control" id="parentconsent" required onchange="validateForm(this.id)" >
 								<?php } else { ?>
 									<label for="hrmsId">PARENT CONSENT</label><span class="text-red spouse-is-required"></span>
-									<input type="file" name='parentconsent' class="form-control" id="parentconsent">
+									<input type="file" name='parentconsent' class="form-control" id="parentconsent" disabled>
 								<?php } ?> 
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">MEDICAL CERTIFICATE</label><span class="text-red spouse-is-required"> * ( Required )</span>
-								 <input type="file" name='medical' class="form-control" id="medical" required onchange="validateForm(this.id)">
+								 <input type="file" name='medical' class="form-control" id="medical" required onchange="validateForm(this.id)" >
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">HOUSE ADDRESS SKETCH</label><span class="text-red spouse-is-required"> * ( Required )</span>
-								 <input type="file" name='house_skecth' class="form-control" id="house_skecth" required onchange="validateForm(this.id)">
+								 <input type="file" name='house_skecth' class="form-control" id="house_skecth" required onchange="validateForm(this.id)" >
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">PAG-IBIG TRACKING</label><span class="text-red spouse-is-required"> * ( Required )</span>
-								 <input type="text" data-inputmask='"mask": "9999-9999-9999"' data-mask name='pagibig_track' class="form-control" id="pagibig_track" required>
+								 <input type="text" data-inputmask='"mask": "9999-9999-9999"' data-mask name='pagibig_track' class="form-control" id="pagibig_track" >
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">PAG-IBIG MID</label>
@@ -368,7 +383,7 @@
 									<tbody>
 											<tr>
 											  <td><input name="documentName[]" type="text" class="form-control"></td>
-											  <td><input name="otherDoc[]" id='otherDoc' onchange='validate(this.id)' type="file" class="form-control"></td>
+											  <td><input name="otherDoc[]" id='otherDoc' onchange='validateForm(this.id)' type="file" class="form-control"></td>
 											  <td><a class="deleteRow"></a></td>
 											</tr>		
 									</tbody>
@@ -379,23 +394,23 @@
 						<div class="col-sm-6" style='padding-left:5px; padding-right:0px;'>
 							<div class="form-group">
 								<label for="hrmsId">BACKGROUND INVESTIGATION</label><span class="text-red spouse-is-required"> * ( Required )</span>
-								<input type="file" name='background_investagation' class="form-control" id="background_investagation" required onchange="validateForm(this.id)">
+								<input type="file" name='background_investagation' class="form-control" id="background_investagation" required onchange="validateForm(this.id)" >
 							</div>
 							<div class="form-group">
 								<label for="hrmsId">DRUG TEST</label><span class="text-red spouse-is-required"> * ( Required )</span>
-								<input type="file" name='drugtest' class="form-control" id="drugtest" required onchange="validateForm(this.id)">
+								<input type="file" name='drugtest' class="form-control" id="drugtest" required onchange="validateForm(this.id)" >
 							</div>
 							<div class="form-group">
 								<label for="hrmsId">RECOMMENDATION LETTER</label><span class="text-red spouse-is-required"> * ( Required )</span>
-								<input type="file" name='recommend_letter' class="form-control" id="recommend_letter" required onchange="validateForm(this.id)">
+								<input type="file" name='recommend_letter' class="form-control" id="recommend_letter" required onchange="validateForm(this.id)" >
 							</div>
 							<div class="form-group">
 								<?php if(strtoupper($finale['civilstatus']) != "SINGLE") {?>
 									<label for="hrmsId">MARRIAGE CERTIFICATE</label><span class="text-red spouse-is-required"> * ( Required )</span>
-									<input type="file" name='marriage' class="form-control" id="marriage" required onchange="validateForm(this.id)">
+									<input type="file" name='marriage' class="form-control" id="marriage" required onchange="validateForm(this.id)" >
 								<?php } else { ?>
 									<label for="hrmsId">MARRIAGE CERTIFICATE</label><span class="text-red spouse-is-required"></span>
-									<input type="file" name='marriage' class="form-control" id="marriage" >
+									<input type="file" name='marriage' class="form-control" id="marriage" disabled>
 								<?php }?>
 							</div>
 							<div class="form-group">
@@ -412,7 +427,8 @@
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">Issued On (CTC)</label><span class="text-red spouse-is-required"> * ( Required )</span>
-								 <input type="text" data-inputmask='"mask": "9999-99-99"' data-mask name='issued_on_ctc' class="form-control" id="issued_on_ctc" placeholder='yyyy-mm-dd' required>
+								 <input type="text" name='issued_on_ctc' class="form-control datepicker inputForm" data-inputmask="'alias': 'mm/dd/yyyy'" data-mask="" id="issued_on_ctc" required>
+								 <!-- <input type="text" data-inputmask='"mask": "9999-99-99"' data-mask name='issued_on_ctc' class="form-control" id="issued_on_ctc" placeholder='yyyy-mm-dd' required> -->
 							</div>
 							<div class="form-group">
 								 <label for="hrmsId">Issued At (CTC)</label><span class="text-red spouse-is-required"> * ( Required )</span>
@@ -441,15 +457,22 @@
 			
 		$("#addOtherDocs").on("click", function () 
 		{
-			var counter1 = $('#documentName tr').length - 2;
-			var newRow = $("<tr>");
-			var cols = "";
-			cols += '<td><input type="text" name="documentName[]" id="documentName' + counter1 + '" onchange="check(this)" class="form-control" ></td>';
-			cols += '<td><input name="otherDoc[]" id="otherDoc['+counter1+']" onchange="validate(this.id)" type="file" class="form-control" ></td>';
-			cols += '<td><input type="button" class="ibtnDelsem" value="Delete" class="form-control" ></td>';
-			newRow.append(cols);
-			$("table.order-list1").append(newRow);
-			counter1++;
+			$.ajax({
+					url: "<?php echo site_url('append_otherDocs'); ?>",
+					success: function(response)
+					{
+						$("table.order-list1").append(response);
+					}
+				});
+			// var counter1 = $('#documentName tr').length - 2;
+			// var newRow = $("<tr>");
+			// var cols = "";
+			// cols += '<td><input type="text" name="documentName[]" id="documentName' + counter1 + '" onchange="check(this)" class="form-control" ></td>';
+			// cols += '<td><input name="otherDoc[]" id="otherDoc['+counter1+']" onchange="validate(this.id)" type="file" class="form-control" ></td>';
+			// cols += '<td><input type="button" class="ibtnDelsem" value="Delete" class="form-control" ></td>';
+			// newRow.append(cols);
+			// $("table.order-list1").append(newRow);
+			// counter1++;
 		});
 		
 		$("table.order-list1").on("click", ".ibtnDelsem", function (event) 
@@ -459,6 +482,14 @@
 			$('#addOtherDocs').prop('disabled', false).prop('value', "Add row");
 		});
 			
+		$('.datepicker').datepicker({
+				inline: true,
+				changeYear: true,
+				changeMonth: true
+			});
+
+		//$("[data-mask]").inputmask();
+		
 		$("[data-mask]").inputmask();
 		
 		</script>
@@ -469,14 +500,16 @@
 		?>
 		<div class="panel-body">
 			<div class="form-group">
-				 <label for="hrmsId">APPLICANT ID</label>
+				 <!--label for="hrmsId">APPLICANT ID</label-->
 				 <input type="hidden" name='appcode' class="form-control" id="appcode"  value='<?=$applicant_examinee['appcode']?>' readonly required>
-				 <input type="text" name='appid' class="form-control" id="appid"  value='<?=$applicant_examinee['app_id']?>' readonly >
+				 <input type="hidden" name='interviewer' class="form-control" id="interviewer"  value='<?=$interviewer_list['interviewer_id']?>' readonly required>
+				 <input type="hidden" name='interview_code' class="form-control" id="interview_code"  value='<?=$interviewer_list['interview_code']?>' readonly required>
+				 <input type="hidden" name='appid' class="form-control" id="appid"  value='<?=$applicant_examinee['app_id']?>' readonly >
 			</div>
 			
 			<div class="form-group">
 				 <label for="hrmsId">APPLICANT NAME</label>
-				 <input type="text" name='name' class="form-control" id="name"  value='<?=$applicant_examinee['lastname'].", ".$applicant_examinee['firstname']." ".$applicant_examinee['middlename']." ".$applicant_examinee['suffix']?>' readonly >
+				 <input type="text" name='name' class="form-control" id="name"  value='<?=$applicant_examinee['app_id']." - ".$applicant_examinee['lastname'].", ".$applicant_examinee['firstname']." ".$applicant_examinee['middlename']." ".$applicant_examinee['suffix']?>' readonly >
 			</div>
 			
 			<div class="form-group">
@@ -488,18 +521,17 @@
 				<label for="hrmsId">FINAL INTERVIEWER</label>
 				<table class='table table-bordered table-hover dataTable dtr-inline' id='ty'>
 					<thead>
-						<th style='width:60%; background-color:lightblue;'>INTERVIEWER</th>
-						<th style='width:20%; background-color:lightblue;'>GRADE</th>
-						<th style='width:20%; background-color:lightblue;'>ACTION</th>
+						<th style='width:70%; background-color:lightblue;'>INTERVIEWER</th>
+						<th style='width:30%; background-color:lightblue;'>GRADE</th>
 					</thead>
 					<tbody>
 						<tr>
 							<input type='hidden' name='grade' value='<?=$this->initial_model->getGrade($interviewer_list['interview_code'])['num_rate']?>'>
-							<td style='background-color:lightblue;'><u><?=$this->initial_model->getName($interviewer_list['interviewer_id'])?></u></td>
+							
+							<td style='background-color:lightblue;'><?=$interviewer_list['interviewer_id']." - ".$this->initial_model->getName($interviewer_list['interviewer_id'])?></td>
 							<td style='color:red; background-color:lightblue;'>
 							<?=$this->initial_model->getGrade($interviewer_list['interview_code'])['num_rate']." - ".
 							$this->initial_model->getGrade($interviewer_list['interview_code'])['desc_rate']?></td>
-							<td><button type="button" class="btn btn-default" id='sheet'>Print Sheet</button><td>
 						</tr>	
 					</tbody>
 				</table>
@@ -515,6 +547,19 @@
 			</div>
 								
 		</div>
+		<script type="text/javascript">
+			var grade = $("[name='grade']").val();
+			if(grade != "")
+			{
+				$("button#sheet").prop('disabled', true);
+				$("button#inputGrade").prop('disabled', true);
+			}
+			else
+			{
+				$("button#sheet").prop('disabled', false);
+				$("button#inputGrade").prop('disabled', false);
+			}
+		</script>
 		<?php
 	}
 	else if($request == "applicant_initial_interview")
@@ -554,29 +599,33 @@
 				 <input type="text" name='name' class="form-control" id="name"  value='<?=$hired['app_id']." - ".$hired['lastname'].", ".$hired['firstname']." ".$hired['middlename']." ".$hired['suffix']?>' readonly>
 			</div>
 			
-			<div class="form-group">
+			<!-- <div class="form-group">
 				 <label for="agency">AGENCY</label>
 				 <select class="form-control" name="agency" onchange="select_agency(this.value)">
 					<option value='0'>Select Agency</option>
 					<?php 
-						$resultype = $this->initial_model->agency(); 
-						foreach ($resultype as $i)  
-						{ ?>
-							<option value='<?=$i['agency_code']?>'><?=$i['agency_name']?></option><?php 
-						} ?>
+						//$resultype = $this->initial_model->agency(); 
+						//foreach ($resultype as $i)  
+						//{ 
+							?>
+							<option value='<?//=$i['agency_code']?>'><?//=$i['agency_name']?></option>
+							<?php 
+						//}
+						?>
 				  </select>
 				 
-			</div>
+			</div> -->
 			
 			<div class="form-group">
 				 <label for="company">COMPANY</label>
-				 <select class="form-control" name="company" onchange="selectProduct(this.value)" required>
+				 <!-- <select class="form-control" name="company" onchange="selectProduct(this.value)" required> -->
+				 <select class="form-control" name="company" required>
 					<option value=''>Select</option>
 					<?php 
 						$r = $this->initial_model->company(); 
 						foreach ($r as $i)  
 						{ ?>
-							<option value='<?=$i['pc_code']?>'><?=$i['pc_name']?></option><?php 
+							<option value='<?=$i['company_code']?>'><?=$i['company_name']?></option><?php 
 						} ?>
 				  </select>
 				 
@@ -584,39 +633,56 @@
 			
 			<div class="form-group">
 				 <label for="company">PROMO TYPE</label>
-				 <select class="form-control" name="promotype" required>
+				 <select class="form-control" name="promotype" required onchange="getV(this.value)">
 					<option value=''>Select</option>
 					<option value='Roving'>ROVING</option>
 					<option value='Station'>STATION</option>
 				  </select>
-				 
+				  <!-- <input type="hidden" name='promoV' class="form-control" readonly> -->
 			</div>
 			
-			<div class="form-group">
-				 <label for="company">BUSINESS UNIT</label>
-				 <?php $result = $this->initial_model->business_unit(); ?>
-				 <table class="table table-bordered">
+			<div class="form-group" >
+				<label for="company">BUSINESS UNIT</label>
+				<?php $result = $this->initial_model->business_unit(); ?>
+				<table class="table table-bordered" style='display:none;' id='rovingDiv'>
 					<tr>
-						<td colspan="2"><b>SELECT STORE</b></td>
+						<td colspan="2" style='padding-left:20px;'><b>SELECT STORE</b></td>
 					</tr>
 					<?php
-					
 					foreach ($result as $i) { ?>
 					<tr>
 						<td>
 							<input type="checkbox" name='check[]' value="<?php echo $i['bunit_id'].'/'.$i['bunit_field']; ?>">
-							<!--input type="checkbox" name='check[]' value="<?php //echo $i['bunit_id'].'/'.$i['bunit_field']; ?>" onchange="intro_letter()"-->
 						</td>
 						<td><?= $i['bunit_name'] ?></td>
 					</tr>
-					<?php }?>
-					
+					<?php }?>	
+				</table>
+
+				<table class="table table-bordered" id='stationDiv'>
+					<tr>
+						<td colspan="2" style='padding-left:20px;'><b>SELECT STORE</b></td>
+					</tr>
+					<?php
+					foreach ($result as $i) { ?>
+					<tr>
+						<td>
+							<input type="radio" name='check[]' id='check[]' value="<?php echo $i['bunit_id'].'/'.$i['bunit_field']; ?>">
+						</td>
+						<td><?= $i['bunit_name'] ?></td>
+					</tr>
+					<?php }?>	
 				</table>
 			</div>
+
+			<!-- <div class="form-group" >
+				 <label for="company">BUSINESS UNIT</label>
+				 <?php //$result = $this->initial_model->business_unit(); ?>	 
+			</div> -->
 			
 			<div class="form-group">
 				 <label for="company">DEPARTMENT</label>
-				 <select class="form-control" name="department" required onchange="locate_vendor(this.value)">
+				 <select class="form-control" name="department" onchange="locate_vendor(this.value)">
 					<option value=''>Select</option>
 					<?php 
 						$r = $this->initial_model->department(); 
@@ -665,8 +731,8 @@
 				<label for="company">INCLUSIVE DATES</label>
 				<table class="table table-bordered">
 					<tr>
-						<td><input type="text" name="startDate" id="startDate" class="form-control datepicker" placeholder="Start Date" autocomplete='off' required></td>
-						<td><input type="text" name="endDate" id='endDate' class="form-control datepicker" placeholder="End Date" onchange="getDuration()" autocomplete='off' required></td>
+						<td style='padding:0px;'><input type="text" name="startDate" id="startDate" class="form-control datepicker" placeholder="Start Date" autocomplete='off' required></td>
+						<td style='padding:0px;'><input type="text" name="endDate" id='endDate' class="form-control datepicker" placeholder="End Date" onchange="getDuration()" autocomplete='off' required></td>
 					</tr>
 					
 				</table>	 
@@ -692,23 +758,36 @@
 		</div>
 		
 		<script>
-		  $('#states').select2({
-			 dropdownParent: $('#parent')
-		  });
-		  $('#states').on('select2:open', function (e) {
-			const evt = "scroll.select2";
-			$(e.target).parents().off(evt);
-			$(window).off(evt);
-		  });  
-				  
-		$('.datepicker').datepicker({
-				inline: true,
-				changeYear: true,
-				changeMonth: true
+			
+			// var $checksStudentActivities = $("input[name = 'check[]']").change(function () {
+			// var numRadioButton = $checksStudentActivities.filter(':checked').length;
+			// var m = $("input[name = 'promoV']").val();
+
+			// 	if(numRadioButton > 1 && m!= "Roving")
+			// 	{
+			// 		alert("You're not allowed to select more than one.. Thanks!")	
+			// 	}
+			// });
+			//===============================
+			$('#states').select2({
+				dropdownParent: $('#parent')
 			});
-		
-		$('.select2').select2();
-		$("span.select2").css("width", "100%");
+			//============================================
+			$('#states').on('select2:open', function (e) {
+				const evt = "scroll.select2";
+				$(e.target).parents().off(evt);
+				$(window).off(evt);
+			});  
+			//============================		
+			$('.datepicker').datepicker({
+					inline: true,
+					changeYear: true,
+					changeMonth: true
+				});
+			
+			$('.select2').select2();
+			$("span.select2").css("width", "100%");
+
 		</script>
 		<?php
 	}
@@ -740,8 +819,9 @@
 	{
 		$split_contact = explode(",",$checkduplicate['contactno']);
 		?>
-			<input type = 'text' value='UPDATE' name='procedure'>
-			<input type = 'text' value="<?=$checkduplicate['app_id']?>" name='hrmsId'>
+			<input type="text" value='<?=$check_record['applicants']['app_code']?>' name='application_code'  style='border:0px; font-size:9px; width:30px;' readonly>
+			<input type = 'text' value='UPDATE' name='procedure' style='border:0px; font-size:9px; width:35px;' readonly>
+			<input type = 'text' value="<?=$checkduplicate['app_id']?>" name='hrmsId' style='border:0px; font-size:9px; width:60px;' readonly>
 			
 			<div class="wrapper" style='padding:5px; '>
 				<div class="col-sm-6">
@@ -752,77 +832,78 @@
 							<div class="panel-body">
 								<div class="form-group"> <span class="text-red">*</span>
 									 <label for="firstname">Firstname <i style='color:red; font-size:11px;'> ( Required )</i></label>
-									 <input type="text" value='<?=$check_record['applicants']['firstname']?>' name='firstname' class="form-control" id="firstname"  required>
+									 <input type="text" value='<?=$check_record['applicants']['firstname']?>' name='firstname' class="form-control" id="firstname"  required readonly="readonly">
 								</div>
 								<div class="form-group">
 									 <label for="suffix">Suffix <i style='color:red; font-size:11px;'></i></label>
-									 <input type="text" value='<?=$check_record['applicants']['suffix']?>' name='suffix' class="form-control" id="suffix" >
+									 <input type="text" value='<?=$check_record['applicants']['suffix']?>' name='suffix' class="form-control" id="suffix" readonly="readonly">
 								</div>
 								<div class="form-group">
 									 <label for="middlename">Middlename <i style='color:red; font-size:11px;'></i></label>
-									 <input type="text" value='<?=$check_record['applicants']['middlename']?>' name='middlename' class="form-control" id="middlename" >
+									 <input type="text" value='<?=$check_record['applicants']['middlename']?>' name='middlename' class="form-control" id="middlename" readonly="readonly">
 								</div>
 								<div class="form-group"> <span class="text-red">*</span>
 									 <label for="lastname">Lastname <i style='color:red; font-size:11px;'> ( Required )</i></label>
-									 <input type="text" value='<?=$check_record['applicants']['lastname']?>' name='lastname' class="form-control" id="lastname" required>
+									 <input type="text" value='<?=$check_record['applicants']['lastname']?>' name='lastname' class="form-control" id="lastname" required readonly="readonly">
 								</div>
 								<div class="form-group"> <span class="text-red">*</span>
 									 <label for="birthdate">Date of Birth <i style='color:red; font-size:11px;'> ( Required )</i></label>
-									 <input type="text" name='birthdate' class="form-control datepicker inputForm" id="birthdate" required value='<?=date("m-d-Y",strtotime($checkduplicate['birthdate'])) ?>'>
+									 <input type="text" name='birthdate' class="form-control datepicker inputForm" id="birthdate" required value='<?=date("m/d/Y",strtotime($checkduplicate['birthdate'])) ?>'>
 								</div>
 								<div class="form-group"> <span class="text-red">*</span>
 									 <label for="gender">Gender <i style='color:red; font-size:11px;'> ( Required )</i></label>
-									 <select class="form-control" name="gender" required>
+										<select class="form-control" name="gender" required readonly="readonly">
 											<option value='<?=$check_record['new_details']['gender']?>'><?=$check_record['new_details']['gender']?></option>
 											<?php 
-												if($check_record['new_details']['gender'] == "Male")
-													{ echo "<option value='Female'>Female</option>"; }
-												else
-													{ echo "<option value='Male'>Male</option>"; }
+												// if($check_record['new_details']['gender'] == "Male")
+												// 	{ echo "<option value='Female'>Female</option>"; }
+												// else
+												// 	{ echo "<option value='Male'>Male</option>"; }
 											?>
-									  </select>	
+										</select>	
 								</div>
 								<div class="form-group"> <span class="text-red">*</span>
 									 <label for="civilstatus">Civil Status <i style='color:red; font-size:11px;'> ( Required )</i></label>
-									 <select class="form-control" name="civilstatus" required onchange="check_status(this.value)">
-										<option value='<?=$check_record['new_details']['civilstatus']?>'><?=$check_record['new_details']['civilstatus']?></option>
-										<?php if($check_record['new_details']['civilstatus'] == "Single")
-											{ 
-												echo "<option value='Married'>Married</option>"; 
-												echo "<option value='Widowed'>Widowed</option>"; 
-												echo "<option value='Separated'>Separated</option>";
-												echo "<option value='Divorced'>Divorced</option>";
-											}
-										else if($check_record['new_details']['civilstatus'] == "Married")	
-											{ 
-												echo "<option value='Single'>Single</option>"; 
-												echo "<option value='Widowed'>Widowed</option>"; 
-												echo "<option value='Separated'>Separated</option>";
-												echo "<option value='Divorced'>Divorced</option>"; 
-											}
-										else if($check_record['new_details']['civilstatus'] == "Widowed")	
-											{ 
-												echo "<option value='Single'>Single</option>";
-												echo "<option value='Married'>Married</option>";  
-												echo "<option value='Separated'>Separated</option>";
-												echo "<option value='Divorced'>Divorced</option>"; 
-											}
-										else if($check_record['new_details']['civilstatus'] == "Separated")
-											{ 
-												echo "<option value='Single'>Single</option>";
-												echo "<option value='Married'>Married</option>"; 
-												echo "<option value='Widowed'>Widowed</option>";
-												echo "<option value='Divorced'>Divorced</option>";  
-											}
-										else if($check_record['new_details']['civilstatus'] == "Divorced")
-											{ 
-												echo "<option value='Single'>Single</option>";
-												echo "<option value='Married'>Married</option>"; 
-												echo "<option value='Widowed'>Widowed</option>"; 
-												echo "<option value='Separated'>Separated</option>"; 
-											}
-										?>
-									  </select>	
+									 	<select class="form-control" name="civilstatus" required onchange="check_status(this.value)" readonly="readonly">
+											<option value='<?=$check_record['new_details']['civilstatus']?>'><?=$check_record['new_details']['civilstatus']?></option>
+											<?php 
+											// if($check_record['new_details']['civilstatus'] == "Single")
+											// 	{ 
+											// 		echo "<option value='Married'>Married</option>"; 
+											// 		echo "<option value='Widowed'>Widowed</option>"; 
+											// 		echo "<option value='Separated'>Separated</option>";
+											// 		echo "<option value='Divorced'>Divorced</option>";
+											// 	}
+											// else if($check_record['new_details']['civilstatus'] == "Married")	
+											// 	{ 
+											// 		echo "<option value='Single'>Single</option>"; 
+											// 		echo "<option value='Widowed'>Widowed</option>"; 
+											// 		echo "<option value='Separated'>Separated</option>";
+											// 		echo "<option value='Divorced'>Divorced</option>"; 
+											// 	}
+											// else if($check_record['new_details']['civilstatus'] == "Widowed")	
+											// 	{ 
+											// 		echo "<option value='Single'>Single</option>";
+											// 		echo "<option value='Married'>Married</option>";  
+											// 		echo "<option value='Separated'>Separated</option>";
+											// 		echo "<option value='Divorced'>Divorced</option>"; 
+											// 	}
+											// else if($check_record['new_details']['civilstatus'] == "Separated")
+											// 	{ 
+											// 		echo "<option value='Single'>Single</option>";
+											// 		echo "<option value='Married'>Married</option>"; 
+											// 		echo "<option value='Widowed'>Widowed</option>";
+											// 		echo "<option value='Divorced'>Divorced</option>";  
+											// 	}
+											// else if($check_record['new_details']['civilstatus'] == "Divorced")
+											// 	{ 
+											// 		echo "<option value='Single'>Single</option>";
+											// 		echo "<option value='Married'>Married</option>"; 
+											// 		echo "<option value='Widowed'>Widowed</option>"; 
+											// 		echo "<option value='Separated'>Separated</option>"; 
+											// 	}
+											?>
+									  	</select>	
 								</div>
 								<div class="form-group"> <span class="text-red">*</span>
 									 <label for="citizenship">Citizenship <i style='color:red; font-size:11px;'> ( Required )</i></label>
@@ -974,7 +1055,7 @@
 								</div>
 								<div class="form-group"><span class="text-red">*</span>
 									 <label for="contact_person">Contact Person</label><i style='color:red; font-size:11px;'> ( Required )</i>
-									 <input type="text" name='contact_person' class="form-control" autocomplete="off" id="contact_person" required value="<?=$checkduplicate['contact_person']?>">
+									 <input type="text" name='contact_person' class="form-control" autocomplete="off" id="contact_person" required value="<?=$checkduplicate['contact_person']?>" style="text-transform: capitalize;">
 								</div>
 								<div class="form-group"><span class="text-red">*</span>
 									 <label for="contact_person_address">Contact Person Address</label><i style='color:red; font-size:11px;'> ( Required )</i>
@@ -1312,7 +1393,9 @@
 	else if($request == "applicant_new_record")
 	{
 		?>
-			<input type = 'text' value='INSERT' name='procedure'>
+			<!-- <input type = 'text' value='INSERT' name='procedure'> -->
+			<input type="text" value='<?=$check_record['applicants']['app_code']?>' name='application_code' style='border:0px; font-size:9px; width:35px;' readonly>
+			<input type = 'text' value='INSERT' name='procedure' style='border:0px; font-size:9px; width:35px;' readonly>
 			<div class="wrapper" style='padding:5px; '>
 				<div class="col-sm-6">
 					<div class="panel panel-default">
@@ -1342,57 +1425,60 @@
 								</div>
 								<div class="form-group"> <span class="text-red">*</span>
 									 <label for="gender">Gender <i style='color:red; font-size:11px;'> ( Required )</i></label>
-									 <select class="form-control" name="gender" required>
-											<option value='<?=$check_record['new_details']['gender']?>'><?=$check_record['new_details']['gender']?></option>
+									 <input type="text"  class="form-control" name="gender" required value='<?=$check_record['new_details']['gender']?>' readonly="readonly">
+									 <!-- <select class="form-control" name="gender" required readonly="readonly">
+											<option value='<?//=$check_record['new_details']['gender']?>'><?//=$check_record['new_details']['gender']?></option>
 											<?php 
-												if($check_record['new_details']['gender'] == "Male")
-													{ echo "<option value='Female'>Female</option>"; }
-												else
-													{ echo "<option value='Male'>Male</option>"; }
+												// if($check_record['new_details']['gender'] == "Male")
+												// 	{ echo "<option value='Female'>Female</option>"; }
+												// else
+												// 	{ echo "<option value='Male'>Male</option>"; }
 											?>
-									  </select>	
+									  </select>	 -->
 								</div>
 								<div class="form-group"> <span class="text-red">*</span>
 									 <label for="civilstatus">Civil Status <i style='color:red; font-size:11px;'> ( Required )</i></label>
-									 <select class="form-control" name="civilstatus" required onchange="check_status(this.value)">
-										<option value='<?=$check_record['new_details']['civilstatus']?>'><?=$check_record['new_details']['civilstatus']?></option>
-										<?php if($check_record['new_details']['civilstatus'] == "Single")
-											{ 
-												echo "<option value='Married'>Married</option>"; 
-												echo "<option value='Widowed'>Widowed</option>"; 
-												echo "<option value='Separated'>Separated</option>";
-												echo "<option value='Divorced'>Divorced</option>";
-											}
-										else if($check_record['new_details']['civilstatus'] == "Married")	
-											{ 
-												echo "<option value='Single'>Single</option>"; 
-												echo "<option value='Widowed'>Widowed</option>"; 
-												echo "<option value='Separated'>Separated</option>";
-												echo "<option value='Divorced'>Divorced</option>"; 
-											}
-										else if($check_record['new_details']['civilstatus'] == "Widowed")	
-											{ 
-												echo "<option value='Single'>Single</option>";
-												echo "<option value='Married'>Married</option>";  
-												echo "<option value='Separated'>Separated</option>";
-												echo "<option value='Divorced'>Divorced</option>"; 
-											}
-										else if($check_record['new_details']['civilstatus'] == "Separated")
-											{ 
-												echo "<option value='Single'>Single</option>";
-												echo "<option value='Married'>Married</option>"; 
-												echo "<option value='Widowed'>Widowed</option>";
-												echo "<option value='Divorced'>Divorced</option>";  
-											}
-										else if($check_record['new_details']['civilstatus'] == "Divorced")
-											{ 
-												echo "<option value='Single'>Single</option>";
-												echo "<option value='Married'>Married</option>"; 
-												echo "<option value='Widowed'>Widowed</option>"; 
-												echo "<option value='Separated'>Separated</option>"; 
-											}
-										?>
-									  </select>	
+									 	<input type="text" class="form-control" name="civilstatus" value='<?=$check_record['new_details']['civilstatus']?>' readonly required>
+									 	<!-- <select class="form-control" name="civilstatus" required onchange="check_status(this.value)" readonly="readonly"> >
+											
+											<?php
+												// if($check_record['new_details']['civilstatus'] == "Single")
+												// 	{ 
+												// 		echo "<option value='Married'>Married</option>"; 
+												// 		echo "<option value='Widowed'>Widowed</option>"; 
+												// 		echo "<option value='Separated'>Separated</option>";
+												// 		echo "<option value='Divorced'>Divorced</option>";
+												// 	}
+												// else if($check_record['new_details']['civilstatus'] == "Married")	
+												// 	{ 
+												// 		echo "<option value='Single'>Single</option>"; 
+												// 		echo "<option value='Widowed'>Widowed</option>"; 
+												// 		echo "<option value='Separated'>Separated</option>";
+												// 		echo "<option value='Divorced'>Divorced</option>"; 
+												// 	}
+												// else if($check_record['new_details']['civilstatus'] == "Widowed")	
+												// 	{ 
+												// 		echo "<option value='Single'>Single</option>";
+												// 		echo "<option value='Married'>Married</option>";  
+												// 		echo "<option value='Separated'>Separated</option>";
+												// 		echo "<option value='Divorced'>Divorced</option>"; 
+												// 	}
+												// else if($check_record['new_details']['civilstatus'] == "Separated")
+												// 	{ 
+												// 		echo "<option value='Single'>Single</option>";
+												// 		echo "<option value='Married'>Married</option>"; 
+												// 		echo "<option value='Widowed'>Widowed</option>";
+												// 		echo "<option value='Divorced'>Divorced</option>";  
+												// 	}
+												// else if($check_record['new_details']['civilstatus'] == "Divorced")
+												// 	{ 
+												// 		echo "<option value='Single'>Single</option>";
+												// 		echo "<option value='Married'>Married</option>"; 
+												// 		echo "<option value='Widowed'>Widowed</option>"; 
+												// 		echo "<option value='Separated'>Separated</option>"; 
+												// 	}
+											?>
+									  	<!-- </select>	 -->
 								</div>
 								<div class="form-group"> <span class="text-red">*</span>
 									 <label for="citizenship">Citizenship <i style='color:red; font-size:11px;'> ( Required )</i></label>
@@ -1462,8 +1548,8 @@
 									 <input type="text" name='guardian' class="form-control" id="guardian" autocomplete='off'>
 								</div>
 								<div class="form-group">
-									 
-									 <?php if(in_array($check_record['new_details']['gender'], array('Married', 'Widowed')))
+									
+									 <?php if(in_array($check_record['new_details']['civilstatus'], array('Married', 'Widowed')))
 									 {
 										 ?>
 										 <span class="text-red spouse-is-required">*</span>
@@ -1913,9 +1999,14 @@
 							{
 								$n=$z['exam_codename'];
 							}
-							?>
-							<option value='<?=$i['exam_code']?>'><?=$i['exam_code']." - ".$n?></option><?php 
-						} ?>
+							if($i['exam_code'] == "CG" || $i['exam_code'] == "CL" || $i['exam_code'] == "DISER-HF" || $i['exam_code'] == "H.S/E.L/G")
+							{ 
+								?>
+								<option value='<?=$i['exam_code']?>'><?=$i['exam_code']." - ".$n?></option>
+								<?php 
+							} 
+						}
+					?>
 				</select>
 			</div>	
 		</div>
@@ -2075,7 +2166,197 @@
 			</script>
 		<?php
 	}
+	else if ($request == 'append_otherDocs')
+	{
+		$characters = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		$string = '';
+			for ($i = 0; $i < 3; $i++) 
+			{
+				$string .= $characters[rand(0, strlen($characters) - 1)];
+			} 
+		?>
+			<tr>
+			<td><input type="text" name="documentName[]" class="form-control" ></td>
+			<td><input name="otherDoc[]" id="otherDoc_<?php echo $string;?>" onchange="validateForm(this.id)" type="file" class="form-control" ></td>
+			<td><input type="button" class="ibtnDelsem" value="Delete" class="form-control" ></td>
+			</tr>
+		<?php
+	}
 
+	else if ($request == 'append_other_Docs')
+	{
+		$characters = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		$string = '';
+			for ($i = 0; $i < 3; $i++) 
+			{
+				$string .= $characters[rand(0, strlen($characters) - 1)];
+			} 
+		?>
+			<tr>
+			<td><input type="text" name="documentName[]" class="form-control" ></td>
+			<td><input name="otherDoc[]" id="otherDoc_<?php echo $string;?>" onchange="validateForm(this.id)" type="file" class="form-control" ></td>
+			<td><input type="button" class="ibtnDelsem" value="Delete" class="form-control" ></td>
+			</tr>
+		<?php
+	}
+	else if($request == 'input_grades')
+	{
+		$resultype = $this->initial_model->interview_question(); 
+
+		?>
+		<div style='padding-top:10px; padding-bottom:10px'>
+			<div style='text-align:center; font-size:25px;'>ALTURAS GROUP OF COMPANY</div>
+			<div style='text-align:center;'>INTERVIEW: APPLICANT EVALUATION FORM</div>
+		</div>
+		
+		<input type='hidden' name='interview_code'>
+		<input type='hidden' name='app_id'>
+		<input type='hidden' name='interviewer'>
+		<input type='hidden' name='appcode'>
+		<div class="col-sm-12">	
+			<table>
+				<td style='border:1px solid grey; width:10%; text-align:center; padding:20px;'>SCORING</td>
+				<td style='border:1px solid grey; padding:5px;'>Applicant evaluation forms are to be completed by the interviewer to rank the candidates' overall qualifications for the position to which they have applied. Under each heading the interviewer should give the candidate a numerical rating and write a specific job related comments in the space provided.</td>						 
+			</table>
+		</div>
+		<div style='padding:40px;'></div>
+		<div class="col-sm-12">	
+			<center>
+				<table>	
+				<td style='padding-left:5px; padding-right:5px;'><i style='color:red;'>1.0-6.9 (VU)</i> - <u>Very Unsatisfactory</u></td>
+				<td style='padding-left:5px; padding-right:5px;'><i style='color:red;'>7.0-8.4 (US)</i> - <u>Unsatisfactory</u></td>					
+				<td style='padding-left:5px; padding-right:5px;'><i style='color:red;'>8.5-8.9 (S)</i> - <u>Satisfactory</u></td>
+				<td style='padding-left:5px; padding-right:5px;'><i style='color:red;'>9.0-9.9 (VS)</i> - <u>Very Satisfactory</u></td>
+				<td style='padding-left:5px; padding-right:5px; '><i style='color:red;'>10.0 (E)</i> - <u>Excelent</u></td>							 
+				</table>
+			</center>
+		</div>
+		<div class="col-sm-12" style='padding:10px;'></div>
+	
+			<div class="col-sm-12" >
+				<table style='width:100%;'>
+					<?php
+					foreach ($resultype as $ii)  
+					{ 
+						
+					?>
+					<tr style='width:70%;'>
+						<td style='border-top:1px solid grey; border-left:1px solid grey; text-align:left; padding-left:20px;'>
+							<input type='hidden' value='<?=$ii['no']?>' name='num[]'>	
+							<i><b><?=$ii['no']?>. <u><?=$ii['title']?></u></b></i>
+						</td>
+						
+						<td rowspan='2' style='border:1px solid grey; text-align:center; padding-left:15px; padding-right:15px;'>
+							<select class="form-control selection" name='select_grade[]' onchange='getTotal()'>
+								<?php 
+									for($i = 0; $i<=10; $i+=.1)
+									{
+										?>
+											<option value='<?php echo $i; ?>'><?php echo number_format($i, 1); ?></option>
+										<?php
+									}
+								?>
+							</select>
+						</td>
+					</tr>
+					<tr style='width:30%;'>
+						<td style='border-bottom:1px solid grey; border-left:1px solid grey; padding: 5px;'> 
+							<?=$ii['description']?>
+						</td>						 
+					</tr>
+					<tr style='width:100%;'>
+						<td colspan='2' style='border:1px solid grey;'>	
+							<input type='text' class='form-control' name='remarks[]' placeholder='Please type your remarks here...' autocomplete='off'>
+						</td>
+					</tr>
+					<?php } ?>
+
+				</table>
+				
+				<div class="col-sm-12" style='padding:10px;'></div>
+				
+				<center>
+					<table style='width:80%;'>
+						<tr>
+							<td style='text-align:center;'>	
+								NUMERICAL RATING
+							</td>
+							<td style='width:25%; border:1px solid grey;'>
+								<input type='text' class='form-control' name='num_rate' readonly>
+							</td>
+							<td style='text-align:center;'>		
+								DESCRIPTIVE RATING
+							</td>
+							<td style='width:25%; border:1px solid grey;'>
+								<input type='text' class='form-control' name='desc_rate' readonly>
+							</td>		
+						</tr>
+					</table>
+				</center>
+
+				<div class="col-sm-12" style='padding:10px;'></div>
+
+				<table style='width:100%;'>
+					<tr>
+						<td colspan='2' style='width:100%; padding-left:15px;'>
+							<i><b>Overall Impression and Recommendation. Final comments/recommendations for applicant evaluation.</b></i>
+						</td>	
+					</tr>
+					<tr style='width:100%;'>
+						<td colspan='2' style='text-align:left; padding-bottom: 5px; padding-right:10px; padding-left:10px;'>	
+							<textarea class='form-control' style='resize:none; height:80px;' name='final_remarks'></textarea>
+						</td>
+					</tr>			
+				</table>
+			</div>
+
+		<div class="col-sm-12" style='padding:10px;'></div>
+		<?php
+	}
+	else if($request == "transfer_applicant")
+	{
+		?>
+			<div class="panel-body">		
+				<div class="form-group">
+					<label for="hrmsId">APPLICANT NAME</label>
+					<input type='text'  class='form-control' value='<?=$applicant_info['app_id']." - ".$applicant_info['lastname'].", ".$applicant_info['firstname']." ".$applicant_info['middlename']." ".$applicant_info['suffix']?>' readonly>
+					<input type='hidden' value=<?=$applicant_info['app_code']?> name='appcode'>
+					<input type='hidden' value=<?=$applicant_info['app_id']?> name='appid'>
+					<input type='hidden' value='<?=$position['position']?>' name='pre_position'>
+					<input type='hidden' value='<?=$position['status']?>' name='pre_status'>
+				</div>
+
+				<div class="form-group">
+					<label for="hrmsId">POSITION</label>
+					<select class="form-control" name="position" required>
+						<option value='<?=$position['position']?>'><?=$position['position']?></option>
+						<?php $result = $this->initial_model->position();
+							foreach ($result as $res) 
+							{ 
+								if($res['poslevel_no'] == '458' || $res['poslevel_no'] == '459' || $res['poslevel_no'] == '522' || $res['poslevel_no'] == '523' || $res['poslevel_no'] == '525')
+								{
+									?>
+										<option value="<?php echo $res['position_title']; ?>"><?php echo $res['position_title']; ?></option> 
+									<?php
+								}
+								
+							} ?>
+					</select>
+				</div>
+			
+				<div class="form-group">
+					<label>PROCESS</label>
+					<select class="form-control" name="process_status" required>
+						<option value='<?=$applicant_info['status']?>'><?=strtoupper($applicant_info['status'])?></option>
+						<option value='for exam'>EXAMINATION</option>
+						<option value='for interview'>INTERVIEW</option>
+						<option value='for final completion'>FINAL COMPLETION</option>
+						<option value='for hiring'>HIRING</option>
+					</select>
+				</div>						
+			</div>
+		<?php
+	}
 ?>
 
 

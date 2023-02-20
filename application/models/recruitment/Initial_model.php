@@ -70,7 +70,7 @@ class Initial_model extends CI_Model
 	}
 	public function check_duplicate_MI_applicant($data)
 	{
-		$query = $this->db->select('app_code,firstname, middlename,lastname')
+		$query = $this->db->select('app_code,firstname, middlename,lastname,suffix')
 									->from('applicants')
 									->group_start()
 									->where('firstname',trim($data['firstname']))
@@ -85,7 +85,7 @@ class Initial_model extends CI_Model
 	}
 	public function check_duplicate_applicant($data)
 	{
-		$query = $this->db->select('app_code,firstname, middlename,lastname')
+		$query = $this->db->select('app_code,firstname, middlename,lastname,suffix')
 									->from('applicants')
 									->where('firstname',trim($data['firstname']," "))
 									->where('lastname',trim($data['lastname']," "))
@@ -119,6 +119,23 @@ class Initial_model extends CI_Model
 		return $refference = $query->result_array();
 	}
 
+	public function get_appId_process($appcode)
+	{
+		$query = $this->db->from('applicant')
+									->where('appcode',$appcode)
+									->get();
+		$refference = $query->row_array();
+		return $this->get_emp_Status($refference['app_id']);
+	}
+
+	public function get_emp_Status($id)
+	{
+		$query = $this->db->from('employee3')
+									->where('emp_id',$id)
+									->get();
+		$refference = $query->row_array();
+		return $refference['current_status'];
+	}
 	// function for checking duplicate applicant recorded for applicant table
 	public function check_applcant_duplicate($lastname,$firstname,$middlename,$suffix)
 	{
@@ -156,9 +173,9 @@ class Initial_model extends CI_Model
 	public function check_employee_existince($data)
 	{		
 		return $this->db->select('emp_id')
-		->from('employee3')
-		->where('emp_id', $data)
-		->count_all_results();
+						->from('employee3')
+						->where('emp_id', $data)
+						->count_all_results();
 	}
 	
 	public function applicant_otherrequirment($fileType,$fetch_data)
@@ -253,34 +270,6 @@ class Initial_model extends CI_Model
 		
 	}
 	
-	public function insert_uploaded_info($fileV,$fileType,$appcode)
-	{
-		if($fileV == 'resume')
-		{
-			$requiName = "Resume";
-		}
-		elseif($fileV == 'application')
-		{
-			$requiName = "Application Letter";
-		}
-		elseif($fileV == 'transcript')
-		{
-			$requiName = "Transcript of Record";
-		}
-		
-		$data = array(
-				'filename' 				=> $fileType,
-				'app_code'				=> $appcode,
-				'requirement_name' 		=> $requiName,
-				'receiving_staff'		=> $_SESSION['emp_id'],
-				'date_time'				=> date("Y-m-d"),
-				'requirement_status'	=> "passed"
-			);
-			
-		$this->db->insert('application_initialreq', $data); 
-		return $this->db->insert_id(); 
-	}
-	
 	public function check_upload_finalcompletion($value,$fetch_data)
 	{
 		$temp 		= 	'jpg';
@@ -319,19 +308,19 @@ class Initial_model extends CI_Model
 				
 				if($filesize >= $maxsize) 
 				{
-					echo $file_name." file too large. File must be less than 2 megabytes.";
+					return $errors[] = $file_name." file too large. File must be less than 2 megabytes.";
 				}
 				else
 				{
 					if((!in_array($filetype, $acceptable)) && (!empty($filetype))) 
 					{
-						echo $file_name." file is invalid file type. Only PDF, JPG, GIF and PNG types are accepted.";
+						return $errors[] = $file_name." file is invalid file type. Only PDF, JPG, GIF and PNG types are accepted.";
 					}
 					else
 					{
 						if(move_uploaded_file($_FILES[$value]["tmp_name"][$i],$target_folder.''.$filename))
 						{
-							$finalreq = $this->initial_model->insert_finalreq_info($value,$location,$fetch_data);
+							return $finalreq = $this->initial_model->insert_finalreq_info($value,$location,$fetch_data);
 						}
 					}
 				}
@@ -346,79 +335,80 @@ class Initial_model extends CI_Model
 			{
 				$file_name 		= "Police Clearance";
 				$target_folder 	= $target_dir."police_clearance/";
-				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d his").".".$temp;
 				$location 		= $target_folder.$filename;
 			}
 			else if($value == "fingerprint")
 			{
 				$file_name 		= "Fingerprint";
 				$target_folder 	= $target_dir."fingerprint/";
-				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d his").".".$temp;
 				$location 		= $target_folder.$filename;
 			}
 			else if($value == "sss")
 			{
 				$file_name 		= "SSS";
 				$target_folder 	= $target_dir."sss/";
-				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d his").".".$temp;
 				$location 		= $target_folder.$filename;
 			}
 			else if($value == "cedula")
 			{
 				$file_name 		= "Cedula";
 				$target_folder 	= $target_dir."cedula/";
-				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d his").".".$temp;
 				$location 		= $target_folder.$filename;
 			}
 			else if($value == "parentconsent")
 			{
 				$file_name 		= "Parent Consent";
 				$target_folder 	= $target_dir."parent_consent/";
-				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d his").".".$temp;
 				$location 		= $target_folder.$filename;
 			}
 			else if($value == "medical")
 			{
 				$file_name 		= "Medical Certificate";
 				$target_folder 	= $target_dir."medical_certificate/";
-				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d his").".".$temp;
 				$location 		= $target_folder.$filename;
 			}
 			else if($value == "house_skecth")
 			{
 				$file_name 		= "House Sketch";
 				$target_folder 	= $target_dir."sketch/";
-				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d his").".".$temp;
 				$location 		= $target_folder.$filename;
 			}
 			else if($value == "background_investagation")
 			{
 				$file_name 		= "Background Investagation";
 				$target_folder 	= $target_dir."bi/";
-				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d his").".".$temp;
 				$location 		= $target_folder.$filename;
 			}
 			else if($value == "drugtest")
 			{
 				$file_name 		= "Drug Test";
 				$target_folder 	= $target_dir."drug_test/";
-				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d his").".".$temp;
 				$location 		= $target_folder.$filename;
 			}
 			else if($value == "recommend_letter")
 			{
 				$file_name 		= "Recommendation Letter";
 				$target_folder 	= $target_dir."recommendation_letter/";
-				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d his").".".$temp;
 				$location 		= $target_folder.$filename;
 			}
 			else if($value == "marriage")
 			{
 				$file_name 		= "Marriage Certificate";
 				$target_folder 	= $target_dir."marriage_certificate/";
-				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d").".".$temp;
+				$filename 		= $value."_".$fetch_data['appid']."_".date("Y-m-d his").".".$temp;
 				$location 		= $target_folder.$filename;
 			}
+			
 			//-------------------------------------------------//
 			if($filesize >= $maxsize) 
 			{
@@ -440,6 +430,36 @@ class Initial_model extends CI_Model
 			}
 		}
 	}
+
+	public function insert_uploaded_info($fileV,$fileType,$appcode)
+	{
+		if($fileV == 'resume')
+		{
+			$requiName = "Resume";
+		}
+		elseif($fileV == 'application')
+		{
+			$requiName = "Application Letter";
+		}
+		elseif($fileV == 'transcript')
+		{
+			$requiName = "Transcript of Record";
+		}
+		
+		$data = array(
+				'filename' 				=> $fileType,
+				'app_code'				=> $appcode,
+				'requirement_name' 		=> $requiName,
+				'receiving_staff'		=> $_SESSION['emp_id'],
+				'date_time'				=> date("Y-m-d"),
+				'requirement_status'	=> "passed"
+			);
+			
+		$this->db->insert('application_initialreq', $data); 
+		return $this->db->insert_id(); 
+	}
+	
+	
 	
 	public function get_appId()
 	{
@@ -478,9 +498,11 @@ class Initial_model extends CI_Model
 		$year 			= 	date('Y');
 		$contactNumber 	= 	$fetch_data['contact1'].",".$fetch_data['contact2'];
 		$town_explode = explode(",",$fetch_data['address']);
-
+		
+		//print_r($fetch_data);
+		
 		if($fetch_data['procedure'] == "UPDATE")
-		{
+		{	
 			$data = array(
 							'lastname'					=> trim(ucfirst($fetch_data['lastname'])),
 							'firstname'					=> trim(ucfirst($fetch_data['firstname'])),
@@ -526,7 +548,9 @@ class Initial_model extends CI_Model
 			return $this->db->update('applicant', $data);
 		}
 		else
-		{
+		{	
+			//return $fetch_data['procedure'];
+			
 			$data = array(
 						'app_id'					=> $fetch_data['appId'],
 						'id'						=> $fetch_data['id'],
@@ -573,10 +597,8 @@ class Initial_model extends CI_Model
 						);
 
 			return $this->db->insert('applicant', $data);
-		}
-			
+		}		
 	}
-	
 	public function save_exam_scores($fetch_data)
 	{
 		// query for getting the exam category
@@ -648,6 +670,7 @@ class Initial_model extends CI_Model
 		$this->db->set('interview_code', $int_code);
 		$this->db->where(array('id' => $id));
 		$this->db->update('application_interview_details');
+		return 1;
 	}
 	
 	public function save_initial_interview($fetch_data)
@@ -672,13 +695,17 @@ class Initial_model extends CI_Model
 		$this->db->set('interview_code', $int_code);
 		$this->db->where(array('id' => $id));
 		$this->db->update('application_interview_details');
+
+		return 1;
 	}
 	
 	public function updateBloodtype($fetch_data)
 	{
-		$this->db->set('bloodtype', $fetch_data['bloodtype']);
-		$this->db->where(array('app_id' => $fetch_data['appid']));
-		$this->db->update('applicant');
+		$data = array('bloodtype' => $fetch_data['bloodtype']);
+		$update_cndtn = array('app_id' => $fetch_data['appid']);
+		
+		$this->db->where($update_cndtn);
+		$this->db->update('applicant', $data);
 	}
 	
 	public function history_info_append($fetch_data)
@@ -955,7 +982,19 @@ class Initial_model extends CI_Model
 						);
 		$this->db->insert('application_employment_history', $data);
 	}
-	
+	public function update_status_and_change_position($data)
+	{
+		$data_applicant = array(	
+								'position'		=> $data['position'],						
+								'status' 		=> $data['process_status']
+							);
+
+		$update_condition = array('app_code' => $data['appcode']);
+		$this->db->where($update_condition);
+		return $this->db->update('applicants', $data_applicant);
+	}	 
+
+
 	public function insert_initial_applicant_info($fetch_data)
 	{	
 		$date_added = date("Y-m-d");
@@ -1098,26 +1137,34 @@ class Initial_model extends CI_Model
 	public function hold_applicants()
     {
 		$query = $this->db->from('applicants')
-							->where("(status = 'exam failed' OR status = 'interview failed') AND tagged_to = 'nesco'")
-							
+							->join('applicant', 'applicants.app_code = applicant.appcode')
+							->where("(applicants.status = 'failed exam' OR applicants.status = 'exam failed' OR applicants.status = 'interview failed') AND tagged_to = 'nesco'")
 							->order_by('app_code', 'ASC')
 							->get();
         return $query->result_array();
     }
 	
-	public function deploy_applicants()
+	
+	public function new_employee_applicants()
     {
-		$query = $this->db->from('applicants')
+		$query = $this->db->select('app_code,applicants.status,applicants.lastname,applicants.firstname,applicants.middlename,applicants.suffix,applicants.position,applicants.date_time,app_id')
+							->from('applicants')
 							->join('applicant', 'applicants.app_code = applicant.appcode')
-							->where("applicants.status = 'new employee' AND applicants.tagged_to = 'nesco'")
+							->where("(applicants.status = 'new employee') AND applicants.tagged_to = 'nesco'")
 							->order_by('app_code', 'ASC')
 							->get();
         return $query->result_array();
-		// $query = $this->db->from('applicants')
-							// ->where("status = 'new employee' AND tagged_to = 'nesco'")
-							// ->order_by('app_code', 'ASC')
-							// ->get();
-        // return $query->result_array();
+    }
+
+	public function deploy_applicants()
+    {
+		$query = $this->db->select('app_code,applicants.status,applicants.lastname,applicants.firstname,applicants.middlename,applicants.suffix,applicants.position,applicants.date_time,app_id')
+							->from('applicants')
+							->join('applicant', 'applicants.app_code = applicant.appcode')
+							->where("(applicants.status = 'deployed') AND applicants.tagged_to = 'nesco'")
+							->order_by('app_code', 'ASC')
+							->get();
+        return $query->result_array();
     }
 	
 	public function applicants_for_exam()
@@ -1168,7 +1215,7 @@ class Initial_model extends CI_Model
 						'sss_no'			=>	$fetch_data['sss_id'],
 						'card_no'			=>	$fetch_data['id_card'],
 						'cedula_no'			=>	$fetch_data['ctc_no'],
-						'cedula_date'		=>	$fetch_data['issued_on_ctc'],
+						'cedula_date'		=>	date("Y-m-d", strtotime($fetch_data['issued_on_ctc'])),
 						'cedula_place'		=>	$fetch_data['issued_at_ctc'],
 						'recordedby'		=> 	$_SESSION['emp_id'],
 						'pagibig_tracking' 	=> 	$fetch_data['pagibig_track'],
@@ -1179,7 +1226,7 @@ class Initial_model extends CI_Model
 		$dataUp = array(
 							'sss_no'			=>	$fetch_data['sss_id'],
 							'cedula_no'			=>	$fetch_data['ctc_no'],
-							'cedula_date'		=>	$fetch_data['issued_on_ctc'],
+							'cedula_date'		=>	date("Y-m-d", strtotime($fetch_data['issued_on_ctc'])),
 							'cedula_place'		=>	$fetch_data['issued_at_ctc'],
 							'recordedby'		=> 	$_SESSION['emp_id'],
 							'pagibig_tracking' 	=> 	$fetch_data['pagibig_track']
@@ -1204,7 +1251,41 @@ class Initial_model extends CI_Model
 					->get_where('application_interview_details', array('interviewee_id' => $data));
 		return $que->row_array()['val'];	
 	}
-	
+	public function save_interview_rate($data)
+	{
+		$data_rate = array(
+							'interview_code'	=>	$data['interview_code'],
+							'num_rate'			=>	$data['num_rate'],
+							'desc_rate'			=>	$data['desc_rate']
+						);
+		
+		return $this->db->insert('application_interview_totalrates', $data_rate);
+	}
+	public function update_interview_detail($data)
+	{
+		$data_detail = array(
+								'interview_status'		=>	$data['interview_stat'],
+								'interviewer_remarks'	=>	$data['final_remarks'],
+								'date_interviewed'		=>	date('Y-m-d')
+							);	
+		$this->db->where('interview_code', $data['interview_code']);	
+		return $this->db->update('application_interview_details', $data_detail);
+	}
+	public function save_interview_grade($data)
+	{
+		foreach($data['select_grade'] as $i => $grade) 
+		{
+			$data_grade = array(
+							'interview_code'	=>	$data['interview_code'],
+							'no'				=>	$data['num'][$i],
+							'rate'				=>	$grade,
+							'remarks'			=>	$data['remarks'][$i]
+							);
+
+			$this->db->insert('application_interview_rates', $data_grade);
+		}
+		return 1;
+	}
 	public function get_Initial_interviewer_list($data)
 	{
 		$query = $this->db->from('application_interview_details')
@@ -1230,7 +1311,229 @@ class Initial_model extends CI_Model
 					->get('application_interview_details');
 		return $que->row_array()['val'];		
 	}
-	
+	function getApplicant_ID($id)
+	{
+		$query = $this->db->from('applicant')
+							->where("appcode = '$id'")
+							->get();
+        $row = $query->row_array();
+		return $row['app_id'];
+	}
+
+	function check_app_code($id)
+	{
+		$query = $this->db->from('application_history')
+							->where("app_id = '$id'")
+							->get();
+        $row = $query->row_array();
+		return $row['no'];
+	}
+	public function save_application_history($data)
+	{
+		
+		if($data['app_history_tag'] == 1) // initial saving history
+		{ 
+			if($data['updt_or_appnd'] == "INSERT")
+			{
+				$applicant_id = $data['appcode'];
+			} 
+			else
+			{
+				$applicant_id = $data['hidden_code'];
+			}
+			
+			$data_history = array(
+							'app_id'		=>	$applicant_id,
+							'date_time'		=>	date('Y-m-d'),
+							'description'	=>	"initial requirements checked",
+							'position'		=>	$data['position'],
+							'phase' 		=>	"Initial Completion",
+							'status' 		=>	"Completed"
+						);
+		}
+		else if($data['app_history_tag'] == 2) // application history tag for Record Applicant
+		{
+			if($data['procedure'] == "UPDATE")
+			{
+				$appId = $data['hrmsId'];
+			}
+			else if($data['procedure'] == "INSERT")
+			{
+				$appId = $data['appId'];
+			}
+			
+			$data_history = array(
+				'app_id'		=>	$appId,
+				'date_time'		=>	date('Y-m-d'),
+				'description'	=>	"recorded as new applicant",
+				'position'		=>	$data['position_applied'],
+				'phase' 		=>	"Initial Completion",
+				'status' 		=>	"Successful"
+			);
+
+			// update application code to application id
+			$check = $this->check_app_code($data['application_code']);
+			if(!empty($check))
+			{
+				$data = array('app_id' 	=> $appId);
+				$this->db->where('no', $check);
+				$d = $this->db->update('application_history', $data);	
+			}
+		}
+		else if($data['app_history_tag'] == 4) // history tag for Applicant encoded manual interview
+		{
+			$position = $this->applicant_position_apply($data['appcode']);
+			$interviewer_name = $this->getName($data['interviewer']);
+			$desc = "done interview with ".$interviewer_name." grades encoded by ".$_SESSION['name'];
+
+			$data_history = array(
+								'app_id'		=>	$data['app_id'],
+								'date_time'		=>	date('Y-m-d'),
+								'description'	=>	$desc,
+								'position'		=>	$position['position'],
+								'phase' 		=>	"Interview",
+								'status' 		=>	$data['interview_stat']
+						);
+		}
+		else if($data['app_history_tag'] == 5) // save exam result history
+		{
+			$description = "done taking exam";
+		
+			$data_history = array(
+								'app_id'		=> $data['appid'],
+								'date_time'		=> date("Y-m-d"),
+								'description'	=> $description,
+								'position'		=> $data['applying'],
+								'phase'			=> 'Examination',
+								'status'		=> 'Completed',
+							);
+		}
+		else if($data['app_history_tag'] == 6) // tag interview
+		{
+			$data_history = array(
+								'app_id'		=> $data['app_id'],
+								'date_time'		=> date("Y-m-d"),
+								'description'	=> "tagged for interview",
+								'position'		=> $data['position'],
+								'phase'			=> 'Interview',
+								'status'		=> 'Tagged',
+							);
+		}
+		else if($data['app_history_tag'] == 7) // initial interview
+		{
+			$position = $this->applicant_position_apply($data['app_code']);
+			
+			$data_history = array(
+								'app_id'		=> $data['appid'],
+								'date_time'		=> date("Y-m-d"),
+								'description'	=> "done initial interview by: ".$this->getName($_SESSION['emp_id']),
+								'position'		=> $position['position'],
+								'phase'			=> 'Interview',
+								'status'		=> 'Successful',
+							);
+		}
+		else if($data['app_history_tag'] == 8) // setup  interviewer
+		{
+
+			$position = $this->applicant_position_apply($data['app_code']);
+			
+			$data_history = array(
+								'app_id'		=> $data['appid'],
+								'date_time'		=> date("Y-m-d"),
+								'description'	=> "done setting up interviewer - ".$this->getName($data['interviewer']),
+								'position'		=> $position['position'],
+								'phase'			=> 'Interview',
+								'status'		=> 'Successful',
+							);
+		}
+		else if($data['app_history_tag'] == 9) // setup  interviewer
+		{
+			$position = $this->applicant_position_apply($data['app_code']);
+			
+			$data_history = array(
+								'app_id'		=> $data['appid'],
+								'date_time'		=> date("Y-m-d"),
+								'description'	=> "done interviewed by - ".$this->getName($data['interviewer']),
+								'position'		=> $position['position'],
+								'phase'			=> 'Interview',
+								'status'		=> 'Successful',
+							);
+		}
+		else if($data['app_history_tag'] == 10) // final completion
+		{
+			$position = $this->applicant_position_apply($data['appcode']);
+			
+			$data_history = array(
+								'app_id'		=> $data['appid'],
+								'date_time'		=> date("Y-m-d"),
+								'description'	=> "final requirements checked",
+								'position'		=> $position['position'],
+								'phase'			=> 'Final Completion',
+								'status'		=> 'Successful',
+							);
+		}
+		else if($data['app_history_tag'] == 11) // hiring application 
+		{
+			$position = $this->applicant_position_apply($data['appcode']);
+			
+			$data_history = array(
+								'app_id'		=> $data['appid'],
+								'date_time'		=> date("Y-m-d"),
+								'description'	=> "recorded as new employee",
+								'position'		=> $position['position'],
+								'phase'			=> 'Hired',
+								'status'		=> 'Successful',
+							);
+		}
+		else if($data['app_history_tag'] == 12) // deploy application 
+		{
+			
+			$position = $this->applicant_position_apply($data['appcode']);
+			
+			$data_history = array(
+								'app_id'		=> $data['appid'],
+								'date_time'		=> date("Y-m-d"),
+								'description'	=> "recorded as new employee",
+								'position'		=> $position['position'],
+								'phase'			=> 'Hired',
+								'status'		=> 'Successful',
+							);
+		}
+		else if($data['app_history_tag'] == 13) // transfer application 
+		{
+			$position	=	strtoupper($data['pre_position'])." to ".strtoupper($data['position']);
+			$phase		=	strtoupper($data['pre_status'])." to ".strtoupper($data['process_status']);	
+			
+			$data_history = array(
+								'app_id'		=> $data['appid'],
+								'date_time'		=> date("Y-m-d"),
+								'description'	=> "transferred job application",
+								'position'		=> $position,
+								'phase'			=> $phase,
+								'status'		=> 'Successful',
+							);
+		}
+		// saving the application history
+		return $this->db->insert('application_history', $data_history);	
+	}
+	public function get_application_code($data)
+	{
+		$query = $this->db->select('applicant.appcode')
+							->from('applicant')
+							->where('app_id', $data)
+							->get();
+        return $query->row_array();
+	}
+	public function save_interview_manual($data)
+	{
+		$data_manual_interview = array(
+										'interview_code'	=>	$data['interview_code'],
+										'encoded_by'		=>	$_SESSION['emp_id'],
+										'date_encoded'		=>	date('Y-m-d')	
+									);
+
+		return $this->db->insert('application_interview_manual', $data_manual_interview);	
+	}
 	public function applicants_for_finalcompletion()
     {
 		$query = $this->db->select('applicants.app_code, applicant.app_id, applicants.lastname, applicants.middlename, applicants.firstname, applicants.suffix, applicants.date_time, applicants.position')
@@ -1244,8 +1547,9 @@ class Initial_model extends CI_Model
 	
 	public function company()
 	{
-		$query = $this->db->from('locate_promo_company')
-							->order_by('pc_name', 'ASC')
+		$query = $this->db2->from('promo_locate_company')
+							->where('agency_code', 29)
+							->order_by('company_name', 'ASC')
 							->get();
 			return $query->result_array();	
 	}
@@ -1328,6 +1632,51 @@ class Initial_model extends CI_Model
 							->order_by('app_code', 'ASC')
 							->get();
         return $query->result_array();
+    }
+	
+	public function newEmp_count_applicant()
+	{
+		$query = $this->db->from('applicants')
+							->where("(status = 'new employee') AND (tagged_to = 'nesco')")
+							->order_by('app_code', 'ASC')
+							->get();
+        return $query->num_rows();
+	}
+	// counting Hold list applicants
+	public function hold_count_applicant()
+    {
+		$query = $this->db->from('applicants')
+							->where("(status = 'exam failed' OR status = 'interview failed') AND (tagged_to = 'nesco')")
+							->order_by('app_code', 'ASC')
+							->get();
+        return $query->num_rows();
+    }
+	// counting for deploy/new employee list applicants
+	public function deploy_count_applicant()
+    {
+		$query = $this->db->from('applicants')
+							->where("(status = 'deployed'  OR status = 'new employee') AND (tagged_to = 'nesco')")
+							->order_by('app_code', 'ASC')
+							->get();
+        return $query->num_rows();
+    }
+	// counting for final completion list applicants
+	public function finalcompletion_count_applicant()
+    {
+		$query = $this->db->from('applicants')
+							->where("(status = 'for final completion') AND (tagged_to = 'nesco')")
+							->order_by('app_code', 'ASC')
+							->get();
+        return $query->num_rows();
+    }
+	// counting for record list applicants
+	public function record_count_applicant()
+    {
+		$query = $this->db->from('applicants')
+							->where("(status = 'tagged') AND (tagged_to = 'nesco')")
+							->order_by('app_code', 'ASC')
+							->get();
+        return $query->num_rows();
     }
 	// dashboard counting examinees 
 	public function examcount_applicant()
@@ -1414,7 +1763,25 @@ class Initial_model extends CI_Model
 		$que = $this->db->get_where('applicant', array('app_id' => $fetch_data['id']));
 		return $que->row_array();	
 	}
+
+	public function applicant_info($fetch_data)
+	{
+		$query = $this->db->select('applicants.firstname,applicants.lastname,applicants.middlename,applicants.suffix,applicants.status,applicants.position,applicants.app_code,applicant.app_id')
+							->from('applicants')
+							->join('applicant', 'applicants.app_code = applicant.appcode')
+							->where("applicant.app_id", $fetch_data['id'])
+							->order_by('app_code', 'ASC')
+							->get();
+        return $query->row_array();
+	}
 	
+	public function interview_question()
+	{
+		$query = $this->db->from('application_interview_questions')
+							->get();
+        return $query->result_array();
+	}
+
 	public function applicant_position_apply($data)
 	{
 		$que = $this->db->get_where('applicants', array('app_code' => $data));
