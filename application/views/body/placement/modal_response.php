@@ -2308,11 +2308,11 @@ if ($request == "update_blacklist_form") {
                                 $result = $this->employee_model->company_list_under_agency($row['agency_code']);
                                 foreach ($result as $res) {
 
-                                    $company = $this->employee_model->getcompanyCodeBycompanyName($res->company_name);
+                                    $company_name = $res->company_name;
+                                    $company = $this->employee_model->getcompanyCodeBycompanyName($company_name);
                                     if (!empty($company)) {
                             ?>
-
-                                        <option value="<?= $company->pc_code ?>" <?php if ($row['promo_company'] == $res->company_name) echo "selected = ''"; ?>><?= $res->company_name ?></option>
+                                        <option value="<?= $company->pc_code ?>" <?php if ($row['promo_company'] == $company_name) echo "selected = ''"; ?>><?= $company_name ?></option>
                                     <?php
                                     }
                                     ?>
@@ -2343,8 +2343,8 @@ if ($request == "update_blacklist_form") {
                         <label>Promo Type</label>
                         <select name="promo_type" class="form-control" onchange="select_business_unit(this.value)" required>
                             <option value=""> --Select-- </option>
-                            <option value="STATION" <?php if ($row['promo_type'] == "STATION") echo "selected=''"; ?>>STATION</option>
-                            <option value="ROVING" <?php if ($row['promo_type'] == "ROVING") echo "selected=''"; ?>>ROVING</option>
+                            <option value="STATION" <?php if (strtolower($row['promo_type']) == "station") echo "selected=''"; ?>>STATION</option>
+                            <option value="ROVING" <?php if (strtolower($row['promo_type']) == "roving") echo "selected=''"; ?>>ROVING</option>
                         </select>
                     </div>
                 </div>

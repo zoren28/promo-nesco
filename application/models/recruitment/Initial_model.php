@@ -822,6 +822,8 @@ class Initial_model extends CI_Model
 	
 	public function employment_New_Record($fetch_data)
 	{
+		//$company = ;
+		
 		$insert = array(
             'name'				=> $fetch_data['name'],
 			'emp_id'    		=> $fetch_data['appid'],
@@ -845,10 +847,20 @@ class Initial_model extends CI_Model
             $this->db->set(end($bunit_field), 'T');
         }
 		
+		// save cut-off here
+		$dataC = array(
+					'statCut'    	=> $fetch_data['statCut'],
+					'recordNo'    	=> $record_no,
+					'empId'  		=> $fetch_data['appid'],
+					'date_setup' 	=> date("Y-m-d")
+        );
+		$this->db2->insert('promo_sched_emp', $dataC);
+
+
 		$this->db->set('record_no', $record_no);
         $this->db->set('emp_id', $fetch_data['appid']);
         $this->db->set('agency_code', $fetch_data['agency']);
-        $this->db->set('promo_company', $fetch_data['company']);
+        $this->db->set('promo_company', $this->getDisplay_Company($fetch_data['company']));
         $this->db->set('promo_department', $fetch_data['department']);
         $this->db->set('vendor_code', $fetch_data['vendor']);
         $this->db->set('company_duration', $fetch_data['duration_display']);
@@ -856,6 +868,8 @@ class Initial_model extends CI_Model
         $this->db->set('type', $fetch_data['contract']);
         $this->db->set('hr_location', "asc");
         $this->db->insert('promo_record');
+
+		
 		
 	}
 	public function employmentRecord($oldData,$fetch_data)
@@ -940,6 +954,15 @@ class Initial_model extends CI_Model
         $this->db->insert('employee3', $insert);
         $record_no = $this->db->insert_id();
 		
+		// save cut-off here
+		$dataC = array(
+            'statCut'    	=> $fetch_data['statCut'],
+            'recordNo'    	=> $record_no,
+            'empId'  		=> $fetch_data['appid'],
+            'date_setup' 	=> date("Y-m-d")
+        );
+		$this->db2->insert('promo_sched_emp', $dataC);
+
 		//$company_name = $this->employee_model->get_company_name($fetch_data['company'])->pc_name;
 		foreach ($fetch_data['check'] as $key => $value) {
 
@@ -950,7 +973,7 @@ class Initial_model extends CI_Model
 		$this->db->set('record_no', $record_no);
         $this->db->set('emp_id', $fetch_data['appid']);
         $this->db->set('agency_code', $fetch_data['agency']);
-        $this->db->set('promo_company', $fetch_data['company']);
+        $this->db->set('promo_company', $this->getDisplay_Company($fetch_data['company']));
         $this->db->set('promo_department', $fetch_data['department']);
         $this->db->set('vendor_code', $fetch_data['vendor']);
         $this->db->set('company_duration', $fetch_data['duration_display']);
@@ -1553,6 +1576,15 @@ class Initial_model extends CI_Model
 							->get();
 			return $query->result_array();	
 	}
+
+	public function getDisplay_Company($data)
+	{
+		$query = $this->db2->from('promo_locate_company')
+							->where('company_code', $data)
+							->get();	
+			$row = $query->row_array();
+			return $row['company_name'];
+	}
 	
 	public function department()
 	{
@@ -1599,6 +1631,7 @@ class Initial_model extends CI_Model
 							->get();
 		return $query->result_array();
 	}
+
 	public function check_agency($data)
 	{
 		$query = $this->db2->from('promo_locate_company')
@@ -1705,6 +1738,14 @@ class Initial_model extends CI_Model
 							->get();
         return $query->num_rows();
     }
+	
+	public function getCutoff()
+    {
+		$query = $this->db2->from('promo_schedule')
+							->get();
+        return $query->result_array();
+    }
+
 	public function attainment()
 	{
 		$query = $this->db->from('attainment')

@@ -596,7 +596,8 @@
 				 <input type="hidden" name='position' class="form-control" id="position"  value='<?=$apposition['position']?>'>
 				 <input type="hidden" name='appid' class="form-control" id="appid"  value='<?=$hired['app_id']?>'>
 				 <input type="hidden" name='hidden_name' class="form-control" id="hidden_name"  value='<?=$hired['lastname'].", ".$hired['firstname']." ".$hired['middlename']." ".$hired['suffix']?>'>
-				 <input type="text" name='name' class="form-control" id="name"  value='<?=$hired['app_id']." - ".$hired['lastname'].", ".$hired['firstname']." ".$hired['middlename']." ".$hired['suffix']?>' readonly>
+				 <input type="text" name='display_name' class="form-control" id="display_name"  value='<?=$hired['app_id']." - ".$hired['lastname'].", ".$hired['firstname']." ".$hired['middlename']." ".$hired['suffix']?>' readonly>
+				 <input type="hidden" name='name' class="form-control" id="name"  value='<?=$hired['lastname'].", ".$hired['firstname']." ".$hired['middlename']." ".$hired['suffix']?>' readonly>
 			</div>
 			
 			<!-- <div class="form-group">
@@ -635,8 +636,8 @@
 				 <label for="company">PROMO TYPE</label>
 				 <select class="form-control" name="promotype" required onchange="getV(this.value)">
 					<option value=''>Select</option>
-					<option value='Roving'>ROVING</option>
-					<option value='Station'>STATION</option>
+					<option value='ROVING'>ROVING</option>
+					<option value='STATION'>STATION</option>
 				  </select>
 				  <!-- <input type="hidden" name='promoV' class="form-control" readonly> -->
 			</div>
@@ -682,7 +683,7 @@
 			
 			<div class="form-group">
 				 <label for="company">DEPARTMENT</label>
-				 <select class="form-control" name="department" onchange="locate_vendor(this.value)">
+				 <select class="form-control" name="department" onchange="locate_vendor(this.value)" required>
 					<option value=''>Select</option>
 					<?php 
 						$r = $this->initial_model->department(); 
@@ -714,7 +715,7 @@
 			<div class="form-group">
 				<label for="company">EMPLOYEE TYPE</label>
 				<select name="emptype" class="form-control">
-					<option value="Promo-Nesco">Promo-Nesco</option>
+					<option value="Promo-NESCO">Promo-Nesco</option>
 				</select>	 
 			</div>
 			
@@ -722,8 +723,8 @@
 				<label for="company">CONTRACT TYPE</label>
 				<select name="contract" class="form-control" required>
 					<option value="">Select</option>
-					<option value="contractual">Contractual</option>
-					<option value="seassonal">Seasonnal</option>
+					<option value="Contractual">Contractual</option>
+					<option value="Seasonal">Seasonnal</option>
 				</select>	 
 			</div>
 			
@@ -743,7 +744,25 @@
 				<input type="text" name="duration_display" class="form-control" autocomplete='off' required >	 
 			</div>
 			
-			
+			<div class="form-group">
+				 <label for="company">CUT-OFF</label>
+				 <select class="form-control" name="statCut"  required>
+					<option value=''>Select</option>
+					<?php 
+						$r = $this->initial_model->getCutoff(); 
+						foreach ($r as $i)  
+						{ 
+							if($i['endFC'] == "")
+							{ 	$end_cut = "last";	} 
+							else
+							{ 	$end_cut = $i['endFC'];	}
+							?>
+							<option value='<?=$i['statCut']?>'><?=$i['statCut']." ( ".$i['startFC']."-".$end_cut." | ".$i['startSC']."-".$i['endSC']." )"?></option><?php 
+						} ?>
+				  </select>
+				 
+			</div>
+
 			<div class="form-group">
 				<div id='intro_letter'>
 			</div>

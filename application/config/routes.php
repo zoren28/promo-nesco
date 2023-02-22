@@ -139,6 +139,9 @@ $route['due_contract_xls'] = 'placement/dashboard/due_contract_xls';
 
 // for employee module
 $route['find_hr_staff'] = 'placement/employee/find_hr_staff';
+$route['applicant/find'] = 'placement/employee/find_applicant';
+$route['fetch_applicant_details/(:any)'] = 'placement/employee/fetch_applicant_details/$1';
+$route['tag_for_recruitment'] = 'placement/employee/tag_for_recruitment';
 $route['fetch_employee_masterfile'] = 'placement/employee/fetch_employee_masterfile';
 $route['fetch_assigned_department/(:any)'] = 'placement/employee/fetch_assigned_department/$1';
 $route['employee/search_employee'] = 'placement/employee/search_employee';

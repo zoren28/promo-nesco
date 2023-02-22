@@ -3,6 +3,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Employee extends CI_Controller
 {
+    public $hr_location = 'asc';
 
     function __construct()
     {
@@ -43,6 +44,26 @@ class Employee extends CI_Controller
 
             echo 'No Result Found';
         }
+    }
+
+    public function find_applicant()
+    {
+        $search = $this->input->get('query', TRUE);
+        $applicants = $this->employee_model->find_applicant($search);
+
+        $data = [];
+        foreach ($applicants as $applicant) {
+
+            if (!empty($applicant->suffix)) {
+
+                $name = "{$applicant->lastname}, {$applicant->firstname} {$applicant->middlename} {$applicant->suffix}";
+            } else {
+
+                $name = "{$applicant->lastname}, {$applicant->firstname} {$applicant->middlename}";
+            }
+            $data[] = "{$applicant->app_id}={$name}";
+        }
+        echo json_encode($data);
     }
 
     public function find_active_promo()
@@ -1834,6 +1855,156 @@ class Employee extends CI_Controller
 
                 echo '<option value="' . $value . '">' . $value . '</option>';
             }
+        }
+    }
+
+    public function fetch_applicant_details($app_id)
+    {
+        $applicant = $this->employee_model->fetch_applicant_details($app_id);
+        if (in_array($applicant['current_status'], ['Active', 'blacklisted', 'Deceased'])) {
+
+            echo json_encode([
+                'flag' => 0,
+                'status' => $applicant['current_status']
+            ]);
+        } else {
+
+            echo json_encode([
+                'flag' => 1,
+                'applicant_status' => $applicant['current_status'],
+                'status' => $applicant['status'],
+                'position' => $applicant['position']
+            ]);
+        }
+    }
+
+    public function tag_for_recruitment()
+    {
+        $this->load->library('form_validation');
+        $data = $this->input->post(NULL, TRUE);
+
+        $config = [
+            [
+                'field' => 'applicant',
+                'label' => 'Applicant',
+                'rules' => 'required'
+            ],
+            [
+                'field' => 'status',
+                'label' => 'Recruitment Process',
+                'rules' => 'required'
+            ],
+            [
+                'field' => 'position',
+                'label' => 'Position',
+                'rules' => 'required'
+            ]
+        ];
+        $this->form_validation->set_rules($config);
+        if ($this->form_validation->run() === FALSE) {
+
+            $errors = $this->form_validation->error_array();
+            echo json_encode([
+                'status' => 406,
+                'errors' => $errors
+            ]);
+        } else {
+
+            $applicant_details = '';
+            list($app_id, $name) = explode('=', $data['applicant']);
+            $applicant = $this->employee_model->get_appcode($app_id);
+
+            if ($data['status'] == 'initial_completion') {
+
+                $this->employee_model->delete_applicants($applicant['app_code']);
+                $this->employee_model->update_applicant(['appcode' => 0], ['app_id' => $app_id]);
+                $applicant_details = '';
+                $message = 'Applicant may process his/her initial requirements.';
+            }
+
+            if ($data['status'] == 'initialreq completed') {
+
+                $applicant_details = 'Initial Completion';
+                $message = 'Applicant is now in examination process.';
+            } else if ($data['status'] == 'for interview') {
+
+                $applicant_details = 'Examination';
+                $message = 'Applicant is now in interview process.';
+            } else if ($data['status'] == 'for training') {
+
+                $applicant_details = 'Training';
+                $message = 'Applicant is now in training process.';
+            } else if ($data['status'] == 'for final completion') {
+
+                $applicant_details = 'Final Completion';
+                $message = 'Applicant is now in final completion process.';
+            } else if ($data['status'] == 'for orientation') {
+
+                $applicant_details = 'Orientation';
+                $message = 'Applicant is now in orientation process.';
+            } else if ($data['status'] == 'for hiring') {
+
+                $applicant_details = 'Hiring';
+                $message = 'Applicant is now in hiring process.';
+            } else {
+
+                $applicant_details = 'Hired';
+                $message = 'Applicant is now in deployment process.';
+            }
+
+            if (!empty($applicant['app_code'])) {
+
+                $temp_data = $data;
+                unset($temp_data['applicant']);
+                unset($temp_data['applicant_status']);
+                $this->employee_model->update_applicants($temp_data, ['app_code' => $applicant['app_code']]);
+            } else {
+
+                $app = $this->employee_model->get_applicant_info($app_id);
+                $temp_data = [
+                    'lastname' => $app->lastname,
+                    'firstname' => $app->firstname,
+                    'middlename' => $app->middlename,
+                    'position' => $data['position'],
+                    'status' => $data['status'],
+                    'date_time' => date('Y-m-d'),
+                    'suffix' => $app->suffix,
+                    'entry_by' => $_SESSION['emp_id'],
+                    'tagged_to' => $data['tagged_to'],
+                    'hr_location' => $this->hr_location
+                ];
+
+                $app_code = $this->employee_model->create_applicants($temp_data);
+                $this->employee_model->update_applicant(['appcode' => $app_code], ['app_id' => $app_id]);
+            }
+
+            $application = $this->employee_model->application_details($app_id);
+            if (!empty($application)) {
+
+                $application_data = [
+                    'application_status' => $applicant_details,
+                    'position_applied' => $data['position'],
+                    'updatedby' => $_SESSION['emp_id'],
+                    'date_updated' => date('Y-m-d')
+                ];
+                $this->employee_model->update_application_details($application_data, ['app_id' => $app_id]);
+            } else {
+
+                $application_data = [
+                    'app_id' => $app_id,
+                    'position_applied' => $data['position'],
+                    'date_applied' => date('Y-m-d'),
+                    'application_status' => $applicant_details,
+                    'updatedby' => $_SESSION['emp_id'],
+                    'date_updated' => date('Y-m-d')
+                ];
+                $this->employee_model->create_application_details($application_data);
+            }
+
+            echo json_encode([
+                'status' => 200,
+                'message' => $message
+            ]);
         }
     }
 }

@@ -11,6 +11,16 @@
             eocList(bU, date, month, year);
         }
 
+        $("form#generate_intro").submit(function(e) {
+
+            e.preventDefault();
+            let employee = $(input[name = 'employee']).val();
+            if (employee) {
+
+                window.open("http://172.16.43.134:81/hrms/report/new_intro.php?val=" + stores + "&emp=" + join_emp);
+            }
+        });
+
         $("select[name = 'filterDate']").change(function() {
 
             let date = $(this).val();

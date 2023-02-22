@@ -1,3 +1,9 @@
+	
+	<section class="content-header" style="padding-left:40px;">
+		<h5>
+			<u style="color:#3399cc;">Initial Completion</u> ( Compiling applicants initial requirements ) 
+		</h5>
+	</section>
 	<div class="wrapper" style='padding:20px; '>
 		<div class="col-sm-6" style="padding-right:5px">
 			<div class="panel panel-default">
@@ -81,18 +87,14 @@
 							<!-- <div class="col-sm-3" style='padding-top:5px; padding-bottom:5px; text-align:right'>
 								<label class="form-label" >PROCEDURE</label>	
 							</div> -->
-							<div class="col-sm-9" style='padding-top:5px; padding-bottom:5px; padding-right:10%;'>
-								<input type="hidden" name='updt_or_appnd' class="form-control" id="updt_or_appnd" >
-							</div>	
+								<input type="hidden" name='updt_or_appnd' class="form-control" id="updt_or_appnd" >	
 						</div>
 						
 						<div class="row">	
 							<!-- <div class="col-sm-3" style='padding-top:5px; padding-bottom:5px; text-align:right'>
 								<label class="form-label" >APP CODE</label>	
 							</div> -->
-							<div class="col-sm-9" style='padding-top:5px; padding-bottom:5px; padding-right:10%;'>
-								<input type="hidden" name='hidden_code' class="form-control" id="hidden_code" >
-							</div>	
+								<input type="hidden" name='hidden_code' class="form-control" id="hidden_code" >	
 						</div>
 						
 						<div class="row">	

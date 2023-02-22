@@ -1,13 +1,8 @@
-<section class="content-header">
-    <h1>
-        Dashboard
-        <small>Control panel</small>
-    </h1>
-    <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Dashboard</li>
-    </ol>
-</section>
+<section class="content-header" style="padding-left:20px;">
+		<h5>
+			<u style="color:#3399cc;">Recruitment Dashboard</u>  ( Data Representions for all application process ) 
+		</h5>
+	</section>
 
 <!-- Main content -->
 <input type="hidden" name="dashboard" value="comeOut">
@@ -43,11 +38,14 @@
                             <span class="badge bg-red" id="hold_count_applicant"><?= $result_applicants = $this->initial_model->hold_count_applicant();?></span><i class="fa fa-pencil-square-o" style="margin-right: 5px;"></i>&nbsp;&nbsp; Hold Applicants
                         </li>
 
-                        <a href="<?php echo base_url('recruitment/page/menu/initial/deploy'); ?>"><li class="list-group-item" style='color:red;'>
-                            
-                                <span class="badge bg-red" id="new_employee"><?= $result_applicants = $this->initial_model->newEmp_count_applicant();?></span><i class="fa fa-pencil-square-o" style="margin-right: 5px;"></i>&nbsp;&nbsp; New Employee
-                            
-                        </li></a>
+                        <!-- <a href="<?php //echo base_url('recruitment/page/menu/initial/deploy'); ?>"> -->
+                            <li class="list-group-item" style='color:red;'>
+                                <span class="badge bg-red" id="new_employee">
+                                    <?= $result_applicants = $this->initial_model->newEmp_count_applicant();?>
+                                </span><i class="fa fa-pencil-square-o" style="margin-right: 5px;"></i>
+                                &nbsp;&nbsp; New Employee   
+                            </li>
+                        <!-- </a> -->
                     </ul>
                 </div>
             </div>
@@ -70,15 +68,19 @@
                 <div class="box-body">
                         <div class="col-md-12">
                         <canvas id="m" width="100%" height="50%"></canvas>
-                        </div>
-                       
-                        
 				</div>
             </div>
         </div>
 		
     </div>
 </section>
+
+
+
+
+
+
+
 
 <!-- $total_app_offense 	= $cnt_tard+$cnt_negli+$cnt_awol+$cnt_aow+$cnt_insu;
 		
@@ -124,5 +126,6 @@ $insu_percentage	= ($cnt_insu/$total_app_offense)*100; -->
         }
     }
     });
+    
 </script>
 

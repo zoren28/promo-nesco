@@ -19,7 +19,23 @@
 					<i class="fa fa-arrow-left"></i> <span>Placement</span>
 				</a>
 			</li>
-			
+
+			<!-- //http://172.16.43.134:81/hrms/promo-nesco/recruitment -->
+
+			<li class="treeview"> 
+				<a href="<?php echo base_url('recruitment'); ?>">
+					<?php
+						if($page == 'dashboard') 
+						{	echo "<i class='fa fa-arrow-right' style='color:#3399cc;'></i>
+							<span style='color:#3399cc;'><span><u>Dashboard 
+							<img src='http://172.16.43.134:81/hrms//images/gear.gif' style='width:20px; hieght:20px;'></u></span></span>";	}
+						else
+						{	echo "<i class='fa fa-arrow-right'></i><span><span>Dashboard</span></span>";	}
+					?>   
+					
+				</a>	
+			</li>
+
 			<li class="treeview"> 
 				<a href="<?php echo base_url('recruitment/page/menu/initial/initial'); ?>">
 					<?php 
@@ -31,9 +47,7 @@
 						{	echo "<i class='fa fa-arrow-right'></i><span><span>Initial Completion</span></span>";	}
 					?>   
 					
-				</a>
-				
-				
+				</a>	
 			</li>
 			
 			<li class="treeview">
@@ -114,11 +128,11 @@
 						
 						if($page == 'new_employee') 
 						{	echo "<i class='fa fa-arrow-right' style='color:#3399cc;'></i>
-							<span style='color:#3399cc;'><u>New Employee
+							<span style='color:#3399cc;'><u>Deploy
 							<img src='http://172.16.43.134:81/hrms//images/gear.gif' style='width:20px; hieght:20px;'>
 							</u></span>";	}
 						else
-						{	echo "<i class='fa fa-arrow-right'></i><span>New Employee</span>";	}
+						{	echo "<i class='fa fa-arrow-right'></i><span>Deploy</span>";	}
 					?>
 				</a>
 			</li>
@@ -129,11 +143,11 @@
 					<?php 
 						if($page == 'deploy') 
 						{	echo "<i class='fa fa-arrow-right' style='color:#3399cc;'></i>
-							<span style='color:#3399cc;'><u>Deployed 
+							<span style='color:#3399cc;'><u>New Employee 
 							<img src='http://172.16.43.134:81/hrms//images/gear.gif' style='width:20px; hieght:20px;'>
 							</u></span>";	}
 						else
-						{	echo "<i class='fa fa-arrow-right'></i><span>Deployed</span>";	}
+						{	echo "<i class='fa fa-arrow-right'></i><span>New Employee</span>";	}
 					?>
 				</a>
 			</li>

@@ -1,7 +1,13 @@
-	<div class="wrapper" style='padding:20px; '>
+<section class="content-header" style="padding-left:40px;">
+    <h5>
+        <u style="color:#3399cc;">Record Applicants</u> ( Applicants to be recorded as NEW / OLD)
+    </h5>
+</section>
+
+<div class="wrapper" style='padding:20px; '>
 		<div class="col-sm-12" style="padding-right:5px">
 			<div class="panel panel-default">		
-				<div class="wrapper" style='padding:10px; color:white; background-color:#3399cc;'><i class="fa fa-th-large"> <u> RECORD </u> </i> 
+				<div class="wrapper" > 
 				</div>
 					<div class="panel-body">
 						<?php

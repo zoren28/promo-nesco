@@ -35,19 +35,18 @@
         <div class="col-md-12">
             <div class="box box-primary">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Print Intro</h3>
+                    <h3 class="box-title">Reprint Intro Letter</h3>
                 </div>
 
                 <div class="box-body">
 
                     <div class="row">
-                        <form id="generate_contract" autocomplete="off">
+                        <form id="generate_intro" autocomplete="off">
                             <div class="col-md-5">
                                 <div class="form-group">
                                     <label>Search Promo</label>
-                                    <input type="hidden" name="page" value="print-intro">
                                     <div class="input-group">
-                                        <input class="form-control" type="text" name="employee" onkeyup="nameSearch(this.value)">
+                                        <input class="form-control" type="text" name="employee" onkeyup="nameSearch(this.value)" required>
                                         <span class="input-group-addon"><i class="fa fa-user"></i></span>
                                     </div>
                                     <div class="search-results" style="display: none;"></div>
@@ -55,7 +54,7 @@
                             </div>
                             <div class="col-md-7">
                                 <div class="form-group" style="margin-top:23px;">
-                                    <button type="button" id="print-intro" class="btn btn-primary">Print Intro</button>
+                                    <button type="submit" id="print-intro" class="btn btn-primary">Print Intro Letter</button>
                                 </div>
                             </div>
                         </form>
