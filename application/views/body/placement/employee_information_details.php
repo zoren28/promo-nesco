@@ -1248,7 +1248,7 @@ if ($request == 'basic_info') {
                 $recordNo = $row['record_no'];
 
                 $no++;
-                if ($row['emp_type'] == 'Promo-NESCO') {
+                if ($row['emp_type'] == 'Promo-NESCO' || $row['emp_type'] == 'Promo-Nesco') {
 
                     $promo_details = $this->employee_model->promo_details('promo_record', $empId, $recordNo);
                     $ctr = 0;

@@ -8,6 +8,86 @@
 
         $(".select2").select2();
 
+        $("input[name = 'applicant']").autocomplete({
+            source: function(request, response) {
+                jQuery.get("<?= site_url('applicant/find'); ?>", {
+                    query: request.term
+                }, function(data) {
+                    data = JSON.parse(data);
+                    response(data);
+                });
+            },
+            search: function(e, u) {
+                $(this).addClass('loader');
+            },
+            response: function(e, u) {
+                $(this).removeClass('loader');
+            }
+            // minLength: 2
+        }).on("autocompleteselect", function(event, ui) {
+
+            let [id, name] = ui.item.value.split('=');
+            fetchApplicantDetails(id);
+            return true;
+        });
+
+        $("form#tag-recruitment").submit(function(e) {
+
+            e.preventDefault();
+            let formData = $(this).serialize();
+
+            $(`span.error-message`).text('');
+            $("button#submit-btn").html('<img src="<?= base_url('assets/images/PleaseWait.gif'); ?>" alt="" width="16" height="16" border="0" /> <span>Please Wait....</span>');
+            $("button#submit-btn").prop('disabled', true);
+
+            $.ajax({
+                type: "POST",
+                url: "<?= site_url('tag_for_recruitment'); ?>",
+                data: formData,
+                dataType: 'json',
+                success: function(data) {
+
+                    if (data.status === 406) {
+
+                        let errors = data.errors
+                        let i = 0;
+                        for (const key in errors) {
+
+                            if (++i === 1) {
+                                $(`[name ='${key}']`).focus();
+                            }
+
+                            $(`span.${key}-error`).text(`${errors[key]}`);
+                        }
+                        $("button#submit-btn").html('Submit');
+                        $("button#submit-btn").prop('disabled', false);
+
+                    } else if (data.status === 200) {
+
+                        $.alert.open({
+                            type: 'warning',
+                            cancel: false,
+                            content: data.message,
+                            buttons: {
+                                OK: 'Ok'
+                            },
+                            callback: function(button) {
+                                if (button == 'OK') {
+
+                                    $("button#submit-btn").html('Submit');
+                                    $("button#submit-btn").prop('disabled', false);
+                                    location.reload();
+                                }
+                            }
+                        });
+
+                    } else {
+                        console.log(data);
+                    }
+                }
+            });
+        });
+
         var dataTable = $("#employee_masterfile_table").DataTable({
 
             "destroy": true,
@@ -3655,5 +3735,40 @@
                 }
             });
         }
+    }
+
+    function fetchApplicantDetails(id) {
+
+        $.ajax({
+            url: "<?php echo site_url('fetch_applicant_details/'); ?>" + id,
+            dataType: 'json',
+            success: function(data) {
+
+                if (data.flag === 0) {
+
+                    $.alert.open({
+                        type: 'warning',
+                        cancel: false,
+                        content: `Cannot be tagged because the applicant is ${data.status}`,
+                        buttons: {
+                            OK: 'Ok'
+                        },
+
+                        callback: function(button) {
+                            if (button == 'OK') {
+
+                                location.reload();
+                            }
+                        }
+                    });
+                } else {
+
+                    let applicant_status = (data.applicant_status != null) ? data.applicant_status : data.status
+                    $("input[name = 'applicant_status']").val(applicant_status);
+                    $("select[name = 'status']").val(data.status);
+                    $("select[name = 'position']").val(data.position);
+                }
+            }
+        });
     }
 </script>

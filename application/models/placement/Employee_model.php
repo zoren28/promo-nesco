@@ -7,6 +7,7 @@ class Employee_model extends CI_Model
     public $loginId = '';
     public $db2 = '';
     public $hr = 'nesco';
+    public $hr_location = 'asc';
 
     function __construct()
     {
@@ -65,8 +66,7 @@ class Employee_model extends CI_Model
     {
         $query = $this->db2->select('company_name')
             ->from('promo_locate_company')
-            ->join('promo_locate_agency', 'promo_locate_agency.agency_code = promo_locate_company.agency_code')
-            ->where('promo_locate_agency.agency_code', $agency_code)
+            ->where('agency_code', $agency_code)
             ->get();
         return $query->result();
     }
@@ -1744,5 +1744,89 @@ class Employee_model extends CI_Model
             ->order_by('dept_name', 'ASC')
             ->get();
         return $query->result();
+    }
+
+    public function find_applicant($search)
+    {
+        if (strpos($search, ",") !== false) {
+
+            list($lastname, $firstname) = explode(',', $search);
+            $this->db->group_start();
+            $this->db->like('lastname', trim($lastname));
+            $this->db->like('firstname', trim($firstname));
+            $this->db->group_end();
+        } else {
+
+            $this->db->group_start();
+            $this->db->like('lastname', $search);
+            $this->db->or_like('firstname', $search);
+            $this->db->group_end();
+        }
+
+        $query = $this->db->or_where('app_id', $search)
+            ->select('app_id, firstname, lastname, middlename, suffix')
+            ->order_by('lastname ASC, firstname ASC')
+            ->limit('10')
+            ->get('applicant');
+        return $query->result();
+    }
+
+    public function fetch_applicant_details($app_id)
+    {
+        $query = $this->db->select('applicants.status, applicants.position, employee3.current_status')
+            ->from('applicant')
+            ->join('applicants', 'applicants.app_code = applicant.appcode')
+            ->join('employee3', 'employee3.emp_id = applicant.app_id', 'left')
+            ->where('applicant.app_id', $app_id)
+            ->get();
+        return $query->row_array();
+    }
+
+    public function get_appcode($app_id)
+    {
+        $query = $this->db->select('applicants.app_code')
+            ->from('applicant')
+            ->join('applicants', 'applicants.app_code = applicant.appcode')
+            ->where('applicant.app_id', $app_id)
+            ->get();
+        return $query->row_array();
+    }
+
+    public function delete_applicants($app_code)
+    {
+        return $this->db->delete('applicants', array('app_code' => $app_code));
+    }
+
+    public function update_applicant($data, $where)
+    {
+        return $this->db->update('applicant', $data, $where);
+    }
+
+    public function update_applicants($data, $where)
+    {
+        return $this->db->update('applicants', $data, $where);
+    }
+
+    public function create_applicants($data)
+    {
+        $this->db->insert('applicants', $data);
+        return $this->db->insert_id();
+    }
+
+    public function application_details($app_id)
+    {
+        $query = $this->db->get_where('application_details', ['app_id' => $app_id]);
+        return $query->row_array();
+    }
+
+    public function update_application_details($data, $where)
+    {
+        return $this->db->update('application_details', $data, $where);
+    }
+
+    public function create_application_details($data)
+    {
+        $this->db->insert('application_details', $data);
+        return $this->db->insert_id();
     }
 }

@@ -139,6 +139,9 @@ $route['due_contract_xls'] = 'placement/dashboard/due_contract_xls';
 
 // for employee module
 $route['find_hr_staff'] = 'placement/employee/find_hr_staff';
+$route['applicant/find'] = 'placement/employee/find_applicant';
+$route['fetch_applicant_details/(:any)'] = 'placement/employee/fetch_applicant_details/$1';
+$route['tag_for_recruitment'] = 'placement/employee/tag_for_recruitment';
 $route['fetch_employee_masterfile'] = 'placement/employee/fetch_employee_masterfile';
 $route['fetch_assigned_department/(:any)'] = 'placement/employee/fetch_assigned_department/$1';
 $route['employee/search_employee'] = 'placement/employee/search_employee';
@@ -259,6 +262,9 @@ $route['view_exam_setup'] = 'recruitment/initial/view_exam_setup';
 $route['setup_examination'] = 'recruitment/initial/setup_examination';
 $route['save_examination'] = 'recruitment/initial/save_examination';
 $route['append_character_ref'] = 'recruitment/initial/append_character_ref';
+$route['append_character_ref_old'] = 'recruitment/initial/append_character_ref_old';
+$route['append_otherDocs'] = 'recruitment/initial/append_otherDocs';
+$route['append_other_Docs'] = 'recruitment/initial/append_other_Docs';
 
 $route['tag_applicant_interview'] = 'recruitment/initial/tag_applicant_interview';
 $route['tag_applicant_transfer'] = 'recruitment/initial/tag_applicant_transfer';
@@ -277,6 +283,12 @@ $route['selproduct'] = 'recruitment/initial/selproduct';
 $route['get_duration'] = 'recruitment/initial/get_duration';
 $route['hire_applicant'] = 'recruitment/initial/hire_applicant';
 $route['show_intro_check'] = 'recruitment/initial/show_intro_check';
+$route['input_grades'] = 'recruitment/initial/input_grades';
+$route['interview_grade'] = 'recruitment/initial/interview_grade';
+$route['deploy_applicant'] = 'recruitment/initial/deploy_applicant';
+$route['transfer_app'] = 'recruitment/initial/transfer_app';
+$route['save_transfer_process'] = 'recruitment/initial/save_transfer_process';
+
 // for menu module
 $route['logout'] = 'logout';
 $route['placement/page/menu/(:any)/(:any)/(:any)'] = 'placement/page/menu/$1/$2/$3';

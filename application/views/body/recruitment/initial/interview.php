@@ -1,6 +1,13 @@
+	<section class="content-header" style="padding-left:40px;">
+		<h5>
+			<u style="color:#3399cc;">Interview</u> ( Application process for evaluating the capabilities of an applicants )
+		</h5>
+	</section>
 	<div class="wrapper" style='padding:20px; '>
 		<div class="col-sm-12" style="padding-right:5px">
-			<div class="panel panel-default">		
+			<div class="panel panel-default">
+				<div class="wrapper">
+				</div>		
 				<div class="panel-body">
 					<?php
 					$result_applicants = $this->initial_model->applicants_for_interview();
@@ -116,7 +123,9 @@
 						</div>
 						
 						<div class="modal-footer">
-							<button type="button" class="btn" data-dismiss="modal">Close</button>
+							<button type="button" class="btn btn-default" id='inputGrade'>Input Grade</button>
+							<button type="button" class="btn btn-default" id='sheet'>Print Interview Sheet</button>
+							<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 							<button type="submit" class="btn btn-primary">Submit</button>
 						</div>
 					</form>
@@ -134,6 +143,43 @@
 					<h5 class="modal-title">Interview Info</h5>
 				</div>
 				<div class="modal-body interview_display" style='font-size=10px;'>		
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn" data-dismiss="modal" id='reloadpage'>Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="interview_grade" >
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header bg-light-blue color-palette">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span></button>
+					<h5 class="modal-title">Interview Grade</h5>
+				</div>
+				<form id='interview_grade' method='post' enctype="multipart/form-data">
+					<div class="modal-body grade_display" style='font-size=10px;'>		
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn" data-dismiss="modal" >Close</button>
+						<button type="submit" class="btn btn-primary">Submit</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="grade_modal_info" >
+		<div class="modal-dialog modal-md">
+			<div class="modal-content">
+				<div class="modal-header bg-light-blue color-palette">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span></button>
+					<h5 class="modal-title">Interview Info</h5>
+				</div>
+				<div class="modal-body grade_modal_info_display" style='font-size=10px;'>		
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn" data-dismiss="modal" id='reloadpage'>Close</button>

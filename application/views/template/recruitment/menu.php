@@ -19,51 +19,169 @@
 					<i class="fa fa-arrow-left"></i> <span>Placement</span>
 				</a>
 			</li>
-			
-			<li class="treeview">
+
+			<!-- //http://172.16.43.134:81/hrms/promo-nesco/recruitment -->
+
+			<li class="treeview"> 
+				<a href="<?php echo base_url('recruitment'); ?>">
+					<?php
+						if($page == 'dashboard') 
+						{	echo "<i class='fa fa-arrow-right' style='color:#3399cc;'></i>
+							<span style='color:#3399cc;'><span><u>Dashboard 
+							<img src='http://172.16.43.134:81/hrms//images/gear.gif' style='width:20px; hieght:20px;'></u></span></span>";	}
+						else
+						{	echo "<i class='fa fa-arrow-right'></i><span><span>Dashboard</span></span>";	}
+					?>   
+					
+				</a>	
+			</li>
+
+			<li class="treeview"> 
 				<a href="<?php echo base_url('recruitment/page/menu/initial/initial'); ?>">
-					<i class="fa fa-arrow-right"></i> <span>Initial Completion</span>
-					<!--i class="fa fa-angle-left pull-right"></i-->
-				</a>
-				
-				
+					<?php 
+						if($page == 'initial') 
+						{	echo "<i class='fa fa-arrow-right' style='color:#3399cc;'></i>
+							<span style='color:#3399cc;'><span><u>Initial Completion 
+							<img src='http://172.16.43.134:81/hrms//images/gear.gif' style='width:20px; hieght:20px;'></u></span></span>";	}
+						else
+						{	echo "<i class='fa fa-arrow-right'></i><span><span>Initial Completion</span></span>";	}
+					?>   
+					
+				</a>	
 			</li>
 			
 			<li class="treeview">
 				 <a href="<?php echo base_url('recruitment/page/menu/initial/record'); ?>">
-					<i class="fa fa-arrow-right"></i> <span>Record Applicants</span>
+					<?php 
+						if($page == 'record') 
+						{	echo "<i class='fa fa-arrow-right' style='color:#3399cc;'></i>
+							<span style='color:#3399cc;'><u>Record Applicants 
+							<img src='http://172.16.43.134:81/hrms//images/gear.gif' style='width:20px; hieght:20px;'>
+							</u></span>";	}
+						else
+						{	echo "<i class='fa fa-arrow-right'></i><span>Record Applicants</span>";	}
+					?>  
 				</a>
 			</li>
 			
 			
 			<li class="treeview">
 				<a href="<?php echo base_url('recruitment/page/menu/initial/examination'); ?>">
-					<i class="fa fa-arrow-right"></i> <span>Examination</span>
+					<?php 
+						if($page == 'examination') 
+						{	echo "<i class='fa fa-arrow-right' style='color:#3399cc;'></i>
+							<span style='color:#3399cc;'><u>Examination 
+							<img src='http://172.16.43.134:81/hrms//images/gear.gif' style='width:20px; hieght:20px;'>
+							</u></span>";	}
+						else
+						{	echo "<i class='fa fa-arrow-right'></i><span>Examination</span>";	}
+					?>  
 				</a>
 			</li>
 			
 			<li class="treeview">
 				<a href="<?php echo base_url('recruitment/page/menu/initial/interview'); ?>">
-					<i class="fa fa-arrow-right"></i> <span>Interview</span>
+					<?php 
+						if($page == 'interview') 
+						{	echo "<i class='fa fa-arrow-right' style='color:#3399cc;'></i>
+							<span style='color:#3399cc;'><u>Interview 
+							<img src='http://172.16.43.134:81/hrms//images/gear.gif' style='width:20px; hieght:20px;'>
+							</u></span>";	}
+						else
+						{	echo "<i class='fa fa-arrow-right'></i><span>Interview</span>";	}
+					?> 
 				</a>
 			</li>
 			
 			<li class="treeview">
 				<a href="<?php echo base_url('recruitment/page/menu/initial/finalcompletion'); ?>">
-					<i class="fa fa-arrow-right"></i> <span>Final Completion</span>
+					<?php 
+						if($page == 'finalcompletion') 
+						{	echo "<i class='fa fa-arrow-right' style='color:#3399cc;'></i>
+							<span style='color:#3399cc;'><u>Final Completion 
+							<img src='http://172.16.43.134:81/hrms//images/gear.gif' style='width:20px; hieght:20px;'>
+							</u></span>";	}
+						else
+						{	echo "<i class='fa fa-arrow-right'></i><span>Final Completion</span>";	}
+					?>
 				</a>
 			</li>
 			
 			<li class="treeview">
 				<a href="<?php echo base_url('recruitment/page/menu/initial/hiring'); ?>">
-					<i class="fa fa-arrow-right"></i> <span>Hiring</span>
+					<?php 
+						if($page == 'hiring') 
+						{	echo "<i class='fa fa-arrow-right' style='color:#3399cc;'></i>
+							<span style='color:#3399cc;'><u>Hiring 
+							<img src='http://172.16.43.134:81/hrms//images/gear.gif' style='width:20px; hieght:20px;'>
+							</u></span>";	}
+						else
+						{	echo "<i class='fa fa-arrow-right'></i><span>Hiring</span>";	}
+					?>
 				</a>
 			</li>
 			
+
+			<li class="treeview">
+				<a href="<?php echo base_url('recruitment/page/menu/initial/new_employee'); ?>">
+					<?php 
+						
+						if($page == 'new_employee') 
+						{	echo "<i class='fa fa-arrow-right' style='color:#3399cc;'></i>
+							<span style='color:#3399cc;'><u>Deploy
+							<img src='http://172.16.43.134:81/hrms//images/gear.gif' style='width:20px; hieght:20px;'>
+							</u></span>";	}
+						else
+						{	echo "<i class='fa fa-arrow-right'></i><span>Deploy</span>";	}
+					?>
+				</a>
+			</li>
+
+
+			<li class="treeview">
+				<a href="<?php echo base_url('recruitment/page/menu/initial/deploy'); ?>">
+					<?php 
+						if($page == 'deploy') 
+						{	echo "<i class='fa fa-arrow-right' style='color:#3399cc;'></i>
+							<span style='color:#3399cc;'><u>New Employee 
+							<img src='http://172.16.43.134:81/hrms//images/gear.gif' style='width:20px; hieght:20px;'>
+							</u></span>";	}
+						else
+						{	echo "<i class='fa fa-arrow-right'></i><span>New Employee</span>";	}
+					?>
+				</a>
+			</li>
+			
+			<!--li class="treeview">
+				<a href="<?php //echo base_url('recruitment/page/menu/initial/transfer'); ?>">
+					<i class="fa fa-arrow-right"></i> <span>Transfer</span>
+				</a>
+			</li-->
+			
+			<!--li class="treeview">
+				<a href="<?php //0echo base_url('recruitment/page/menu/initial/transfer'); ?>">
+					<i class="fa fa-arrow-right"></i> <span>Transfer</span>
+					<ul class="treeview-menu">
+							<li class="">
+                                <a href="">
+                                	<i class="fa fa-arrow-right"></i> 
+								</a>
+                            </li>
+                    </ul>
+				</a>
+			</li-->
 			
 			<li class="treeview">
-				<a href="<?php echo base_url('recruitment/page/menu/initial/transfer'); ?>">
-					<i class="fa fa-arrow-right"></i> <span>Transfer</span>
+				<a href="<?php echo base_url('recruitment/page/menu/initial/hold'); ?>">
+					<?php 
+						if($page == 'hold') 
+						{	echo "<i class='fa fa-arrow-right' style='color:#3399cc;'></i>
+							<span style='color:#3399cc;'><u>Hold Applicants 
+							<img src='http://172.16.43.134:81/hrms//images/gear.gif' style='width:20px; hieght:20px;'>
+							</u></span>";	}
+						else
+						{	echo "<i class='fa fa-arrow-right'></i><span>Hold Applicants</span>";	}
+					?> 
 				</a>
 			</li>
 			

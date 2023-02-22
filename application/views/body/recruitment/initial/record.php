@@ -1,30 +1,39 @@
-	<div class="wrapper" style='padding:20px; '>
+<section class="content-header" style="padding-left:40px;">
+    <h5>
+        <u style="color:#3399cc;">Record Applicants</u> ( Applicants to be recorded as NEW / OLD)
+    </h5>
+</section>
+
+<div class="wrapper" style='padding:20px; '>
 		<div class="col-sm-12" style="padding-right:5px">
 			<div class="panel panel-default">		
-				<div class="panel-body">
-					<?php
-					$result_applicants = $this->initial_model->record_applicants();
-					?>
-						<table id="tableViewEmp" class="table table-bordered">
-							<thead>
-								<th>Code</th>
-								<th>Name</th>
-								<th>Position</th>
-								<th>Date Applied</th>
-								<th>Action</th>
-							</thead>
-							<tbody>
-								<?php 
-								foreach ($result_applicants as $i) { ?>
-									<tr>
-										<td><?= $i['app_code'] ?></td>
-										<td><?= $i['lastname'].", ".$i['firstname']." ".$i['middlename']." ".$i['suffix'] ?></td>
-										<td><?= $i['position'] ?></td>
-										<td><?= $i['date_time'] ?></td>
-										<td><button id="<?= $i['app_code'] ?>" type="button" class="btn btn-primary btn-sm record">Record</button></td>
-									</tr><?php } ?>
-							</tbody>
-						</table>
+				<div class="wrapper" > 
+				</div>
+					<div class="panel-body">
+						<?php
+						$result_applicants = $this->initial_model->record_applicants();
+						?>
+							<table id="tableViewEmp" class="table table-bordered">
+								<thead>
+									<th>Code</th>
+									<th>Name</th>
+									<th>Position</th>
+									<th>Date Applied</th>
+									<th>Action</th>
+								</thead>
+								<tbody>
+									<?php 
+									foreach ($result_applicants as $i) { ?>
+										<tr>
+											<td><?= $i['app_code']?></td>
+											<td><?= $i['lastname'].", ".$i['firstname']." ".$i['middlename']." ".$i['suffix'] ?></td>
+											<td><?= $i['position'] ?></td>
+											<td><?= $i['date_time'] ?></td>
+											<td><button id="<?= $i['app_code']."|".$i['lastname']."|".$i['firstname']."|".$i['middlename']."|".$i['suffix'] ?>" type="button" class="btn btn-primary btn-sm record">Record</button></td>
+										</tr><?php } ?>
+								</tbody>
+							</table>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -61,7 +70,7 @@
 				<h5 class="modal-title">Record Applicants Information</h5>
 			</div>
 			
-				<div class="modal-body applicant_record_success" style='font-size=10px;'>
+				<div class="modal-body record_success" style='font-size=10px;'>
 						
 				</div>
 				<div class="modal-footer">

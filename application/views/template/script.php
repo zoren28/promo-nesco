@@ -34,7 +34,12 @@
 <script src="<?php echo base_url('assets/plugins/DataTables/datatables.min.js'); ?>"></script>
 
 <!-- ChartJS 1.0.1 -->
-<script src="<?php echo base_url('assets/plugins/chartjs/Chart.min.js'); ?>"></script>
+<!-- <script src="<?php //echo base_url('assets/plugins/chartjs/Chart.min.js'); ?>"></script>
+<script src="<?php //echo base_url('assets/plugins/chartjs/dough.js'); ?>"></script> -->
+<!-- <script src="<?php //echo base_url('assets/plugins/chartjs/chart_morris.js'); ?>"></script>
+<script src="<?php //echo base_url('assets/plugins/chartjs/morris.js'); ?>"></script>
+<script src="<?php //echo base_url('assets/plugins/chartjs/morris.min.js'); ?>"></script>
+<script src="<?php //echo base_url('assets/plugins/chartjs/rafa.js'); ?>"></script> -->
 
 <!-- AdminLTE App -->
 <script src="<?php echo base_url('assets/dist/js/app.min.js'); ?>"></script>
@@ -46,6 +51,9 @@
 <script src="<?php echo base_url('assets/plugins/alert/js/alert.js'); ?>"></script>
 <script src="<?php echo base_url('assets/plugins/alert/js/doc.js'); ?>"></script>
 <script src="<?php echo base_url('assets/plugins/alert/message.js'); ?>"></script>
+<script src="<?php echo base_url('assets/plugins/alert/js/sweetalert.js'); ?>"></script>
+
+
 
 <script type="text/javascript">
     $(document).ready(function() {

@@ -11,6 +11,16 @@
             eocList(bU, date, month, year);
         }
 
+        $("form#generate_intro").submit(function(e) {
+
+            e.preventDefault();
+            let employee = $(input[name = 'employee']).val();
+            if (employee) {
+
+                window.open("http://172.16.43.134:81/hrms/report/new_intro.php?val=" + stores + "&emp=" + join_emp);
+            }
+        });
+
         $("select[name = 'filterDate']").change(function() {
 
             let date = $(this).val();
@@ -200,7 +210,7 @@
             let emp_type = "";
             let contract_type = "";
 
-            let intros = $("input[name='bunit_intro[]']").map(function() {
+            /* let intros = $("input[name='bunit_intro[]']").map(function() {
                 return this.value;
             }).get();
 
@@ -211,7 +221,7 @@
                 if (!intro) {
                     intro_msg = 'true';
                 }
-            });
+            }); */
 
             let stores = $("input[name='stores[]']:checked").map(function() {
                 return this.value;
@@ -233,7 +243,7 @@
                 contract_type = $("input[name = 'contractType']").val();
             }
 
-            if ((edited == 'true' && (company == '' || promo_type == '' || department == '' || vendor == '' || position == '')) || intro_msg == 'true' || stores.length == 0 || (companyDuration == "" && (contract_type == "Seasonal" || department == "HOME AND FASHION" || department == "FIXRITE" || department == "EASY FIX")) || startdate == '' || eocdate == '' || duration == '') {
+            if ((edited == 'true' && (company == '' || promo_type == '' || department == '' || vendor == '' || position == '')) || stores.length == 0 || (companyDuration == "" && (contract_type == "Seasonal" || department == "HOME AND FASHION" || department == "FIXRITE" || department == "EASY FIX")) || startdate == '' || eocdate == '' || duration == '') {
 
                 if (stores.length == 0) {
 
@@ -294,7 +304,7 @@
                                     $("input[name = 'duration']").css("border-color", "#dd4b39");
                                 }
 
-                                if (intro_msg == "true") {
+                                /* if (intro_msg == "true") {
 
                                     intros.forEach(i => {
 
@@ -304,7 +314,7 @@
                                             $("input[name = '" + intro + "']").css("border-color", "#dd4b39");
                                         }
                                     });
-                                }
+                                } */
                             }
                         }
                     });
@@ -1000,7 +1010,7 @@
             }
         });
 
-        $.ajax({
+        /* $.ajax({
             type: "GET",
             url: "<?= site_url('show_intro') ?>",
             data: {
@@ -1009,7 +1019,7 @@
             success: function(data) {
                 $("#promoIntro").html('').append(data);
             }
-        });
+        }); */
     }
 
     function search_witness(witness, key) {

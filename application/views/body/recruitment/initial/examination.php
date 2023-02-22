@@ -1,6 +1,14 @@
+<section class="content-header" style="padding-left:40px;">
+    <h5>
+        <u style="color:#3399cc;">Examination</u> ( Application process to evaluate the applicants IQ, Logical etc.. by examination )
+    </h5>
+</section>
+	
 	<div class="wrapper" style='padding:20px; '>
 		<div class="col-sm-12" style="padding-right:5px">
-			<div class="panel panel-default">		
+			<div class="panel panel-default">
+				<div class="wrapper">
+				</div>		
 				<div class="panel-body">
 					<?php
 					$result_applicants = $this->initial_model->applicants_for_exam();
@@ -37,7 +45,8 @@
 										} 
 										else if($i['status'] == 'exam failed') 
 										{
-											?><button id="<?= $i['app_id']."|".$i['app_code'] ?>" type="button" class="btn btn-danger btn-sm tag_transfer">Tag for Transfer</button><?php 
+											// tag to transfer button change to HOLD for changes of concerns
+											?><button id="<?= $i['app_id']."|".$i['app_code'] ?>" type="button" class="btn btn-danger btn-sm tag_transfer">Tag to Hold</button><?php 
 										} 
 										?></td>
 									</tr><?php } ?>
@@ -80,7 +89,7 @@
 						<div class="modal-body view_examination" style='font-size=10px;'>		
 						</div>
 						<div class="modal-footer">
-							<button type="button" class="btn" data-dismiss="modal">Close</button>
+							<button type="button" class="btn" data-dismiss="modal" id='reloadpage'>Close</button>
 							<button type="submit" class="btn btn-primary">Submit</button>
 						</div>
 					</form>

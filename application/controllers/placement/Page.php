@@ -42,6 +42,9 @@ class Page extends CI_Controller
         } else if ($menu == "employee" && $page == "masterfile") {
 
             $data['filters'] = $empId;
+        } else if ($menu == "employee" && $page == "tag-to-recruitment") {
+
+            $data['positions'] = $this->employee_model->list_of_positions();
         } else {
 
             $data['searchThis'] = $empId;

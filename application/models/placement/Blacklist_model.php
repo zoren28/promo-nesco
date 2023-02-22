@@ -162,7 +162,7 @@ class Blacklist_model extends CI_Model
     {
         $this->db->from('blacklist');
         $this->db->join('employee3', 'employee3.emp_id = blacklist.app_id', 'left');
-        $this->db->where('emp_type', 'Promo-NESCO');
+        // $this->db->where('emp_type', 'Promo-NESCO');
 
         $i = 0;
         foreach ($this->search_column as $item) // loop column 

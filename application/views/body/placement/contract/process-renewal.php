@@ -444,58 +444,33 @@
                                     <?php
 
                                     $sc = $this->employee_model->promo_cutoff($emp_details->record_no, $empId);
-                                    $co = $this->employee_model->cutoff_details($sc->statCut);
-                                    $endFC = ($co->endFC != '') ? $co->endFC : 'last';
-                                    if ($co->startFC != '') {
+                                    if (isset($sc)) {
 
-                                        $cut_off = $co->startFC . '-' . $endFC . ' / ' . $co->startSC . '-' . $co->endSC;
+                                        $statCut = $sc->statCut;
+                                        $co = $this->employee_model->cutoff_details($sc->statCut);
+                                        $endFC = ($co->endFC != '') ? $co->endFC : 'last';
+                                        if ($co->startFC != '') {
+
+                                            $cut_off = $co->startFC . '-' . $endFC . ' / ' . $co->startSC . '-' . $co->endSC;
+                                        } else {
+
+                                            $cut_off = '';
+                                        }
                                     } else {
-
                                         $cut_off = '';
+                                        $statCut = '';
                                     }
+
                                     ?>
                                     <td><span class="text-red">*</span> </span>Cut-off</td>
                                     <td><?= $cut_off; ?></td>
                                     <td>
-                                        <input name="cutoff" value="<?= $sc->statCut ?>" type="hidden">
+                                        <input name="cutoff" value="<?= $statCut ?>" type="hidden">
                                         <span class="inputLabel"><?= $cut_off ?></span>
                                         <select name="cutoff_select" class="form-control inputSelect" style="display:none;"></select>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <th colspan="3">INTRO &nbsp;<small class="text-red">Allowed File : jpg, jpeg, png only</small></th>
-                                </tr>
-                                <tr>
-                                    <td colspan="2">
-                                        <table class="table table-bordered" style="margin-bottom:0px;">
-                                            <tbody id="promoIntro">
-                                                <?php
-
-                                                $counter = 0;
-                                                $bUs = $this->dashboard_model->businessUnit_list();
-                                                foreach ($bUs as $bu) {
-
-                                                    $hasBU = $this->dashboard_model->promo_has_bu($empId, $bu->bunit_field);
-                                                    if ($hasBU > 0) {
-
-                                                        echo '
-                                                                <tr>
-                                                                    <td><i class="text-red">*</i> ' . $bu->bunit_name . '</td>
-                                                                    <td>
-                                                                        <input type="hidden" name="bunit_intro[]" value="' . $bu->bunit_intro . '">
-                                                                        <input type="file" name="' . $bu->bunit_intro . '" id="' . $bu->bunit_intro . '" class="form-control" required onchange="validateForm(this.id)">
-                                                                    </td>
-                                                                </tr>
-                                                            ';
-                                                    }
-                                                    $counter++;
-                                                }
-
-                                                ?>
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                    <td></td>
+                                <td></td>
                                 </tr>
                                 <tr>
                                     <th colspan="3">SIGNED IN THE PRESENCE OF</th>
