@@ -1,6 +1,81 @@
 <script>
     $(document).ready(function() {
 
+        $("button#add-department").click(function() {
+
+            $("div#add-department").modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+
+            $("div.add-department").html("");
+            $.ajax({
+                url: "<?= site_url('add_department_form') ?>",
+                success: function(data) {
+
+                    $("div.add-department").html(data);
+                }
+            });
+        });
+
+        $("form#add-department").submit(function(e) {
+
+            e.preventDefault();
+            let formData = $(this).serialize();
+
+            $(`span.error-message`).text('');
+            $("button#submit-btn").html('<img src="<?= base_url('assets/images/PleaseWait.gif'); ?>" alt="" width="16" height="16" border="0" /> <span>Please Wait....</span>');
+            $("button#submit-btn").prop('disabled', true);
+
+            $.ajax({
+                type: "POST",
+                url: "<?= site_url('create_department'); ?>",
+                data: formData,
+                dataType: 'json',
+                success: function(data) {
+
+                    if (data.status === 406) {
+
+                        let errors = data.errors
+                        let i = 0;
+                        for (const key in errors) {
+
+                            if (++i === 1) {
+                                $(`[name ='${key}']`).focus();
+                            }
+
+                            $(`span.${key}-error`).text(`${errors[key]}`);
+                        }
+                        $("button#submit-btn").html('Submit');
+                        $("button#submit-btn").prop('disabled', false);
+
+                    } else if (data.status === 200) {
+
+                        $.alert.open({
+                            type: 'warning',
+                            cancel: false,
+                            content: data.message,
+                            buttons: {
+                                OK: 'Ok'
+                            },
+                            callback: function(button) {
+                                if (button == 'OK') {
+
+                                    $("button#submit-btn").html('Submit');
+                                    $("button#submit-btn").prop('disabled', false);
+                                    location.reload();
+                                }
+                            }
+                        });
+
+                    } else {
+                        console.log(data);
+                    }
+                }
+            });
+        });
+
         var dt_company = $("table#dt-company").DataTable({
             "destroy": true,
             "stateSave": true,

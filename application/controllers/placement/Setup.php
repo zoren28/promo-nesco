@@ -16,6 +16,67 @@ class Setup extends CI_Controller
 
         $this->load->model('placement/setup_model');
         $this->load->model('placement/employee_model');
+        $this->load->model('placement/dashboard_model');
+    }
+
+    public function add_department_form()
+    {
+        $business_units = $this->dashboard_model->businessUnit_list();
+        $data = [
+            'request' => 'add_department_form',
+            'business_units' => $business_units
+        ];
+        $this->load->view('body/placement/modal_response', $data);
+    }
+
+    public function create_department()
+    {
+        $this->load->library('form_validation');
+        $request = $this->input->post(NULL, TRUE);
+
+        $config = [
+            [
+                'field' => 'bunit_id',
+                'label' => 'Business Unit',
+                'rules' => 'required'
+            ],
+            [
+                'field' => 'dept_name',
+                'label' => 'Department',
+                'rules' => 'required'
+            ]
+        ];
+        $this->form_validation->set_rules($config);
+        if ($this->form_validation->run() === FALSE) {
+
+            $errors = $this->form_validation->error_array();
+            echo json_encode([
+                'status' => 406,
+                'errors' => $errors
+            ]);
+        } else {
+
+            $exist = $this->setup_model->is_department_exist($request);
+            if ($exist) {
+
+                echo json_encode([
+                    'status' => 406,
+                    'errors' => [
+                        'dept_name' => 'Department already exist'
+                    ]
+                ]);
+                die();
+            } else {
+
+                $request['dept_name'] = strtoupper($request['dept_name']);
+                $this->setup_model->create_department($request);
+            }
+
+            echo json_encode([
+                'status' => 200,
+                'message' => 'Department successfully saved'
+            ]);
+        }
     }
 
     public function company_list()

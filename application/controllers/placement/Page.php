@@ -45,6 +45,19 @@ class Page extends CI_Controller
         } else if ($menu == "employee" && $page == "tag-to-recruitment") {
 
             $data['positions'] = $this->employee_model->list_of_positions();
+        } else if ($menu == "setup" && $page == "department-list") {
+
+            $designations = [];
+            $business_units = $this->dashboard_model->businessUnit_list();
+            foreach ($business_units as $bu) {
+
+                $departments = $this->employee_model->assigned_departments($bu->bunit_id);
+                $designations[] = [
+                    'bunit' => $bu->bunit_name,
+                    'depts' => $departments
+                ];
+            }
+            $data['designations'] = $designations;
         } else {
 
             $data['searchThis'] = $empId;

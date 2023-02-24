@@ -22,6 +22,21 @@ class Setup_model extends CI_Model
         $this->db->query('SET SESSION sql_mode = ""');
     }
 
+    public function is_department_exist($data)
+    {
+        foreach ($data as $key => $value) {
+            $this->db->where($key, $value);
+        }
+
+        return $this->db->from('locate_promo_department')
+            ->count_all_results();
+    }
+
+    public function create_department($data)
+    {
+        return $this->db->insert('locate_promo_department', $data);
+    }
+
     public function company_list($filter)
     {
         if (!empty($filter)) {

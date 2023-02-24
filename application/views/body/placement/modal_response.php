@@ -6328,4 +6328,24 @@ if ($request == "update_blacklist_form") {
         </tbody>
     </table>
 <?php
+} else if ($request == 'add_department_form') {
+?>
+    <div class="form-group">
+        <label for="bunit-name">Business Unit</label>
+        <select name="bunit_id" id="bunit-name" class="form-control">
+            <option value=""> -Select- </option>
+            <?php
+            foreach ($business_units as $bu) {
+                echo "<option value='{$bu->bunit_id}'>{$bu->bunit_name}</option>";
+            }
+            ?>
+        </select>
+        <span class="bunit_id-error error-message text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label for="dept_name">Department</label>
+        <input type="text" name="dept_name" id="dept_name" class="form-control" style="text-transform:uppercase">
+        <span class="dept_name-error error-message text-danger"></span>
+    </div>
+<?php
 }
