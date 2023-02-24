@@ -14,10 +14,12 @@
         $("form#generate_intro").submit(function(e) {
 
             e.preventDefault();
-            let employee = $(input[name = 'employee']).val();
+            let employee = $("input[name = 'employee']").val();
             if (employee) {
 
-                window.open("http://172.16.43.134:81/hrms/report/new_intro.php?val=" + stores + "&emp=" + join_emp);
+                let [id, name] = employee.split('*');
+
+                window.open("http://172.16.43.134:81/hrms/report/promo_intro.php?emp_id=" + id.trim());
             }
         });
 

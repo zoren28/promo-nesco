@@ -26,6 +26,8 @@ $route['fetch_secured_clearance'] = 'placement/resignation/fetch_secured_clearan
 $route['show_secured_clerance_details'] = 'placement/resignation/show_secured_clerance_details';
 
 // for setup module
+$route['add_department_form'] = 'placement/setup/add_department_form';
+$route['create_department'] = 'placement/setup/create_department';
 $route['company_list'] = 'placement/setup/company_list';
 $route['delete_company'] = 'placement/setup/delete_company';
 $route['update_company_status'] = 'placement/setup/update_company_status';

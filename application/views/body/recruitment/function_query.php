@@ -757,7 +757,7 @@
 							else
 							{ 	$end_cut = $i['endFC'];	}
 							?>
-							<option value='<?=$i['statCut']?>'><?=$i['statCut']." ( ".$i['startFC']."-".$end_cut." | ".$i['startSC']."-".$i['endSC']." )"?></option><?php 
+							<option value='<?=$i['statCut']?>'>( <?=$i['startFC']."-".$end_cut." | ".$i['startSC']."-".$i['endSC']." )"?></option><?php 
 						} ?>
 				  </select>
 				 
